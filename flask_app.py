@@ -1,5 +1,4 @@
 from flask import Flask, render_template
-from livereload import Server
 
 app = Flask(__name__)
 
