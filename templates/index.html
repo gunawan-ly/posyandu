@@ -1,31 +1,112 @@
 <!doctype html>
-<html lang="en">
+<html lang="id">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <title>Halaman Home</title>
+    <title>Cek Status Gizi Posyandu</title>
   </head>
-  <body class="bg-linear-to-r from-blue-500 to-purple-500">
-    <div class="container mx-auto px-4 justify-items-center">
-      <h1 class="text-3xl font-bold text-center my-4">Halaman Cek Statu Berat Badan Menurut Umur</h1>
-      <form action="/hitung" method="POST" class="bg-white shadow-2xl w-150 h-auto rounded-lg py-4 px-4">
-        <div class="px-2 py-2">
-          <label for="jk" class="font-semibold">Jenis Kelamin: </label>
-          <select name="jk" id="jk" required class="border-2 rounded">
+
+  <body
+    class="bg-gradient-to-br from-blue-500 to-purple-600 min-h-screen flex items-center justify-center p-4 font-sans text-gray-800"
+  >
+    <div class="bg-white shadow-2xl rounded-2xl w-full max-w-md p-8">
+      <div class="text-center mb-8">
+        <h1 class="text-2xl font-bold text-gray-800">
+          Cek Status Gizi Anak (BB/Umur)
+        </h1>
+        <p class="text-gray-500 text-sm mt-2">
+          Berdasarkan Standar Z-Score WHO
+        </p>
+      </div>
+
+      <form action="/hitung" method="POST" class="space-y-5">
+        <div>
+          <label
+            for="nama"
+            class="block text-sm font-semibold text-gray-700 mb-1"
+            >Nama Anak</label
+          >
+          <div class="relative">
+            <input
+              type="text"
+              name="nama"
+              id="nama"
+              required
+              placeholder="Nama Anak"
+              class="w-full border border-gray-300 rounded-lg pl-4 pr-16 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+            />
+          <label for="jk" class="block text-sm font-semibold text-gray-700 mb-1"
+            >Jenis Kelamin</label
+          >
+          <select
+            name="jk"
+            id="jk"
+            required
+            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white cursor-pointer"
+          >
             <option value="L">Laki-laki</option>
             <option value="P">Perempuan</option>
           </select>
         </div>
-        <div class="px-2 py-2">
-          <label for="umur" class="font-semibold">Umur (Minggu)</label>
-          <input type="number" name="umur" id="umur" class="w-2xs border-2 rounded-lg pl-2 ml-2" min="0" max="13" required placeholder="Contoh 5">
+
+        <div>
+          <label
+            for="umur"
+            class="block text-sm font-semibold text-gray-700 mb-1"
+            >Umur Bayi</label
+          >
+          <div class="relative">
+            <input
+              type="number"
+              name="umur"
+              id="umur"
+              min="0"
+              max="13"
+              required
+              placeholder="Contoh: 5"
+              class="w-full border border-gray-300 rounded-lg pl-4 pr-16 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+            />
+            <span
+              class="absolute right-4 top-2.5 text-gray-400 font-medium select-none"
+              >Minggu</span
+            >
+          </div>
         </div>
-        <div class="px-2 py-2">
-          <label for="berat" class="font-semibold">Berat Badan (kg)</label>
-          <input type="number" name="berat" id="berat" class="w-2xs border-2 rounded-lg pl-2 ml-2" step="0.01" min="0.5" required placeholder="Contoh 4.2">
+
+        <div>
+          <label
+            for="berat"
+            class="block text-sm font-semibold text-gray-700 mb-1"
+            >Berat Badan</label
+          >
+          <div class="relative">
+            <input
+              type="number"
+              name="berat"
+              id="berat"
+              step="0.01"
+              min="0.5"
+              required
+              placeholder="Contoh: 4.2"
+              class="w-full border border-gray-300 rounded-lg pl-4 pr-12 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+            />
+            <span
+              class="absolute right-4 top-2.5 text-gray-400 font-medium select-none"
+              >kg</span
+            >
+          </div>
         </div>
-        <button type="submit" class="px-2 py-2 font-bold text-white shadow-2xs bg-blue-400 rounded-lg hover:bg-blue-500 transition">Cek Status Gizi</button>
+
+        <div class="pt-2">
+          <button
+            type="submit"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"
+          >
+            Cek Status Gizi
+          </button>
+        </div>
       </form>
+    </div>
   </body>
 </html>
