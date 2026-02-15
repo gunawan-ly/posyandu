@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hasil Analisis Gizi</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+        background-color: #f4f7f6;
+      }
+      .container {
+        max-width: 500px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      /* Gaya dasar untuk kotak hasil */
+      .result-card {
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 20px;
+        color: white;
+        font-weight: bold;
+        font-size: 24px;
+        text-transform: uppercase;
+      }
+
+      /* Indikator Warna Berdasarkan Status Gizi */
+      .normal {
+        background-color: #28a745;
+      } /* Hijau */
+      .kurang {
+        background-color: #dc3545;
+      } /* Merah */
+      .lebih {
+        background-color: #ffc107;
+        color: #333;
+      } /* Kuning */
+
+      .detail {
+        text-align: left;
+        margin-top: 20px;
+        font-size: 16px;
+        line-height: 1.6;
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 5px;
+      }
+      .btn-back {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: bold;
+      }
+      .btn-back:hover {
+        background-color: #0056b3;
+      }
+      hr {
+        border: 0;
+        border-top: 1px solid #ddd;
+        margin: 15px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Hasil Analisis Status Gizi</h2>
+
+      {% if status == 'Normal' %}
+      <div class="result-card normal">Status: NORMAL</div>
+      {% elif status == 'Gizi Kurang' %}
+      <div class="result-card kurang">Status: GIZI KURANG</div>
+      {% elif status == 'Gizi Lebih' %}
+      <div class="result-card lebih">Status: GIZI LEBIH</div>
+      {% endif %}
+
+      <div class="detail">
+        <p><strong>Nama Anak:</strong> {{ nama }}</p>
+        <p>
+          <strong>Jenis Kelamin:</strong> {{ 'Laki-laki' if jk == 'L' else
+          'Perempuan' }}
+        </p>
+        <p><strong>Umur:</strong> {{ umur }} Minggu</p>
+        <p><strong>Berat Aktual:</strong> {{ berat }} kg</p>
+        <hr />
+        <h4>Referensi Standar WHO (Untuk {{ umur }} Minggu):</h4>
+        <ul>
+          <li>Batas Bawah (-2 SD): <strong>{{ batas_bawah }} kg</strong></li>
+          <li>Berat Ideal (Median): <strong>{{ ideal }} kg</strong></li>
+          <li>Batas Atas (+2 SD): <strong>{{ batas_atas }} kg</strong></li>
+        </ul>
+      </div>
+
+      <a href="/" class="btn-back">Kembali Cek Data Lain</a>
+    </div>
+  </body>
+</html>
