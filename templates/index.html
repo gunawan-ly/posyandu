@@ -3,20 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='output.css') }}"
-    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <title>Halaman Home</title>
   </head>
   <body>
     <div class="container mx-auto px-4">
-      <h1 class="text-3xl font-bold text-center">Hello Ini Halaman Home</h1>
-      <a
-        href="/about"
-        class="inline-block px-5 py-2 bg-green-600 text-white font-semibold rounded-lg shadow hover:bg-green-700 transition"
-        >KE HALAMAN ABOUT</a
-      >
-    </div>
+      <h1 class="text-3xl font-bold text-center">Halaman Cek Statu Berat Badan Menurut Umur</h1>
+      <form action="/hitung" method="POST" class="bg-white shadow-2xl w-full h-auto rounded-lg py-4 px-4">
+        <div class="px-2 py-2">
+          <label for="jk">Jenis Kelamin: </label>
+          <select name="jk" id="jk" required>
+            <option value="L">Laki-laki</option>
+            <option value="P">Perempuan</option>
+          </select>
+        </div>
+        <div class="px-2 py-2">
+          <label for="umur" class="font-semibold">Umur (Minggu)</label>
+          <input type="number" name="umur" id="umur" min="0" max="13" required placeholder="Contoh 5">
+        </div>
+        <div class="px-2 py-2">
+          <label for="berat">Berat Badan (kg)</label>
+          <input type="number" name="berat" id="berat" step="0.01" min="0.5" required placeholder="Contoh 4.2">
+        </div>
+        <button type="submit" class="px-2 py-2 bg-blue-400 rounded-lg hover:bg-blue-500 transition">Cek Status Gizi</button>
+      </form>
   </body>
 </html>
