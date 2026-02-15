@@ -11,7 +11,7 @@
       <h1 class="text-3xl font-bold text-center">Halaman Cek Statu Berat Badan Menurut Umur</h1>
       <form action="/hitung" method="POST" class="bg-white shadow-2xl w-full h-auto rounded-lg py-4 px-4">
         <div class="px-2 py-2">
-          <label for="jk">Jenis Kelamin: </label>
+          <label for="jk" class="font-semibold">Jenis Kelamin: </label>
           <select name="jk" id="jk" required>
             <option value="L">Laki-laki</option>
             <option value="P">Perempuan</option>
@@ -19,13 +19,13 @@
         </div>
         <div class="px-2 py-2">
           <label for="umur" class="font-semibold">Umur (Minggu)</label>
-          <input type="number" name="umur" id="umur" min="0" max="13" required placeholder="Contoh 5">
+          <input type="number" name="umur" id="umur" class="w-2xs border-2 rounded-lg pl-2 ml-2" min="0" max="13" required placeholder="Contoh 5">
         </div>
         <div class="px-2 py-2">
-          <label for="berat">Berat Badan (kg)</label>
-          <input type="number" name="berat" id="berat" step="0.01" min="0.5" required placeholder="Contoh 4.2">
+          <label for="berat" class="font-semibold">Berat Badan (kg)</label>
+          <input type="number" name="berat" id="berat" class="w-2xs border-2 rounded-lg pl-2 ml-2" step="0.01" min="0.5" required placeholder="Contoh 4.2">
         </div>
-        <button type="submit" class="px-2 py-2 bg-blue-400 rounded-lg hover:bg-blue-500 transition">Cek Status Gizi</button>
+        <button type="submit" class="px-2 py-2 font-bold text-white shadow-2xs bg-blue-400 rounded-lg hover:bg-blue-500 transition">Cek Status Gizi</button>
       </form>
   </body>
 </html>
