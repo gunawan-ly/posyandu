@@ -5,11 +5,18 @@ import os
 app = Flask(__name__)
 
 # Fungsi untuk membaca database refrensi
-def get_data_refrensi():
+def get_data_refrensi(jk):
     # Mengarahkan ke folder database
     # Sesuaikan nama file
-    file_path = os.path.join('database', 'wfa_boys_13_weeks_zscores.xlsx')
-    df = pd.read_excel(file_path, engine='openpyxl')
+    # Logika percabangan untuk memilih file
+    if jk == 'L':
+        nama_file = 'wfa_boys_13_weeks_zscores.csv'
+    elif jk == 'P':
+        nama_file = 'wfa_girls_13_weeks_zscores.csv'
+    else:
+        return None # Jaga-jaga jika input tidak valid
+    file_path = os.path.join('database', nama_file)
+    df = pd.read_csv(file_path)
     return df # Jangan lupa menambahkan baris ini
 
 # Route untuk menampilkan halaman utama
@@ -31,9 +38,12 @@ def hitung():
 
     # 2. Membaca data refrensi dari pandas
     try:
-        df = get_data_refrensi()
+        df = get_data_refrensi(jk)
     except Exception as e:
         return f"Terjasi kesalahan saat membaca database: {e}"
+    
+    if df is None:
+        return "Error: Jenis kelamin tidak valid"
     
     # 3. Memfilter data (mencari baris yang umurnya sesuai input)
     data_anak = df[df['Week'] == umur_minggu]
