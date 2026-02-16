@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 import pandas as pd
 import os
+from styles import THEME, FORM
 
 app = Flask(__name__)
 
@@ -15,14 +16,15 @@ def get_data_refrensi(jk):
         nama_file = 'wfa_girls_13_weeks_zscores.csv'
     else:
         return None # Jaga-jaga jika input tidak valid
-    file_path = os.path.join('database', nama_file)
+    file_path = os.path.join('/home', 'awanophilee', 'mysite', 'database', nama_file)
     df = pd.read_csv(file_path)
     return df # Jangan lupa menambahkan baris ini
 
 # Route untuk menampilkan halaman utama
 @app.route('/')
 def home():
-    return render_template('index.html')
+    combined_styles = {**THEME, **FORM}
+    return render_template('index.html', s=combined_styles)
 
 # Route untuk memproses hitungan
 @app.route('/hitung', methods=['POST'])
