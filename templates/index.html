@@ -36,7 +36,7 @@
               placeholder="Nama Anak"
               class="{{ s.input }}"
             />
-          <label for="jk" class="{{ s.label_jk }}"
+          <label for="jk" class="{{ s.label }}"
             >Jenis Kelamin</label
           >
           <select
@@ -53,7 +53,7 @@
         <div>
           <label
             for="umur"
-            class="block text-sm font-semibold text-gray-700 mb-1"
+            class="{{ s.label }}"
             >Umur Bayi</label
           >
           <div class="relative">
@@ -77,7 +77,7 @@
         <div>
           <label
             for="berat"
-            class="block text-sm font-semibold text-gray-700 mb-1"
+            class="{{ s.label }}"
             >Berat Badan</label
           >
           <div class="relative">
@@ -89,10 +89,10 @@
               min="0.5"
               required
               placeholder="Contoh: 4.2"
-              class="{{ s.input}}"
+              class="{{ s.input }}"
             />
             <span
-              class="absolute right-4 top-2.5 text-gray-400 font-medium select-none"
+              class="{{ s.span }}"
               >kg</span
             >
           </div>
