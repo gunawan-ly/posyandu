@@ -9,7 +9,7 @@ def get_data_refrensi(jk):
     else:
         return None
     
-    file_path = os.path.join('database', nama_file)
+    file_path = os.path.join('/home', 'awanophlee', 'mysite', 'database', nama_file)
     df = pd.read_csv(file_path)
     return df
 
