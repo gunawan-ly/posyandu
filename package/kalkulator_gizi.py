@@ -33,7 +33,7 @@ def proses_status_gizi(nama, jk, umur_minggu, berat_badan):
     elif berat_badan > batas_atas:
         status_gizi = "Gizi Lebih"
     else:
-        status_gizi = "Gizi Normal"
+        status_gizi = "Normal"
 
     return {
         "error": None,
