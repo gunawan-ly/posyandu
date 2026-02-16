@@ -10,7 +10,7 @@ def get_data_refrensi():
     # Sesuaikan nama file
     file_path = os.path.join('database', 'wfa_boys_13_weeks_zscores.xlsx')
     df = pd.read_excel(file_path, engine='openpyxl')
-    return df
+    return df # Jangan lupa menambahkan baris ini
 
 # Route untuk menampilkan halaman utama
 @app.route('/')
