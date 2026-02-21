@@ -70,16 +70,16 @@ def proses_status_gizi(nama, jk, umur, s_umur, berat_badan):
 
     # Tentukan status gizi berdasarkan Z-score (standar WHO)
     if z_score < -3.0:
-        status_gizi = "Gizi Sangat Kurang (Severely Underweight)"
+        status_gizi = "Berat Badan Sangat Kurang (SK)"
         status_tag = "sangat_kurang"
     elif -3.0 <= z_score < -2.0:
-        status_gizi = "Gizi Kurang (Underweight)"
+        status_gizi = "Bereat Badan Kurang (K)"
         status_tag = "kurang"
     elif -2.0 <= z_score <= 1.0:
-        status_gizi = "Gizi Baik (Normal)"
+        status_gizi = "Berat Badan Normal (N)"
         status_tag = "baik"
     else: # z_score > 1.0
-        status_gizi = "Berisiko Gizi Lebih (Risk of Overweight)"
+        status_gizi = "Resiko Berat Badan Lebih (RB)"
         status_tag = "lebih"
 
     # Kembalikan hasil dalam bentuk dictionary yang rapi

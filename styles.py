@@ -1,6 +1,6 @@
 # Tempat untuk menyimpan semua class tailwind css
 THEME = {
-    "body": "bg-linear-to-br from-gray-500 to-white min-h-screen flex items-center justify-center p-4 font-sans text-gray-800",
+    "body": "bg-gradient-to-br from-gray-400 to-white min-h-screen flex items-center justify-center p-4 font-sans text-gray-800",
     "div": "bg-white shadow-2xl rounded-2xl w-full max-w-md p-8",
     "div_div": "text-center mb-8",
     "div_h1": "text-2xl font-bold text-gray-800",
@@ -23,7 +23,7 @@ STATUS = {
     "status_lebih": "mb-6 p-4 rounded-xl border border-orange-500 bg-orange-100 text-orange-800 text-center shadow-sm",
     "p_status": "text-xs uppercase tracking-widest font-bold opacity-80 mb-1",
     "pe": "text-2xl font-black uppercase",
-    "div_data": "bg-gray-50 rounded-xl p-5 mb-6 border border-gray-100",
+    "div_data": "bg-sky-50 rounded-xl p-5 mb-6 border border-gray-100",
     "h3_data": "font-bold text-gray-700 mb-3 border-b border-gray-200 pb-2 text-sm uppercase tracking-wider",
     "div_span": "flex justify-between items-center",
     "a": "block w-full text-center bg-white hover:bg-gray-50 text-gray-700 font-bold py-3 px-4 rounded-lg shadow-sm transition-all border border-gray-300 transform hover:-translate-y-0.5"

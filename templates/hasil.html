@@ -5,9 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hasil Status Gizi</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .animate-on-load {
+        animation: fadeInUp 0.6s ease-out forwards;
+      }
+    </style>
   </head>
   <body class="{{ s.body }}">
-    <div class="{{ s.div }}">
+    <div class="{{ s.div }} animate-on-load">
       <div class="{{ s.div_div }}">
         <h1 class="{{ s.div_h1 }}">Hasil Perhitungan Status Gizi</h1>
         <p class="{{ s.h1_p }}">Nama Anak: {{ nama }}</p>
