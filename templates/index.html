@@ -3,107 +3,100 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
-    <title>Cek Status Gizi Posyandu</title>
+    <title>Kalkulator Gizi Posyandu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
   </head>
-
-  <body
-    class="{{ s.body}}"
-  >
+  <body class="{{ s.body }}">
     <div class="{{ s.div }}">
       <div class="{{ s.div_div }}">
-        <h1 class="{{ s.div_h1 }}">
-          Cek Status Gizi Anak (BB/Umur)
-        </h1>
-        <p class="{{ s.h1_p }}">
-          Berdasarkan Standar Z-Score WHO
-        </p>
+        <h1 class="{{ s.div_h1 }}">Kalkulator Status Gizi Anak</h1>
+        <p class="{{ s.h1_p }}">Berdasarkan Standar WHO (BB/U)</p>
       </div>
 
-      <form action="/hitung" method="POST" class="space-y-5">
-        <div>
-          <label
-            for="nama"
-            class="{{ s.label_nama }}"
-            >Nama Anak</label
-          >
-          <div class="relative">
-            <input
-              type="text"
-              name="nama"
-              id="nama"
-              required
-              placeholder="Nama Anak"
-              class="{{ s.input }}"
-            />
-          <label for="jk" class="{{ s.label }}"
-            >Jenis Kelamin</label
-          >
-          <select
-            name="jk"
-            id="jk"
-            required
-            class="{{ s.select }}"
-          >
+      <!-- Bagian untuk menampilkan pesan error -->
+      {% if error %}
+      <div
+        class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-6"
+        role="alert"
+      >
+        <strong class="font-bold">Oops!</strong>
+        <span class="block sm:inline">{{ error }}</span>
+      </div>
+      {% endif %}
+
+      <form action="/hitung" method="POST">
+        <!-- Jenis Kelamin -->
+        <div class="mb-4">
+          <label for="jk" class="{{ s.label }}">Jenis Kelamin</label>
+          <select id="jk" name="jk" class="{{ s.select }}" required>
+            <option value="" disabled selected>Pilih...</option>
             <option value="L">Laki-laki</option>
             <option value="P">Perempuan</option>
           </select>
         </div>
 
-        <div>
-          <label
-            for="umur"
-            class="{{ s.label }}"
-            >Umur Bayi</label
+        <!-- Nama Anak -->
+        <div class="mb-4">
+          <label for="nama" class="{{ s.label_nama }}"
+            >Nama Anak (Opsional)</label
           >
-          <div class="relative">
+          <input
+            type="text"
+            id="nama"
+            name="nama"
+            class="{{ s.input }}"
+            placeholder="Contoh: Budi"
+          />
+        </div>
+
+        <!-- Umur & Satuan Umur -->
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label for="umur" class="{{ s.label }}">Umur</label>
             <input
               type="number"
-              name="umur"
               id="umur"
-              min="0"
-              max="13"
-              required
-              placeholder="Hanya 1 - 13"
+              name="umur"
               class="{{ s.input }}"
+              placeholder="Contoh: 5"
+              required
             />
-            <span
-              class="absolute right-4 top-2.5 text-gray-400 font-medium select-none"
-              >Minggu</span
+          </div>
+          <div>
+            <label for="satuan_umur" class="{{ s.label }}">Satuan Umur</label>
+            <select
+              id="satuan_umur"
+              name="satuan_umur"
+              class="{{ s.select }}"
+              required
             >
+              <option value="" disabled selected>Pilih...</option>
+              <option value="M">Minggu (0-13)</option>
+              <option value="B">Bulan (1-60)</option>
+            </select>
           </div>
         </div>
 
-        <div>
-          <label
-            for="berat"
-            class="{{ s.label }}"
-            >Berat Badan</label
-          >
+        <!-- Berat Badan -->
+        <div class="mb-4">
+          <label for="berat" class="{{ s.label }}">Berat Badan (kg)</label>
           <div class="relative">
             <input
-              type="number"
-              name="berat"
+              type="text"
               id="berat"
-              step="0.01"
-              min="0.5"
-              required
-              placeholder="Contoh: 4.2"
+              name="berat"
               class="{{ s.input }}"
+              placeholder="Contoh: 7.5"
+              required
             />
-            <span
-              class="{{ s.span }}"
-              >kg</span
-            >
+            <span class="{{ s.span }}">kg</span>
           </div>
         </div>
 
-        <div class="pt-2">
-          <button
-            type="submit"
-            class="{{ s.button }}"
-          >
-            Cek Status Gizi
+        <!-- Tombol Submit -->
+        <div class="mt-8">
+          <button type="submit" class="{{ s.button }}">
+            Hitung Status Gizi
           </button>
         </div>
       </form>

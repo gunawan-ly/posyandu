@@ -3,121 +3,53 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='output.css') }}"
-    />
-    <title>Hasil Analisis Gizi</title>
+    <title>Hasil Status Gizi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
   </head>
-
-  <body
-    class="bg-linear-to-br from-gray-500 to-white min-h-screen flex items-center justify-center p-4 font-sans text-gray-800"
-  >
-    <div class="bg-white shadow-2xl rounded-2xl w-full max-w-md p-8">
-      <div class="text-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">Hasil Analisis</h2>
-        <p class="text-gray-500 text-sm mt-1">
-          Sistem Cek Status Gizi Posyandu
-        </p>
+  <body class="{{ s.body }}">
+    <div class="{{ s.div }}">
+      <div class="{{ s.div_div }}">
+        <h1 class="{{ s.div_h1 }}">Hasil Perhitungan Status Gizi</h1>
+        <p class="{{ s.h1_p }}">Nama Anak: {{ nama }}</p>
       </div>
 
-      {% if status == 'Normal' %}
-      <div
-        class="mb-6 p-4 rounded-xl bg-green-100 border border-green-400 text-green-700 text-center shadow-sm transform transition hover:scale-105"
-      >
-        <p class="text-xs uppercase tracking-widest font-bold opacity-80 mb-1">
-          Status Gizi
-        </p>
-        <p class="text-3xl font-black">NORMAL</p>
+      <!-- Status Gizi -->
+      <div class="{{ s['status_' + status_tag] }}">
+        <p class="{{ s.p_status }}">Status Gizi (BB/U)</p>
+        <p class="{{ s.pe }}">{{ status }}</p>
       </div>
-      {% elif status == 'Gizi Kurang' %}
-      <div
-        class="mb-6 p-4 rounded-xl bg-red-100 border border-red-400 text-red-700 text-center shadow-sm transform transition hover:scale-105"
-      >
-        <p class="text-xs uppercase tracking-widest font-bold opacity-80 mb-1">
-          Status Gizi
-        </p>
-        <p class="text-3xl font-black">GIZI KURANG</p>
-      </div>
-      {% elif status == 'Gizi Lebih' %}
-      <div
-        class="mb-6 p-4 rounded-xl bg-yellow-100 border border-yellow-500 text-yellow-800 text-center shadow-sm transform transition hover:scale-105"
-      >
-        <p class="text-xs uppercase tracking-widest font-bold opacity-80 mb-1">
-          Status Gizi
-        </p>
-        <p class="text-3xl font-black">GIZI LEBIH</p>
-      </div>
-      {% endif %}
 
-      <div class="bg-gray-50 rounded-xl p-5 mb-5 border border-gray-100">
-        <h3
-          class="font-bold text-gray-700 mb-3 border-b border-gray-200 pb-2 text-sm uppercase tracking-wider"
-        >
-          Data Anak
-        </h3>
+      <!-- Detail Data -->
+      <div class="{{ s.div_data }}">
+        <h3 class="{{ s.h3_data }}">Detail Perhitungan</h3>
         <div class="space-y-3 text-sm">
-          <div class="flex justify-between items-center">
-            <span class="text-gray-500">Nama</span>
-            <span class="font-semibold text-gray-800">{{ nama }}</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-gray-500">Jenis Kelamin</span>
-            <span class="font-semibold text-gray-800"
-              >{{ 'Laki-laki' if jk == 'L' else 'Perempuan' }}</span
-            >
-          </div>
-          <div class="flex justify-between items-center">
+          <div class="{{ s.div_span }}">
             <span class="text-gray-500">Umur</span>
-            <span class="font-semibold text-gray-800">{{ umur }} Minggu</span>
+            <span class="font-semibold">{{ umur_display }}</span>
           </div>
-          <div
-            class="flex justify-between items-center bg-white p-2 rounded border border-gray-200 shadow-sm mt-1"
-          >
-            <span class="text-gray-600 font-medium">Berat Aktual</span>
-            <span class="font-bold text-blue-600 text-base"
-              >{{ berat }} kg</span
-            >
+          <div class="{{ s.div_span }}">
+            <span class="text-gray-500">Jenis Kelamin</span>
+            <span class="font-semibold">{{ jk }}</span>
           </div>
-        </div>
-      </div>
-
-      <div class="bg-blue-50 rounded-xl p-5 mb-8 border border-blue-100">
-        <h3
-          class="font-bold text-blue-800 mb-3 border-b border-blue-200 pb-2 text-xs uppercase tracking-wider"
-        >
-          Standar WHO ({{ umur }} Minggu)
-        </h3>
-        <div class="space-y-2 text-sm">
-          <div class="flex justify-between">
-            <span class="text-gray-600"
-              >Batas Bawah <span class="text-xs">(-2 SD)</span></span
-            >
-            <span class="font-semibold text-red-500">{{ batas_bawah }} kg</span>
+          <div class="{{ s.div_span }}">
+            <span class="text-gray-500">Berat Badan</span>
+            <span class="font-semibold">{{ berat }} kg</span>
           </div>
-          <div class="flex justify-between">
-            <span class="text-gray-600"
-              >Ideal <span class="text-xs">(Median)</span></span
-            >
-            <span class="font-semibold text-green-600">{{ ideal }} kg</span>
+          <div class="{{ s.div_span }}">
+            <span class="text-gray-500">Z-Score</span>
+            <span class="font-semibold">{{ z_score }}</span>
           </div>
-          <div class="flex justify-between">
-            <span class="text-gray-600"
-              >Batas Atas <span class="text-xs">(+2 SD)</span></span
-            >
-            <span class="font-semibold text-yellow-600"
-              >{{ batas_atas }} kg</span
-            >
+          <div class="{{ s.div_span }}">
+            <span class="text-gray-500">Berat Badan Ideal</span>
+            <span class="font-semibold">{{ ideal }} kg</span>
           </div>
         </div>
       </div>
 
-      <a
-        href="/"
-        class="block w-full text-center bg-white hover:bg-gray-50 text-gray-700 font-bold py-3 px-4 rounded-lg shadow-sm transition-all border border-gray-300 transform hover:-translate-y-0.5"
-      >
-        &larr; Kembali Cek Data Lain
-      </a>
+      <!-- Tombol Kembali -->
+      <div class="mt-8">
+        <a href="{{ url_for('home') }}" class="{{ s.a }}"> Hitung Lagi </a>
+      </div>
     </div>
   </body>
 </html>
