@@ -20,7 +20,7 @@ def get_data_refrensi(jk, s_umur):
         return None # Jenis kelamin tidak valid
     
     # Buat path file yang lengkap
-    file_path = os.path.join('/home', 'awanophilee', 'mysite', 'database', nama_file)
+    file_path = os.path.join('database', nama_file)
 
     # Coba baca file, return None jika gagal
     try:

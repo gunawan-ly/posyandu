@@ -1,53 +1,52 @@
-from flask import Flask, render_template, request
-from package.kalkulator_gizi import proses_status_gizi
-from styles import THEME, FORM, STATUS
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-@app.route('/')
-def home():
-    """Menampilkan halaman utama dengan form input."""
-    all_styles = {**THEME, **FORM}
-    return render_template('index.html', s=all_styles)
+# Konfigurasi database: menyimpan data ke file bernama posyandu.db
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posyandu.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-@app.route('/hitung', methods=['POST'])
-def hitung():
-    """Menerima data dari form, memproses, dan menampilkan hasil atau error."""
-    all_styles = {**THEME, **FORM, **STATUS}
-    try:
-        # 1. Ambil data dari form
-        nama = request.form.get('nama') or "Tanpa Nama"
-        jk = request.form.get('jk')
-        s_umur = request.form.get('satuan_umur')
-        umur_str = request.form.get('umur')
-        berat_str = request.form.get('berat')
+db = SQLAlchemy(app)
 
-        # 2. Validasi input: pastikan tidak ada yang kosong
-        if not all([jk, s_umur, umur_str, berat_str]):
-            # Jika ada yang kosong, kembali ke halaman utama dengan pesan error
-            return render_template('index.html', s=all_styles, error="Semua kolom wajib diisi.")
+# TABEL 1: Data Induk Anak
+class Anak(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nama = db.Column(db.String(100), nullable=False)
+    tanggal_lahir = db.Column(db.Date, nullable=False)
+    jenis_kelamin = db.Column(db.String(1), nullable=False)
 
-        # 3. Konversi ke tipe data yang benar (int, float)
-        umur = int(umur_str)
-        berat = float(berat_str)
+    # Ini "Jembatan" ajaib untuk menarik semua data pengukuran anak ini nanti
+    riwayat_pengukuran = db.relationship('Pengukuran', backref='anak', lazy=True)
 
-        # 4. Panggil fungsi kalkulator dari package
-        hasil = proses_status_gizi(nama, jk, umur, s_umur, berat)
+# TABEL 2: Riwayat Pengukuran Blanan
+class Pengukuran(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
 
-        # 5. Cek jika ada error dari kalkulator (misal: data referensi tidak ada)
-        if hasil.get("error"):
-            return render_template('index.html', s=all_styles, error=hasil["error"])
-        
-        # 6. Jika berhasil, tampilkan halaman hasil
-        return render_template('hasil.html', **hasil, s=all_styles)
+    # Ini kuncinya: menyambungkan pengukuran ini milik anak yang mana
+    anak_id = db.Column(db.Integer, db.ForeignKey('anak.id'), nullable=False)
 
-    except ValueError:
-        # Error ini terjadi jika 'umur' atau 'berat' diisi teks, bukan angka
-        return render_template('index.html', s=all_styles, error="Input umur dan berat badan harus berupa angka.")
-    except Exception as e:
-        # Menangkap error tak terduga lainnya untuk keamanan
-        app.logger.error(f"Terjadi kesalahan tak terduga: {e}")
-        return render_template('index.html', s=all_styles, error="Terjadi kesalahan pada server. Silakan coba lagi.")
+    # Kolom Input Tabel
+    waktu_kunjungan = db.Column(db.Date, nullable=False)
+    umur_bulan = db.Column(db.Integer, nullable=False)
+    checklist_perkembangan = db.Column(db.String(2))
+    berat_badan = db.Column(db.Float, nullable=False)
+    panjang_badan = db.Column(db.Float, nullable=False)
+    lingkar_lengan = db.Column(db.Float, nullable=False)
+    lingkar_kepala = db.Column(db.Float, nullable=False)
 
-if __name__ == "__main__":
+    # Kolom Hasil Otomatisasi (Nanti diisi oleh perhitungan L, M, S)
+    kesimpulan_bb_bulan_lalu = db.Column(db.String(50))
+    kesimpulan_bb_umur = db.Column(db.String(50))
+    kesimpulan_pb_umur = db.Column(db.String(50))
+    kesimpulan_bb_pb = db.Column(db.String(50))
+    kesimpulan_lingkar_kepala = db.Column(db.String(50))
+    kesimpulan_lingkar_lengan = db.Column(db.String(50))
+
+# Mengeksekusi pembuatan file database
+with app.app_context():
+    db.create_all()
+    print("Database berhasil dibuat!")
+
+if __name__ == '__main__':
     app.run(debug=True)
