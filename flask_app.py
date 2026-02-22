@@ -1,7 +1,12 @@
-from flask import Flask
+from flask import Flask, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
 
 # Konfigurasi database: menyimpan data ke file bernama posyandu.db
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posyandu.db'
