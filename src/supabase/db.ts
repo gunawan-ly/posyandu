@@ -21,7 +21,7 @@ const LABEL_STATUS: Record<string, string> = {
   SP: 'Sangat Pendek',
   P: 'Pendek',
   T: 'Tinggi',
-  GK: 'Gizi Kurang',
+  GK: 'Gizi Buruk',
   GB: 'Gizi Baik',
   GL: 'Gizi Lebih',
   O: 'Obesitas',
@@ -132,6 +132,34 @@ export interface InputKunjungan {
   tinggi_badan: number
   lingkar_lengan?: number | null
   status_lingkar_lengan?: string | null
+  lingkar_kepala?: number | null
+  status_lingkar_kepala?: string | null
+  imunisasi?: string | null
+  vitamin_a?: string | null
+  asi_eksklusif?: string | null
+  mp_asi?: string | null
+  obat_cacing?: string | null
+  bb_naik_tidak?: string | null
+  ceklis_perkembangan?: string | null
+  gejala_tbc?: string | null
+  edukasi?: string | null
+}
+
+// Tampilkan nilai Ya/Tidak secara konsisten (data lama memakai Y/T).
+export function labelYaTidak(nilai: string | null | undefined): string {
+  if (nilai == null || nilai === '') return '—'
+  if (nilai === 'Y') return 'Ya'
+  if (nilai === 'T') return 'Tidak'
+  return nilai
+}
+
+const KODE_BULAN = ['JAN', 'FEB', 'MAR', 'APR', 'MEI', 'JUN', 'JUL', 'AGST', 'SEP', 'OKT', 'NOV', 'DES']
+
+// Kode bulan (kolom legacy) diturunkan dari tanggal kunjungan agar konsisten.
+function kodeBulan(tgl: string): string | null {
+  const d = parseTanggal(tgl)
+  if (!d) return null
+  return KODE_BULAN[d.getMonth()]
 }
 
 export async function listBalita(cari = ''): Promise<Balita[]> {
@@ -219,10 +247,22 @@ export async function tambahKunjungan(balita: Balita, input: InputKunjungan): Pr
       balita_id: balita.id,
       nama_anak: balita.nama,
       tanggal_kunjungan: input.tanggal_kunjungan,
+      bulan: kodeBulan(input.tanggal_kunjungan),
       berat_badan: input.berat_badan,
       tinggi_badan: input.tinggi_badan,
       lingkar_lengan: input.lingkar_lengan ?? null,
       status_lingkar_lengan: input.status_lingkar_lengan ?? null,
+      lingkar_kepala: input.lingkar_kepala ?? null,
+      status_lingkar_kepala: input.status_lingkar_kepala ?? null,
+      imunisasi: input.imunisasi ?? null,
+      vitamin_a: input.vitamin_a ?? null,
+      asi_eksklusif: input.asi_eksklusif ?? null,
+      mp_asi: input.mp_asi ?? null,
+      obat_cacing: input.obat_cacing ?? null,
+      bb_naik_tidak: input.bb_naik_tidak ?? null,
+      ceklis_perkembangan: input.ceklis_perkembangan ?? null,
+      gejala_tbc: input.gejala_tbc ?? null,
+      edukasi: input.edukasi ?? null,
       umur_bulan: umurBulan,
       bb_menurut_umur: labelStatus(hasil.status_bb_u),
       pbtb_menurut_umur: labelStatus(hasil.status_tb_u),

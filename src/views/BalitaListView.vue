@@ -112,8 +112,8 @@ async function hapus(balita: Balita) {
       <div v-else class="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card v-for="b in daftar" :key="b.id" class="h-full">
           <CardContent class="gap-3">
-            <div class="flex items-start justify-between gap-3">
-              <div class="flex items-center gap-3">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex min-w-0 items-center gap-3">
                 <span class="bg-primary/10 text-primary grid size-10 shrink-0 place-items-center rounded-lg">
                   <UserRound class="size-5" />
                 </span>
@@ -124,15 +124,16 @@ async function hapus(balita: Balita) {
                   >
                     {{ b.nama }}
                   </RouterLink>
-                  <p class="text-muted-foreground text-xs">
+                  <p class="text-muted-foreground mt-0.5 text-xs">
                     {{ labelJk(b.jenis_kelamin) }} · {{ formatUmur(b.tanggal_lahir) }}
                   </p>
                 </div>
               </div>
               <button
                 type="button"
-                class="text-muted-foreground hover:text-red-600 rounded-lg p-1.5 transition-colors"
+                class="text-muted-foreground hover:bg-red-50 hover:text-red-600 -mr-1.5 mt-1 shrink-0 rounded-lg p-2 transition-colors"
                 aria-label="Hapus balita"
+                title="Hapus balita"
                 @click="hapus(b)"
               >
                 <Trash2 class="size-4" />

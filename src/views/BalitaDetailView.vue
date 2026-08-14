@@ -13,6 +13,7 @@ import {
   hapusBalita,
   hapusKunjungan,
   kodeDariLabel,
+  labelYaTidak,
   listKunjungan,
   tambahKunjungan,
   umurSaatIni,
@@ -39,6 +40,17 @@ const beratBadan = ref<string>('')
 const tinggiBadan = ref<string>('')
 const lingkarLengan = ref<string>('')
 const statusLila = ref('')
+const lingkarKepala = ref<string>('')
+const statusLika = ref('')
+const bbNaik = ref('')
+const imunisasi = ref('')
+const vitaminA = ref('')
+const asiEksklusif = ref('')
+const mpAsi = ref('')
+const obatCacing = ref('')
+const ceklisPerkembangan = ref('')
+const gejalaTbc = ref('')
+const edukasi = ref('')
 const menyimpan = ref(false)
 const pesanSukses = ref('')
 const pesanForm = ref('')
@@ -67,6 +79,30 @@ async function muat() {
 const kunjunganTerbaru = computed<Kunjungan | null>(() => kunjungan.value[0] ?? null)
 
 const jkKurva = computed<'L' | 'P'>(() => (balita.value?.jenis_kelamin === 'Perempuan' ? 'P' : 'L'))
+
+type TabKurva = 'bbu' | 'tbu' | 'bbtb'
+const TAB_KURVA: { kunci: TabKurva; label: string }[] = [
+  { kunci: 'bbu', label: 'BB/U' },
+  { kunci: 'tbu', label: 'TB/U' },
+  { kunci: 'bbtb', label: 'BB/TB' },
+]
+const tabKurva = ref<TabKurva>('bbu')
+
+const kurvaProps = computed(() => {
+  const k = kunjunganTerbaru.value
+  const umur = k?.umur_bulan ?? 0
+  if (tabKurva.value === 'bbu') return { indikator: 'bbu' as const, umurBulan: umur, nilai: 0, z: k?.z_bb_u ?? null }
+  if (tabKurva.value === 'tbu') return { indikator: 'tbu' as const, umurBulan: umur, nilai: 0, z: k?.z_tb_u ?? null }
+  return { indikator: 'bbtb' as const, umurBulan: umur, nilai: k?.tinggi_badan ?? 0, z: k?.z_bb_tb ?? null }
+})
+
+const keteranganKurva = computed(() => {
+  const k = kunjunganTerbaru.value
+  if (!k) return ''
+  if (tabKurva.value === 'bbu') return `z-score BB/U ${k.z_bb_u != null ? k.z_bb_u.toFixed(2) : '—'}`
+  if (tabKurva.value === 'tbu') return `z-score TB/U ${k.z_tb_u != null ? k.z_tb_u.toFixed(2) : '—'}`
+  return `panjang ${k.tinggi_badan ?? '—'} cm · z-score BB/TB ${k.z_bb_tb != null ? k.z_bb_tb.toFixed(2) : '—'}`
+})
 
 function formatUmur(tanggalLahir: string): string {
   const u = umurSaatIni(tanggalLahir)
@@ -108,12 +144,34 @@ async function simpanKunjungan() {
       tinggi_badan: tb,
       lingkar_lengan: lingkarLengan.value ? Number(lingkarLengan.value) : null,
       status_lingkar_lengan: statusLila.value || null,
+      lingkar_kepala: lingkarKepala.value ? Number(lingkarKepala.value) : null,
+      status_lingkar_kepala: statusLika.value || null,
+      bb_naik_tidak: bbNaik.value || null,
+      imunisasi: imunisasi.value || null,
+      vitamin_a: vitaminA.value || null,
+      asi_eksklusif: asiEksklusif.value || null,
+      mp_asi: mpAsi.value || null,
+      obat_cacing: obatCacing.value || null,
+      ceklis_perkembangan: ceklisPerkembangan.value || null,
+      gejala_tbc: gejalaTbc.value || null,
+      edukasi: edukasi.value || null,
     })
     kunjungan.value = await listKunjungan(balita.value.id)
     beratBadan.value = ''
     tinggiBadan.value = ''
     lingkarLengan.value = ''
     statusLila.value = ''
+    lingkarKepala.value = ''
+    statusLika.value = ''
+    bbNaik.value = ''
+    imunisasi.value = ''
+    vitaminA.value = ''
+    asiEksklusif.value = ''
+    mpAsi.value = ''
+    obatCacing.value = ''
+    ceklisPerkembangan.value = ''
+    gejalaTbc.value = ''
+    edukasi.value = ''
     pesanSukses.value = 'Kunjungan berhasil dicatat.'
   } catch (e) {
     pesanForm.value = e instanceof Error ? e.message : 'Gagal menyimpan kunjungan.'
@@ -144,6 +202,10 @@ async function hapusBal() {
 }
 
 const OPSI_STATUS_LILA = ['Normal', 'Gizi Kurang']
+const OPSI_STATUS_LIKA = ['Normal', 'Mikrosefali', 'Makrosefali']
+const OPSI_YA_TIDAK = ['Ya', 'Tidak']
+const OPSI_NAIK = ['Naik', 'Tidak Naik']
+const OPSI_CEKLIS = ['L', 'TL']
 
 const klsInput =
   'border-input bg-background h-10 w-full min-w-0 rounded-md border px-3 py-2 text-base shadow-sm outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-3 disabled:pointer-events-none disabled:opacity-50 md:text-sm'
@@ -194,20 +256,34 @@ const klsInput =
           <!-- Kiri: kurva + riwayat -->
           <div class="space-y-6 lg:col-span-2">
             <Card>
-              <CardHeader>
-                <CardTitle class="font-display text-lg font-normal">Kurva BB/U (pengukuran terbaru)</CardTitle>
+              <CardHeader class="flex flex-wrap items-center justify-between gap-3 sm:flex-row">
+                <CardTitle class="font-display text-lg font-normal">Kurva pertumbuhan</CardTitle>
+                <div
+                  class="inline-flex rounded-lg border border-emerald-200 bg-emerald-50 p-1"
+                  role="group"
+                  aria-label="Pilih indikator kurva"
+                >
+                  <button
+                    v-for="t in TAB_KURVA"
+                    :key="t.kunci"
+                    type="button"
+                    :class="tabKurva === t.kunci
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'"
+                    class="cursor-pointer rounded-md px-3 py-1.5 text-sm font-bold transition-colors"
+                    @click="tabKurva = t.kunci"
+                  >
+                    {{ t.label }}
+                  </button>
+                </div>
               </CardHeader>
               <CardContent>
                 <template v-if="kunjunganTerbaru">
-                  <KurvaWHO
-                    :jk="jkKurva"
-                    :umur-bulan="kunjunganTerbaru.umur_bulan ?? 0"
-                    :z-bbu="kunjunganTerbaru.z_bb_u"
-                  />
+                  <KurvaWHO :jk="jkKurva" v-bind="kurvaProps" />
                   <p class="text-muted-foreground mt-2 text-xs">
                     Kunjungan {{ formatTanggal(kunjunganTerbaru.tanggal_kunjungan) }},
-                    umur {{ kunjunganTerbaru.umur_bulan ?? '—' }} bulan,
-                    z-score BB/U {{ kunjunganTerbaru.z_bb_u != null ? kunjunganTerbaru.z_bb_u.toFixed(2) : '—' }}.
+                    umur {{ kunjunganTerbaru.umur_bulan ?? '—' }} bulan ·
+                    {{ keteranganKurva }}.
                   </p>
                 </template>
                 <div
@@ -230,35 +306,62 @@ const klsInput =
                   Belum ada kunjungan tercatat.
                 </div>
                 <div v-else class="overflow-x-auto">
-                  <table class="w-full min-w-[640px] text-sm">
+                  <table class="w-full min-w-[1500px] text-sm">
                     <thead>
                       <tr class="text-muted-foreground border-border/60 border-b text-left text-xs font-bold tracking-wide uppercase">
-                        <th class="py-2 pr-3">Tanggal</th>
+                        <th class="py-2 pr-3 whitespace-nowrap">Tanggal</th>
                         <th class="py-2 pr-3">Umur</th>
                         <th class="py-2 pr-3">BB (kg)</th>
                         <th class="py-2 pr-3">PB (cm)</th>
+                        <th class="py-2 pr-3">LiLA</th>
+                        <th class="py-2 pr-3">LiKA</th>
+                        <th class="py-2 pr-3">BB naik</th>
+                        <th class="py-2 pr-3">Imunisasi</th>
+                        <th class="py-2 pr-3">Vit. A</th>
+                        <th class="py-2 pr-3">ASI</th>
+                        <th class="py-2 pr-3">MP-ASI</th>
+                        <th class="py-2 pr-3">Cacing</th>
+                        <th class="py-2 pr-3">Ceklis</th>
+                        <th class="py-2 pr-3">TBC</th>
+                        <th class="py-2 pr-3">Edukasi</th>
                         <th class="py-2 pr-3">BB/U</th>
                         <th class="py-2 pr-3">TB/U</th>
                         <th class="py-2 pr-3">BB/TB</th>
-                        <th class="py-2 pr-3">LiLA</th>
                         <th class="py-2"></th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr v-for="k in kunjungan" :key="k.id" class="border-border/60 border-b last:border-0">
-                        <td class="py-3 pr-3 font-medium">{{ formatTanggal(k.tanggal_kunjungan) }}</td>
-                        <td class="py-3 pr-3 text-muted-foreground">{{ k.umur_bulan ?? '—' }} bln</td>
-                        <td class="py-3 pr-3">{{ k.berat_badan ?? '—' }}</td>
-                        <td class="py-3 pr-3">{{ k.tinggi_badan ?? '—' }}</td>
-                        <td class="py-3 pr-3"><StatusBadge :kode="kodeDariLabel(k.bb_menurut_umur)" /></td>
-                        <td class="py-3 pr-3"><StatusBadge :kode="kodeDariLabel(k.pbtb_menurut_umur)" /></td>
-                        <td class="py-3 pr-3"><StatusBadge :kode="kodeDariLabel(k.bb_menurut_pbtb)" /></td>
-                        <td class="py-3 pr-3 text-muted-foreground">{{ k.lingkar_lengan ?? '—' }} <span v-if="k.status_lingkar_lengan" class="text-xs">({{ k.status_lingkar_lengan }})</span></td>
+                        <td class="py-3 pr-3 font-medium whitespace-nowrap">{{ formatTanggal(k.tanggal_kunjungan) }}</td>
+                        <td class="py-3 pr-3 text-muted-foreground whitespace-nowrap">{{ k.umur_bulan ?? '—' }} bln</td>
+                        <td class="py-3 pr-3 whitespace-nowrap">{{ k.berat_badan ?? '—' }}</td>
+                        <td class="py-3 pr-3 whitespace-nowrap">{{ k.tinggi_badan ?? '—' }}</td>
+                        <td class="py-3 pr-3 whitespace-nowrap">
+                          {{ k.lingkar_lengan ?? '—' }}
+                          <span v-if="k.status_lingkar_lengan" class="text-muted-foreground text-xs">({{ k.status_lingkar_lengan }})</span>
+                        </td>
+                        <td class="py-3 pr-3 whitespace-nowrap">
+                          {{ k.lingkar_kepala ?? '—' }}
+                          <span v-if="k.status_lingkar_kepala" class="text-muted-foreground text-xs">({{ k.status_lingkar_kepala }})</span>
+                        </td>
+                        <td class="py-3 pr-3 whitespace-nowrap">{{ k.bb_naik_tidak ?? '—' }}</td>
+                        <td class="py-3 pr-3 whitespace-nowrap">{{ labelYaTidak(k.imunisasi) }}</td>
+                        <td class="py-3 pr-3 whitespace-nowrap">{{ labelYaTidak(k.vitamin_a) }}</td>
+                        <td class="py-3 pr-3 whitespace-nowrap">{{ labelYaTidak(k.asi_eksklusif) }}</td>
+                        <td class="py-3 pr-3 whitespace-nowrap">{{ labelYaTidak(k.mp_asi) }}</td>
+                        <td class="py-3 pr-3 whitespace-nowrap">{{ labelYaTidak(k.obat_cacing) }}</td>
+                        <td class="py-3 pr-3 whitespace-nowrap">{{ labelYaTidak(k.ceklis_perkembangan) }}</td>
+                        <td class="py-3 pr-3 whitespace-nowrap">{{ labelYaTidak(k.gejala_tbc) }}</td>
+                        <td class="text-muted-foreground py-3 pr-3 max-w-[160px] truncate whitespace-nowrap" :title="k.edukasi || ''">{{ k.edukasi || '—' }}</td>
+                        <td class="py-3 pr-3 whitespace-nowrap"><StatusBadge :kode="kodeDariLabel(k.bb_menurut_umur)" /></td>
+                        <td class="py-3 pr-3 whitespace-nowrap"><StatusBadge :kode="kodeDariLabel(k.pbtb_menurut_umur)" /></td>
+                        <td class="py-3 pr-3 whitespace-nowrap"><StatusBadge :kode="kodeDariLabel(k.bb_menurut_pbtb)" /></td>
                         <td class="py-3 text-right">
                           <button
                             type="button"
-                            class="text-muted-foreground hover:text-red-600 rounded-lg p-1.5 transition-colors"
+                            class="text-muted-foreground hover:bg-red-50 hover:text-red-600 rounded-lg p-2 transition-colors"
                             aria-label="Hapus kunjungan"
+                            title="Hapus kunjungan"
                             @click="hapusKunj(balita.id, k)"
                           >
                             <Trash2 class="size-4" />
@@ -351,6 +454,92 @@ const klsInput =
                         <option value="">— pilih —</option>
                         <option v-for="s in OPSI_STATUS_LILA" :key="s" :value="s">{{ s }}</option>
                       </select>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label for="lika" class="text-muted-foreground mb-1.5 block text-xs font-bold">LiKA (cm)</label>
+                      <input id="lika" v-model="lingkarKepala" type="number" inputmode="decimal" step="0.1" min="0" class="w-full" :class="klsInput" />
+                    </div>
+                    <div>
+                      <label for="status-lika" class="text-muted-foreground mb-1.5 block text-xs font-bold">Status LiKA</label>
+                      <select id="status-lika" v-model="statusLika" class="w-full" :class="klsInput">
+                        <option value="">— pilih —</option>
+                        <option v-for="s in OPSI_STATUS_LIKA" :key="s" :value="s">{{ s }}</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="border-border/60 border-t pt-4">
+                    <p class="text-muted-foreground mb-3 text-xs font-bold tracking-widest uppercase">Gizi & kesehatan</p>
+                    <div class="grid grid-cols-2 gap-3">
+                      <div>
+                        <label for="bb-naik" class="text-muted-foreground mb-1.5 block text-xs font-bold">BB naik</label>
+                        <select id="bb-naik" v-model="bbNaik" class="w-full" :class="klsInput">
+                          <option value="">— pilih —</option>
+                          <option v-for="s in OPSI_NAIK" :key="s" :value="s">{{ s }}</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label for="ceklis-perkembangan" class="text-muted-foreground mb-1.5 block text-xs font-bold">Ceklis perkembangan</label>
+                        <select id="ceklis-perkembangan" v-model="ceklisPerkembangan" class="w-full" :class="klsInput">
+                          <option value="">— pilih —</option>
+                          <option v-for="s in OPSI_CEKLIS" :key="s" :value="s">{{ s === 'L' ? 'L (Lengkap)' : 'TL (Tidak Lengkap)' }}</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label for="imunisasi" class="text-muted-foreground mb-1.5 block text-xs font-bold">Imunisasi</label>
+                        <select id="imunisasi" v-model="imunisasi" class="w-full" :class="klsInput">
+                          <option value="">— pilih —</option>
+                          <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label for="vitamin-a" class="text-muted-foreground mb-1.5 block text-xs font-bold">Vitamin A</label>
+                        <select id="vitamin-a" v-model="vitaminA" class="w-full" :class="klsInput">
+                          <option value="">— pilih —</option>
+                          <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label for="asi-eksklusif" class="text-muted-foreground mb-1.5 block text-xs font-bold">ASI eksklusif</label>
+                        <select id="asi-eksklusif" v-model="asiEksklusif" class="w-full" :class="klsInput">
+                          <option value="">— pilih —</option>
+                          <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label for="mp-asi" class="text-muted-foreground mb-1.5 block text-xs font-bold">MP-ASI</label>
+                        <select id="mp-asi" v-model="mpAsi" class="w-full" :class="klsInput">
+                          <option value="">— pilih —</option>
+                          <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label for="obat-cacing" class="text-muted-foreground mb-1.5 block text-xs font-bold">Obat cacing</label>
+                        <select id="obat-cacing" v-model="obatCacing" class="w-full" :class="klsInput">
+                          <option value="">— pilih —</option>
+                          <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label for="gejala-tbc" class="text-muted-foreground mb-1.5 block text-xs font-bold">Gejala TBC</label>
+                        <select id="gejala-tbc" v-model="gejalaTbc" class="w-full" :class="klsInput">
+                          <option value="">— pilih —</option>
+                          <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="mt-3">
+                      <label for="edukasi" class="text-muted-foreground mb-1.5 block text-xs font-bold">Edukasi (opsional)</label>
+                      <textarea
+                        id="edukasi"
+                        v-model="edukasi"
+                        rows="2"
+                        class="w-full resize-none"
+                        :class="klsInput"
+                        placeholder="Catatan edukasi gizi/kesehatan…"
+                      ></textarea>
                     </div>
                   </div>
 

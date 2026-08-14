@@ -85,7 +85,7 @@ const KET = [
   { kode: 'SP', label: 'Sangat Pendek' },
   { kode: 'P', label: 'Pendek' },
   { kode: 'T', label: 'Tinggi' },
-  { kode: 'GK', label: 'Gizi Kurang' },
+  { kode: 'GK', label: 'Gizi Buruk' },
   { kode: 'GB', label: 'Gizi Baik' },
   { kode: 'GL', label: 'Gizi Lebih' },
   { kode: 'O', label: 'Obesitas' },
@@ -168,7 +168,7 @@ const KET = [
                 </div>
               </div>
 
-              <KurvaWHO :jk="jk" :umur-bulan="umur" :z-bbu="hasil?.z_bb_u ?? null" />
+              <KurvaWHO :jk="jk" :umur-bulan="umur" :z="hasil?.z_bb_u ?? null" />
 
               <div class="mt-5 grid gap-4 sm:grid-cols-3">
                 <div>
@@ -244,15 +244,15 @@ const KET = [
 
         <Reveal :delay="150">
           <div class="mt-8 rounded-2xl border border-emerald-100 bg-white p-5 sm:p-6">
-            <p class="text-muted-foreground text-xs font-bold tracking-widest uppercase">Kode status</p>
+            <p class="text-muted-foreground text-xs font-bold tracking-widest uppercase">Status gizi</p>
             <div class="mt-4 flex flex-wrap gap-2">
               <span
                 v-for="k in KET"
                 :key="k.kode"
-                class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium"
+                class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium"
                 :class="TONE_BADGE[infoStatus(k.kode).tone]"
               >
-                <span class="font-bold">{{ k.kode }}</span>{{ k.label }}
+                {{ k.label }}
               </span>
             </div>
           </div>

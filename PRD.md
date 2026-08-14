@@ -1,7 +1,7 @@
 # PRD — Sistem Informasi Posyandu (PosyanduGizi)
 
 Dokumen ini adalah **living document**: terus diperbarui seiring perkembangan project.
-Status terakhir: **Fase 1 (MVP) — Pencatatan berjalan** (Auth + RLS + CRUD balita & kunjungan aktif di Supabase; imunisasi/vitamin/LiKA menyusul di form kunjungan).
+Status terakhir: **Fase 1 (MVP) — Pencatatan berjalan** (Auth + RLS + CRUD balita & kunjungan aktif di Supabase; form kunjungan lengkap + dashboard hub publik sudah jalan).
 
 ## 1. Ringkasan Produk
 
@@ -41,17 +41,17 @@ autentikasi **Supabase Auth + RLS diterapkan sejak awal** karena data anak sensi
 ## 5. Fitur & Persyaratan
 
 ### Fase 1 (MVP) — Pencatatan
-- ✅ Supabase Auth + RLS (data sensitif dilindungi sejak awal; anonim hanya bisa landing & kalkulator).
+- ✅ Supabase Auth + RLS (data sensitif dilindungi sejak awal; anonim hanya bisa landing, kalkulator & dashboard hub).
 - ✅ CRUD data balita: nama, jenis kelamin, tanggal lahir, nama orang tua, posyandu/dusun/alamat (sesuai tabel eksisting `balita_identitas`).
-- ✅ Pencatatan kunjungan & pengukuran: tanggal, berat badan, panjang/tinggi badan, lingkar lengan + status; status gizi dihitung otomatis di browser (metode LMS WHO: BB/U, TB/U, BB/TB) lalu disimpan.
-- ✅ Daftar balita (cari + hapus) dan halaman detail dengan kurva BB/U + riwayat kunjungan.
-- ⏳ Pencatatan imunisasi, vitamin A, ASI, MP-ASI, obat cacing, LiKA: kolom sudah ada di `balita_kunjungan` (data lama), form menyusul.
+- ✅ Pencatatan kunjungan & pengukuran lengkap: tanggal, BB, PB, lingkar lengan, lingkar kepala, imunisasi, vitamin A, ASI, MP-ASI, obat cacing, ceklis perkembangan, gejala TBC, edukasi; status gizi dihitung otomatis di browser (metode LMS WHO: BB/U, TB/U, BB/TB) lalu disimpan.
+- ✅ Daftar balita (cari + hapus) dan halaman detail dengan kurva tabs (BB/U · TB/U · BB/TB) + riwayat kunjungan kolom penuh (scroll horizontal).
 - ⏳ UI bumil (schema `bumil_*` sudah ada di DB).
 - ✅ Halaman kalkulator tetap tersedia untuk hitung cepat tanpa menyimpan.
+- ✅ Dashboard hub publik: menu navigasi modul (Balita aktif; Bumil/Remaja/Dewasa & Lansia "Segera").
 
 ### Fase 2 — Analisis
-- Dashboard & statistik: jumlah balita, distribusi status gizi, cakupan kunjungan.
-- Grafik tumbuh kembang: kurva BB/U, TB/U, BB/TB terhadap referensi WHO.
+- Statistik & rekap: jumlah balita, distribusi status gizi, cakupan kunjungan (hub dashboard sudah ada sebagai navigasi).
+- Grafik tumbuh kembang per balita (kurva BB/U, TB/U, BB/TB vs WHO — sudah tersedia di halaman detail, Fase 1).
 - Pemantauan stunting: daftar balita berstatus SP/P dan filter berdasarkan status.
 - Rekap laporan & ekspor (Excel/PDF) untuk laporan posyandu & puskesmas.
 
@@ -85,7 +85,7 @@ yang sudah berisi data eksisting (bukan dibuat baru). Semua relasi & audit bersi
 - Frontend: **Vue 3 SPA + TypeScript + Vite 8**, Vue Router (lazy), Tailwind CSS v4, shadcn-vue, `@lucide/vue` icons
 - Perhitungan: **TypeScript client-side** (metode LMS WHO, z-score) di `src/lib/kalkulator/` — port dari kalkulator Python lama, tervalidasi vs fixture Python
 - Database & Auth: **Supabase** (PostgreSQL + Auth/RLS) via `@supabase/supabase-js`
-- Deploy: **Vercel** (static SPA; `vercel.json` rewrite untuk deep-link)
+- Deploy: **GitHub Pages** aktif (URL sementara `gunawan-ly.github.io/posyandu`, workflow + `public/404.html` untuk deep-link); **Vercel** sebagai target final (static SPA; `vercel.json` rewrite siap)
 
 ## 8. Non-Fungsional
 
@@ -106,7 +106,7 @@ yang sudah berisi data eksisting (bukan dibuat baru). Semua relasi & audit bersi
 ## 10. Roadmap & Prioritas
 
 1. **Fondasi (selesai):** SPA Vite + Vue 3, kalkulator client-side (TS, valid vs fixture Python), landing + kalkulator, shadcn-vue, deploy Vercel.
-2. **Fase 1 (MVP, berjalan):** schema Supabase diadaptasi dari data eksisting + Auth/RLS ketat + CRUD balita & kunjungan (sudah aktif); menyusul: form imunisasi/vitamin/LiKA, UI bumil.
+2. **Fase 1 (MVP, berjalan):** schema Supabase diadaptasi dari data eksisting + Auth/RLS ketat + CRUD balita & kunjungan (aktif); form kunjungan lengkap + dashboard hub publik (selesai); menyusul: UI bumil.
 3. **Fase 2:** dashboard, grafik tumbuh kembang, pemantauan stunting, laporan & ekspor.
 4. **Fase 3:** jadwal & pengingat, peran lanjutan, perluasan multi-posyandu.
 

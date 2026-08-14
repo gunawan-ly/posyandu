@@ -20,6 +20,11 @@ const router = createRouter({
       component: () => import('@/views/LoginView.vue'),
     },
     {
+      path: '/dashboard',
+      name: 'dashboard',
+      component: () => import('@/views/DashboardView.vue'),
+    },
+    {
       path: '/balita',
       name: 'balita',
       component: () => import('@/views/BalitaListView.vue'),

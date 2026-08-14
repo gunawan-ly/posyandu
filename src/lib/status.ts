@@ -15,7 +15,7 @@ export const DAFTAR_STATUS: Record<string, InfoStatus> = {
   SP: { kode: 'SP', label: 'Sangat Pendek', deskripsi: 'Tinggi badan sangat jauh di bawah standar seusianya', tone: 'danger' },
   P: { kode: 'P', label: 'Pendek', deskripsi: 'Tinggi badan di bawah standar seusianya', tone: 'warning' },
   T: { kode: 'T', label: 'Tinggi', deskripsi: 'Tinggi badan di atas standar seusianya', tone: 'ok' },
-  GK: { kode: 'GK', label: 'Gizi Kurang', deskripsi: 'Proporsi berat terhadap tinggi di bawah standar', tone: 'danger' },
+  GK: { kode: 'GK', label: 'Gizi Buruk', deskripsi: 'Proporsi berat terhadap tinggi sangat jauh di bawah standar', tone: 'danger' },
   GB: { kode: 'GB', label: 'Gizi Baik', deskripsi: 'Proporsi berat terhadap tinggi sesuai standar', tone: 'ok' },
   GL: { kode: 'GL', label: 'Gizi Lebih', deskripsi: 'Proporsi berat terhadap tinggi di atas standar', tone: 'warning' },
   O: { kode: 'O', label: 'Obesitas', deskripsi: 'Proporsi berat terhadap tinggi jauh di atas standar', tone: 'danger' },

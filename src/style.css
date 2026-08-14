@@ -84,6 +84,13 @@
     font-family: var(--font-sans);
   }
 
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  select:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
+
   h1,
   h2,
   h3,

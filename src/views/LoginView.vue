@@ -41,12 +41,12 @@ async function submit() {
   try {
     if (mode.value === 'masuk') {
       await masuk(email.value.trim(), kataSandi.value)
-      const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/balita'
+      const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/dashboard'
       await router.replace(redirect)
     } else {
       const data = await daftar(email.value.trim(), kataSandi.value)
       if (data.session) {
-        await router.replace('/balita')
+        await router.replace('/dashboard')
       } else {
         pesanInfo.value = 'Pendaftaran berhasil. Silakan periksa email Anda untuk konfirmasi, lalu masuk.'
         mode.value = 'masuk'

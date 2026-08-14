@@ -1,26 +1,44 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref } from 'vue'
-import { klasifikasiBbu } from '@/lib/kalkulator'
-import { wfaBoy, wfaGirl, type BarisUmur } from '@/lib/kalkulator/tabel'
+import { klasifikasiBbu, klasifikasiBbtb, klasifikasiTbu } from '@/lib/kalkulator'
+import {
+  lhfaBoy2y,
+  lhfaBoy5y,
+  lhfaGirl2y,
+  lhfaGirl5y,
+  wfaBoy,
+  wfaGirl,
+  wfhBoy,
+  wfhGirl,
+  wflBoy,
+  wflGirl,
+  type BarisUmur,
+} from '@/lib/kalkulator/tabel'
 import { infoStatus, TONE_DOT } from '@/lib/status'
+
+type Indikator = 'bbu' | 'tbu' | 'bbtb'
 
 const props = withDefaults(
   defineProps<{
     jk: 'L' | 'P'
+    indikator?: Indikator
     umurBulan?: number
-    zBbu?: number | null
+    nilai?: number
+    z?: number | null
   }>(),
   {
+    indikator: 'bbu',
     umurBulan: 24,
-    zBbu: null,
+    nilai: 0,
+    z: null,
   },
 )
 
-const TABEL = computed<readonly BarisUmur[]>(() => (props.jk === 'L' ? wfaBoy : wfaGirl))
-
-function beratUntukZ(l: number, m: number, s: number, z: number): number {
-  if (l === 0) return m * Math.exp(s * z)
-  return m * Math.pow(1 + l * s * z, 1 / l)
+interface Baris {
+  kunci: number
+  L: number
+  M: number
+  S: number
 }
 
 const PAD = { atas: 16, kanan: 12, bawah: 34, kiri: 42 }
@@ -29,56 +47,126 @@ const H = 320
 const W_INNER = W - PAD.kiri - PAD.kanan
 const H_INNER = H - PAD.atas - PAD.bawah
 const Z_LINES = [-3, -2, -1, 0, 1, 2, 3]
-const TICK_BULAN = [0, 12, 24, 36, 48, 60]
+const TICK_UMUR = [0, 12, 24, 36, 48, 60]
+
+function nilaiUntukZ(l: number, m: number, s: number, z: number): number {
+  if (l === 0) return m * Math.exp(s * z)
+  return m * Math.pow(1 + l * s * z, 1 / l)
+}
+
+// TB/U memakai gabungan tabel lhfa 0–24 bln (2_years) + 24–60 bln (5_years).
+const gabungLhfa = computed<readonly BarisUmur[]>(() => {
+  const dua = props.jk === 'L' ? lhfaBoy2y : lhfaGirl2y
+  const lima = props.jk === 'L' ? lhfaBoy5y : lhfaGirl5y
+  return [...dua, ...lima.filter((r) => r.kunci > 24)]
+})
+
+const tabel = computed<readonly Baris[]>(() => {
+  if (props.indikator === 'bbu') return props.jk === 'L' ? wfaBoy : wfaGirl
+  if (props.indikator === 'tbu') return gabungLhfa.value
+  const pakaiWfl = props.umurBulan < 24
+  if (props.jk === 'L') return pakaiWfl ? wflBoy : wfhBoy
+  return pakaiWfl ? wflGirl : wfhGirl
+})
+
+const xMin = computed(() => tabel.value[0]?.kunci ?? 0)
+const xMax = computed(() => tabel.value[tabel.value.length - 1]?.kunci ?? 60)
+
+const xNilai = (kunci: number) =>
+  PAD.kiri + ((kunci - xMin.value) / (xMax.value - xMin.value)) * W_INNER
 
 const dataTitik = computed(() => {
-  const rows = TABEL.value
   let min = Number.POSITIVE_INFINITY
   let max = Number.NEGATIVE_INFINITY
-  for (const r of rows) {
+  for (const r of tabel.value) {
     for (const z of Z_LINES) {
-      const w = beratUntukZ(r.L, r.M, r.S, z)
-      if (w < min) min = w
-      if (w > max) max = w
+      const v = nilaiUntukZ(r.L, r.M, r.S, z)
+      if (v < min) min = v
+      if (v > max) max = v
     }
   }
   const pad = (max - min) * 0.08
-  return { min: min - pad, max: max + pad, rows }
+  return { min: min - pad, max: max + pad }
 })
 
-const xUmur = (bulan: number) => PAD.kiri + (bulan / 60) * W_INNER
-const yBerat = (berat: number) =>
+const yNilai = (v: number) =>
   PAD.atas +
-  (1 - (berat - dataTitik.value.min) / (dataTitik.value.max - dataTitik.value.min)) * H_INNER
+  (1 - (v - dataTitik.value.min) / (dataTitik.value.max - dataTitik.value.min)) * H_INNER
 
 function pathZ(z: number): string {
-  const pts = dataTitik.value.rows.map((r) => {
-    const w = beratUntukZ(r.L, r.M, r.S, z)
-    return `${xUmur(r.kunci).toFixed(1)},${yBerat(w).toFixed(1)}`
+  const pts = tabel.value.map((r) => {
+    const v = nilaiUntukZ(r.L, r.M, r.S, z)
+    return `${xNilai(r.kunci).toFixed(1)},${yNilai(v).toFixed(1)}`
   })
   return `M ${pts[0]} L ${pts.join(' L ')}`
 }
 
+const STEP_Y = computed(() => (props.indikator === 'tbu' ? 10 : 2))
+
 const garisGrid = computed(() => {
-  const step = 2
+  const step = STEP_Y.value
   const start = Math.floor(dataTitik.value.min / step) * step
   const out: { y: number; label: string }[] = []
-  for (let w = start; w <= dataTitik.value.max; w += step) {
-    out.push({ y: yBerat(w), label: String(w) })
+  for (let v = start; v <= dataTitik.value.max; v += step) {
+    out.push({ y: yNilai(v), label: String(v) })
   }
   return out
 })
 
-const posisiTitik = computed(() => {
-  if (props.zBbu == null) return null
-  const bulan = Math.max(0, Math.min(60, Math.round(props.umurBulan)))
-  const baris = dataTitik.value.rows.find((r) => r.kunci === bulan)
-  if (!baris) return null
-  const berat = beratUntukZ(baris.L, baris.M, baris.S, props.zBbu)
-  return { x: xUmur(bulan), y: yBerat(berat) }
+const tickX = computed(() => {
+  if (props.indikator === 'bbtb') {
+    const step = 5
+    const start = Math.ceil(xMin.value / step) * step
+    const out: number[] = []
+    for (let v = start; v <= xMax.value; v += step) out.push(v)
+    return out
+  }
+  return TICK_UMUR.filter((v) => v >= xMin.value && v <= xMax.value)
 })
 
-const warnaTitik = computed(() => TONE_DOT[infoStatus(klasifikasiBbu(props.zBbu ?? 0)).tone])
+const LABEL_X = computed(() =>
+  props.indikator === 'bbtb' ? 'Panjang/Tinggi (cm)' : 'Umur (bulan)',
+)
+
+const posisiTitik = computed(() => {
+  if (props.z == null) return null
+  if (props.indikator === 'bbtb') {
+    let terdekat = tabel.value[0]
+    let selisih = Number.POSITIVE_INFINITY
+    for (const r of tabel.value) {
+      const s = Math.abs(r.kunci - props.nilai)
+      if (s < selisih) {
+        selisih = s
+        terdekat = r
+      }
+    }
+    const kunci = Math.max(xMin.value, Math.min(xMax.value, props.nilai))
+    const v = nilaiUntukZ(terdekat.L, terdekat.M, terdekat.S, props.z)
+    return { x: xNilai(kunci), y: yNilai(v) }
+  }
+  const bulan = Math.max(xMin.value, Math.min(xMax.value, Math.round(props.umurBulan)))
+  const baris = tabel.value.find((r) => r.kunci === bulan)
+  if (!baris) return null
+  const v = nilaiUntukZ(baris.L, baris.M, baris.S, props.z)
+  return { x: xNilai(bulan), y: yNilai(v) }
+})
+
+const warnaTitik = computed(() => {
+  if (props.z == null) return TONE_DOT.info
+  const kode =
+    props.indikator === 'bbu'
+      ? klasifikasiBbu(props.z)
+      : props.indikator === 'tbu'
+        ? klasifikasiTbu(props.z)
+        : klasifikasiBbtb(props.z)
+  return TONE_DOT[infoStatus(kode).tone]
+})
+
+const LABEL_KURVA: Record<Indikator, string> = {
+  bbu: 'Kurva pertumbuhan berat badan menurut umur (BB/U) standar WHO',
+  tbu: 'Kurva pertumbuhan panjang/tinggi badan menurut umur (TB/U) standar WHO',
+  bbtb: 'Kurva pertumbuhan berat badan menurut panjang/tinggi (BB/TB) standar WHO',
+}
 
 const pathLength = 1600
 const offset = ref(pathLength)
@@ -102,7 +190,7 @@ onMounted(async () => {
     :viewBox="`0 0 ${W} ${H}`"
     class="h-auto w-full"
     role="img"
-    aria-label="Kurva pertumbuhan berat badan menurut umur berdasarkan standar WHO"
+    :aria-label="LABEL_KURVA[indikator]"
   >
     <g>
       <line
@@ -149,10 +237,10 @@ onMounted(async () => {
 
     <g>
       <line
-        v-for="b in TICK_BULAN"
+        v-for="b in tickX"
         :key="'tick-' + b"
-        :x1="xUmur(b)"
-        :x2="xUmur(b)"
+        :x1="xNilai(b)"
+        :x2="xNilai(b)"
         :y1="H - PAD.bawah"
         :y2="H - PAD.bawah + 5"
         stroke="#134e4a"
@@ -160,9 +248,9 @@ onMounted(async () => {
         stroke-width="1"
       />
       <text
-        v-for="b in TICK_BULAN"
+        v-for="b in tickX"
         :key="'label-' + b"
-        :x="xUmur(b)"
+        :x="xNilai(b)"
         :y="H - 10"
         text-anchor="middle"
         fill="#134e4a"
@@ -172,7 +260,7 @@ onMounted(async () => {
         {{ b }}
       </text>
       <text :x="W - PAD.kanan" :y="H - 10" text-anchor="end" fill="#134e4a" fill-opacity="0.5" font-size="10">
-        Umur (bulan)
+        {{ LABEL_X }}
       </text>
     </g>
 
