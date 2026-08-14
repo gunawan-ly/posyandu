@@ -1,6 +1,19 @@
-venv
-node_modules
+# Node
+node_modules/
+dist/
+.vite/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Python (legacy)
+venv/
 __pycache__/
 *.pyc
 instance/
-*.db
+
+# Editor / OS
+.DS_Store
+*.log
