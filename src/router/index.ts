@@ -34,13 +34,13 @@ const router = createRouter({
       path: '/balita/baru',
       name: 'balita-baru',
       component: () => import('@/views/BalitaFormView.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiresAdmin: true },
     },
     {
       path: '/balita/:id/edit',
       name: 'balita-edit',
       component: () => import('@/views/BalitaFormView.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiresAdmin: true },
     },
     {
       path: '/balita/:id',
@@ -53,11 +53,16 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  if (!to.meta.requiresAuth) return true
-  if (!supabase) return { name: 'landing' }
-  const { data } = await supabase.auth.getSession()
-  if (!data.session) {
-    return { name: 'login', query: { redirect: to.fullPath } }
+  if (to.meta.requiresAuth) {
+    if (!supabase) return { name: 'landing' }
+    const { data } = await supabase.auth.getSession()
+    if (!data.session) {
+      return { name: 'login', query: { redirect: to.fullPath } }
+    }
+  }
+  if (to.meta.requiresAdmin && supabase) {
+    const { data: admin } = await supabase.rpc('is_admin')
+    if (admin !== true) return { name: 'balita' }
   }
   return true
 })

@@ -7,6 +7,9 @@ import AppNavbar from '@/components/AppNavbar.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { listBalita, hapusBalita, umurSaatIni, type Balita } from '@/supabase/db'
+import { useAuth } from '@/supabase/useAuth'
+
+const { isAdmin } = useAuth()
 
 const daftar = ref<Balita[]>([])
 const cari = ref('')
@@ -67,7 +70,7 @@ async function hapus(balita: Balita) {
             Kelola identitas balita dan catat pengukuran setiap kunjungan.
           </p>
         </div>
-        <RouterLink to="/balita/baru">
+        <RouterLink v-if="isAdmin" to="/balita/baru">
           <Button size="lg">
             <Plus class="size-4" />
             Tambah Balita
@@ -130,6 +133,7 @@ async function hapus(balita: Balita) {
                 </div>
               </div>
               <button
+                v-if="isAdmin"
                 type="button"
                 class="text-muted-foreground hover:bg-red-50 hover:text-red-600 -mr-1.5 mt-1 shrink-0 rounded-lg p-2 transition-colors"
                 aria-label="Hapus balita"

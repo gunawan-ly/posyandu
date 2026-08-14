@@ -21,6 +21,9 @@ import {
   type Kunjungan,
 } from '@/supabase/db'
 import { parseTanggal } from '@/lib/umur'
+import { useAuth } from '@/supabase/useAuth'
+
+const { isAdmin } = useAuth()
 
 const route = useRoute()
 const router = useRouter()
@@ -233,7 +236,7 @@ const klsInput =
               </p>
             </div>
           </div>
-          <div class="flex items-center gap-2">
+          <div v-if="isAdmin" class="flex items-center gap-2">
             <RouterLink :to="`/balita/${balita.id}/edit`">
               <Button variant="outline">
                 <Pencil class="size-4" />
@@ -356,7 +359,7 @@ const klsInput =
                         <td class="py-3 pr-3 whitespace-nowrap"><StatusBadge :kode="kodeDariLabel(k.bb_menurut_umur)" /></td>
                         <td class="py-3 pr-3 whitespace-nowrap"><StatusBadge :kode="kodeDariLabel(k.pbtb_menurut_umur)" /></td>
                         <td class="py-3 pr-3 whitespace-nowrap"><StatusBadge :kode="kodeDariLabel(k.bb_menurut_pbtb)" /></td>
-                        <td class="py-3 text-right">
+                        <td v-if="isAdmin" class="py-3 text-right">
                           <button
                             type="button"
                             class="text-muted-foreground hover:bg-red-50 hover:text-red-600 rounded-lg p-2 transition-colors"
@@ -423,7 +426,7 @@ const klsInput =
               </CardContent>
             </Card>
 
-            <Card>
+            <Card v-if="isAdmin">
               <CardHeader>
                 <CardTitle class="font-display text-lg font-normal">Catat kunjungan</CardTitle>
               </CardHeader>
