@@ -13,7 +13,7 @@ terdokumentasi di **PRD.md** (living document); jaga agar AGENTS.md dan PRD.md t
 - UI: shadcn-vue (komponen `src/components/ui/`) + Tailwind CSS v4 (`@tailwindcss/vite`)
 - Ikon: `@lucide/vue`
 - Perhitungan: TS port dari kalkulator Python (metode LMS WHO, z-score) di `src/lib/kalkulator/`
-- Font: Varela Round (display) + Nunito Sans (body) — bundel woff2 lokal di `public/fonts/`
+- Font: Fredoka (display) + Nunito Sans (body) — bundel woff2 lokal di `public/fonts/`
 - Backend: Supabase (PostgreSQL + Auth/RLS) — fase data, lihat PRD; `@supabase/supabase-js` sudah terpasang
 - Deploy: Vercel (static SPA, lihat `vercel.json`)
 - Test: Vitest (unit kalkulator + smoke test render komponen)
@@ -35,8 +35,8 @@ terdokumentasi di **PRD.md** (living document); jaga agar AGENTS.md dan PRD.md t
 - `index.html` — entry HTML SPA (mount `#app`); `public/` (favicon, font woff2)
 - `src/main.ts` — bootstrap app + router
 - `src/router/index.ts` — rute `/` (landing), `/kalkulator`, `/login`, `/dashboard` (publik), `/balita*` (guard `requiresAuth`), lazy-load, fallback `*` → `/`
-- `src/views/` — `LandingView.vue`, `DashboardView.vue` (hub publik: modul Balita aktif + Bumil/Remaja/Dewasa & Lansia "Segera"), `KalkulatorView.vue`, `LoginView.vue` (masuk/daftar kader; redirect default `/dashboard`), `BalitaListView.vue`, `BalitaFormView.vue` (baru/edit), `BalitaDetailView.vue` (identitas + kurva tabs + riwayat + form kunjungan lengkap)
-- `src/components/` — `KurvaWHO.vue` (kurva WHO self-draw + titik z-score; mode `bbu`/`tbu`/`bbtb`), `StatusBadge.vue` (label lengkap saja, tanpa kode), `AppNavbar.vue` (menu + status login), `AppFooter.vue`, `Reveal.vue`, `ui/` (komponen shadcn-vue)
+- `src/views/` — `LandingView.vue` (hero dengan animasi ketik "Posyandu [Wapalo/Sehat/Mandiri]" + kalkulator kilat interaktif + seksi indikator/cara pakai/tentang/CTA), `DashboardView.vue` (hub publik: modul Balita aktif + Bumil/Remaja/Dewasa & Lansia "Segera"), `KalkulatorView.vue`, `LoginView.vue` (masuk/daftar kader; redirect default `/dashboard`), `BalitaListView.vue`, `BalitaFormView.vue` (baru/edit), `BalitaDetailView.vue` (identitas + kurva tabs + riwayat + form kunjungan lengkap)
+- `src/components/` — `KurvaWHO.vue` (kurva WHO self-draw + titik z-score; mode `bbu`/`tbu`/`bbtb`), `StatusBadge.vue` (label lengkap saja, tanpa kode), `Typewriter.vue` (animasi ketik kata bergantian di judul hero; hormati `prefers-reduced-motion`), `AppNavbar.vue` (menu ringkas 3–4 tautan + status login), `AppFooter.vue`, `Reveal.vue`, `ui/` (komponen shadcn-vue)
 - `src/lib/kalkulator/index.ts` — port TS `hitungSemuaStatus(jk, umurBulan, beratBadan, panjangBadan)` → `{status_bb_u, status_tb_u, status_bb_tb, z_bb_u, z_tb_u, z_bb_tb, error}`
 - `src/lib/kalkulator/tabel.ts` — data WHO hasil konversi CSV (jangan edit manual)
 - `src/lib/kalkulator/__fixtures__/expected.json` — fixture output Python lama untuk validasi port

@@ -10,7 +10,7 @@ describe('render komponen utama', () => {
     const wrapper = mount(LandingView, {
       global: { stubs: { RouterLink: true, RouterView: true } },
     })
-    expect(wrapper.text()).toContain('Tumbuh kembang anak')
+    expect(wrapper.text()).toContain('Posyandu')
     expect(wrapper.text()).toContain('PosyanduGizi')
   })
 

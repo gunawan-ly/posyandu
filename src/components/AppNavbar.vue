@@ -20,10 +20,8 @@ onMounted(() => {
 
 const TAUTAN = [
   { label: 'Beranda', href: '/' },
+  { label: 'Kalkulator', href: '/kalkulator' },
   { label: 'Dashboard', href: '/dashboard' },
-  { label: 'Indikator', href: '/#indikator' },
-  { label: 'Cara Pakai', href: '/#cara-pakai' },
-  { label: 'Tentang', href: '/#tentang' },
 ]
 </script>
 

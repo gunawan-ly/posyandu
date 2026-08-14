@@ -1,7 +1,7 @@
 # PRD — Sistem Informasi Posyandu (PosyanduGizi)
 
 Dokumen ini adalah **living document**: terus diperbarui seiring perkembangan project.
-Status terakhir: **Fase 1 (MVP) — Pencatatan berjalan** (Auth + RLS + CRUD balita & kunjungan aktif di Supabase; form kunjungan lengkap + dashboard hub publik sudah jalan).
+Status terakhir: **Fase 1 (MVP) — Pencatatan berjalan** (Auth + RLS + CRUD balita & kunjungan aktif di Supabase; form kunjungan lengkap + dashboard hub publik sudah jalan). Terakhir, landing page didesain ulang: font display Fredoka (menggantikan Varela Round) + animasi ketik judul hero "Posyandu Wapalo, Sehat, Mandiri" + navbar diringkas menjadi 3–4 tautan.
 
 ## 1. Ringkasan Produk
 
@@ -82,7 +82,7 @@ yang sudah berisi data eksisting (bukan dibuat baru). Semua relasi & audit bersi
 
 ## 7. Teknologi
 
-- Frontend: **Vue 3 SPA + TypeScript + Vite 8**, Vue Router (lazy), Tailwind CSS v4, shadcn-vue, `@lucide/vue` icons
+- Frontend: **Vue 3 SPA + TypeScript + Vite 8**, Vue Router (lazy), Tailwind CSS v4, shadcn-vue, `@lucide/vue` icons; font Fredoka (display) + Nunito Sans (body) dibundel lokal woff2
 - Perhitungan: **TypeScript client-side** (metode LMS WHO, z-score) di `src/lib/kalkulator/` — port dari kalkulator Python lama, tervalidasi vs fixture Python
 - Database & Auth: **Supabase** (PostgreSQL + Auth/RLS) via `@supabase/supabase-js`
 - Deploy: **GitHub Pages** aktif (URL sementara `gunawan-ly.github.io/posyandu`, workflow + `public/404.html` untuk deep-link); **Vercel** sebagai target final (static SPA; `vercel.json` rewrite siap)
@@ -120,7 +120,7 @@ yang sudah berisi data eksisting (bukan dibuat baru). Semua relasi & audit bersi
 
 ## 12. Pertanyaan Terbuka
 
-- Nama final produk (sementara: PosyanduGizi).
+- Nama final produk (sementara: PosyanduGizi). Judul hero kini memakai "Posyandu Wapalo, Sehat, Mandiri" — **Wapalo adalah nama desa** tempat posyandu; kata "Sehat" & "Mandiri" diketik bergantian sebagai tagline.
 - Format laporan yang dibutuhkan puskesmas (kolom/bentuk rekap).
 - Daftar imunisasi & vitamin standar yang dicatat.
 - Cakupan wilayah/desa yang perlu direpresentasikan.
