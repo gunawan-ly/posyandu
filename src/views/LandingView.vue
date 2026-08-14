@@ -20,7 +20,6 @@ import AppNavbar from '@/components/AppNavbar.vue'
 import KurvaWHO from '@/components/KurvaWHO.vue'
 import Reveal from '@/components/Reveal.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
-import Typewriter from '@/components/Typewriter.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { hitungSemuaStatus } from '@/lib/kalkulator'
@@ -34,8 +33,6 @@ const panjang = ref(87)
 const hasil = computed(() =>
   hitungSemuaStatus(jk.value, umur.value, berat.value, panjang.value),
 )
-
-const KATA_POSYANDU = ['Wapalo', 'Sehat', 'Mandiri']
 
 const INDIKATOR = [
   {
@@ -124,10 +121,8 @@ const KET = [
           </p>
 
           <h1 class="font-display mt-6 text-[2.9rem] leading-[1.06] font-semibold sm:text-6xl lg:text-[4.3rem]">
-            Posyandu
-            <span class="text-primary inline-flex">
-              <Typewriter :words="KATA_POSYANDU" />
-            </span>
+            Tumbuh kembang anak,
+            <span class="text-primary">terukur dengan akurat.</span>
           </h1>
 
           <p class="text-muted-foreground mt-6 max-w-md text-lg leading-relaxed">

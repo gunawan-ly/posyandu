@@ -11,7 +11,7 @@ describe('render komponen utama', () => {
       global: { stubs: { RouterLink: true, RouterView: true } },
     })
     expect(wrapper.text()).toContain('Posyandu')
-    expect(wrapper.text()).toContain('PosyanduGizi')
+    expect(wrapper.text()).toContain('Posyandu Wapalo')
   })
 
   it('KalkulatorView ter-render tanpa error dan menghitung hasil', async () => {

@@ -2,6 +2,7 @@
 import { LogOut, Menu, Sprout } from '@lucide/vue'
 import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import Typewriter from '@/components/Typewriter.vue'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -33,7 +34,7 @@ const TAUTAN = [
           <Sprout class="size-5" />
         </span>
         <span class="font-display text-lg font-normal tracking-tight">
-          Posyandu<span class="text-primary">Gizi</span>
+          Posyandu<span class="text-primary">&nbsp;<Typewriter :words="['Wapalo', 'Sehat', 'Mandiri']" /></span>
         </span>
       </RouterLink>
 
@@ -82,7 +83,7 @@ const TAUTAN = [
             </Button>
           </SheetTrigger>
           <SheetContent side="right">
-            <SheetTitle class="font-display px-6 pt-6 text-lg font-normal">PosyanduGizi</SheetTitle>
+            <SheetTitle class="font-display px-6 pt-6 text-lg font-normal">Posyandu Wapalo</SheetTitle>
             <nav class="flex flex-col gap-1 px-4" aria-label="Menu mobile">
               <RouterLink
                 v-for="t in TAUTAN"

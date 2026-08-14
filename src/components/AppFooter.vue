@@ -11,7 +11,7 @@ import { RouterLink } from 'vue-router'
           <span class="bg-primary grid size-8 place-items-center rounded-lg text-white">
             <Sprout class="size-4" />
           </span>
-          <span class="font-display text-lg font-normal">PosyanduGizi</span>
+          <span class="font-display text-lg font-normal">Posyandu Wapalo</span>
         </div>
         <p class="text-muted-foreground max-w-xs text-sm">
           Kalkulator status gizi anak berbasis standar pertumbuhan WHO untuk kader dan orang tua.
@@ -36,7 +36,7 @@ import { RouterLink } from 'vue-router'
     </div>
     <div class="border-border/60 border-t">
       <p class="text-muted-foreground mx-auto max-w-6xl px-4 py-4 text-center text-xs sm:px-6">
-        © {{ new Date().getFullYear() }} PosyanduGizi — dibuat dengan standar WHO.
+        © {{ new Date().getFullYear() }} Posyandu Wapalo — dibuat dengan standar WHO.
       </p>
     </div>
   </footer>
