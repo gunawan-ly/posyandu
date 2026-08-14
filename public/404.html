@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8">
+    <title>Mengalihkan…</title>
+    <!-- Khusus GitHub Pages (SPA di subpath /posyandu/): simpan rute lalu
+         paksa muat index.html agar vue-router menanganinya.
+         Pada Vercel file ini tidak terpakai (vercel.json me-rewrite ke index.html). -->
+    <script>
+      ;(function () {
+        var p = location.pathname
+        if (p.indexOf('/posyandu/') === 0) p = p.slice('/posyandu'.length)
+        sessionStorage.setItem('redirect-pages', p || '/')
+        location.replace('/posyandu/')
+      })()
+    </script>
+  </head>
+  <body></body>
+</html>
