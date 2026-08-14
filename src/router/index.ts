@@ -1,8 +1,18 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { supabase } from '@/supabase/client'
 
+const reduksiGerak =
+  typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+  scrollBehavior: (to, _from, savedPosition) => {
+    if (savedPosition) return savedPosition
+    if (to.hash) {
+      return { el: to.hash, behavior: reduksiGerak ? 'auto' : 'smooth' }
+    }
+    return { top: 0 }
+  },
   routes: [
     {
       path: '/',

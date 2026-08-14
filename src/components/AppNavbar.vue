@@ -27,7 +27,7 @@ function isAktif(href: string) {
 
 const TAUTAN = [
   { label: 'Beranda', href: '/' },
-  { label: 'Kalkulator', href: '/kalkulator' },
+  { label: 'Tentang', href: '/#tentang' },
   { label: 'Dashboard', href: '/dashboard' },
 ]
 </script>

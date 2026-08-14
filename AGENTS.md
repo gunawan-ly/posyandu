@@ -27,23 +27,23 @@ terdokumentasi di **PRD.md** (living document); jaga agar AGENTS.md dan PRD.md t
 - Uji kalkulator cepat: `npx vitest run src/lib/kalkulator`
 - `npx supabase link --project-ref <ref>` # tautkan repo ke proyek Supabase
 - `npx supabase db push`               # terapkan migrasi `supabase/migrations/` ke remote (meminta password DB)
-- `.env.example`                       # templat env (VITE_SUPABASE_URL & VITE_SUPABASE_ANON_KEY)
-- Deploy GitHub Pages: `npm run build -- --base=/posyandu/` lalu push `main` → workflow `.github/workflows/deploy-pages.yml` otomatis deploy ke `gunawan-ly.github.io/posyandu` (deep-link ditangani `public/404.html` + restore di `src/main.ts`)
+- `.env.example`                       # templat env (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_APP_URL)
+- Deploy GitHub Pages: `npm run build -- --base=/posyandu/` lalu push `main` → workflow `.github/workflows/deploy-pages.yml` (secret `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY`/`VITE_APP_URL` diteruskan ke build) otomatis deploy ke `gunawan-ly.github.io/posyandu` (deep-link ditangani `public/404.html` + restore di `src/main.ts`)
 - Build ulang font/sumber data: `refrences/*.csv` → `src/lib/kalkulator/tabel.ts` (lihat skrip konversi)
 
 ## Struktur Proyek
 - `index.html` — entry HTML SPA (mount `#app`); `public/` (favicon, font woff2)
 - `src/main.ts` — bootstrap app + router
-- `src/router/index.ts` — rute `/` (landing), `/kalkulator`, `/login`, `/dashboard` (publik), `/balita*` (guard `requiresAuth`), lazy-load, fallback `*` → `/`
-- `src/views/` — `LandingView.vue` (hero dengan animasi ketik "Posyandu [Wapalo/Sehat/Mandiri]" + kalkulator kilat interaktif + seksi indikator/cara pakai/tentang/CTA), `DashboardView.vue` (hub publik: modul Balita aktif + Bumil/Remaja/Dewasa & Lansia "Segera"), `KalkulatorView.vue`, `LoginView.vue` (masuk/daftar kader; redirect default `/dashboard`), `BalitaListView.vue`, `BalitaFormView.vue` (baru/edit), `BalitaDetailView.vue` (identitas + kurva tabs + riwayat + form kunjungan lengkap)
-- `src/components/` — `KurvaWHO.vue` (kurva WHO self-draw + titik z-score; mode `bbu`/`tbu`/`bbtb`), `StatusBadge.vue` (label lengkap saja, tanpa kode), `Typewriter.vue` (animasi ketik kata bergantian di judul hero; hormati `prefers-reduced-motion`), `AppNavbar.vue` (menu ringkas 3–4 tautan + status login), `AppFooter.vue`, `Reveal.vue`, `ui/` (komponen shadcn-vue)
+- `src/router/index.ts` — rute `/` (landing), `/kalkulator`, `/login`, `/dashboard` (publik), `/balita*` (guard `requiresAuth` + `requiresAdmin`), lazy-load, fallback `*` → `/`; `scrollBehavior` (scroll ke anchor `/#indikator`, `/#tentang`; selain itu ke atas; hormati `prefers-reduced-motion`)
+- `src/views/` — `LandingView.vue` (hero split dengan motif kurva pertumbuhan WHO sebagai elemen tanda tangan + kalkulator kilat interaktif + seksi indikator/cara pakai/tentang/CTA), `DashboardView.vue` (hub publik: modul Balita aktif + Bumil/Remaja/Dewasa & Lansia "Segera"), `KalkulatorView.vue`, `LoginView.vue` (masuk/daftar kader; redirect default `/dashboard`), `BalitaListView.vue`, `BalitaFormView.vue` (baru/edit), `BalitaDetailView.vue` (identitas + kurva tabs + riwayat + form kunjungan lengkap)
+- `src/components/` — `KurvaWHO.vue` (kurva WHO self-draw + titik z-score; mode `bbu`/`tbu`/`bbtb`), `StatusBadge.vue` (label lengkap saja, tanpa kode), `AppNavbar.vue` (brand statis "Posyandu Wapalo", tautan Beranda/Tentang/Dashboard + Data Balita saat login, state tautan aktif), `AppFooter.vue`, `Reveal.vue`, `ui/` (komponen shadcn-vue)
 - `src/lib/kalkulator/index.ts` — port TS `hitungSemuaStatus(jk, umurBulan, beratBadan, panjangBadan)` → `{status_bb_u, status_tb_u, status_bb_tb, z_bb_u, z_tb_u, z_bb_tb, error}`
 - `src/lib/kalkulator/tabel.ts` — data WHO hasil konversi CSV (jangan edit manual)
 - `src/lib/kalkulator/__fixtures__/expected.json` — fixture output Python lama untuk validasi port
 - `src/lib/umur.ts` — hitung umur bulan (kalender) + parse tanggal lokal
 - `src/lib/status.ts` — metadata status (label, deskripsi, tone warna)
 - `src/supabase/client.ts` — klien Supabase (aktif hanya bila env var terisi)
-- `src/supabase/useAuth.ts` — composable auth (session, masuk, daftar, keluar) + guard route
+- `src/supabase/useAuth.ts` — composable auth (session, masuk, daftar, keluar) + `isAdmin` via `rpc('is_admin')`; `signUp` memakai `emailRedirectTo = VITE_APP_URL || origin + BASE_URL`
 - `src/supabase/db.ts` — service CRUD balita & kunjungan; status dihitung kalkulator TS lalu disimpan sebagai label Indonesia
 - `supabase/` — CLI project (`config.toml`) + `migrations/*.sql` (schema, relasi, RLS); `.temp/` & `.branches` di-ignore
 - `refrences/` — CSV referensi WHO (sumber data `tabel.ts`; CATATAN: folder ditulis `refrences`, bukan `references`)
@@ -80,7 +80,7 @@ terdokumentasi di **PRD.md** (living document); jaga agar AGENTS.md dan PRD.md t
 1. Kalkulator TS sudah divalidasi vs fixture Python (20 kasus, toleransi z ±0.005)
 2. `kesimpulan_bb_bulan_lalu` belum ada (butuh riwayat pengukuran sebelumnya)
 3. Umur < 13 minggu masih dihitung per bulan (tabel mingguan belum dipakai)
-4. **Fase data aktif:** Supabase Auth (email/password) + RLS ketat sudah jalan. `anon` bisa landing, kalkulator & `/dashboard` (hub publik); `/balita*` butuh login (guard redirect). Status disimpan sebagai label Indonesia (`Normal`, `Kurus`, `Gizi Buruk`, dst); `src/supabase/db.ts` memetakan kode↔label.
+4. **Fase data aktif:** Supabase Auth (email/password) + RLS ketat sudah jalan. `anon` bisa landing, kalkulator & `/dashboard` (hub publik); `/balita*` butuh login (guard redirect). **Peran admin** (`public.user_peran` + fungsi `is_admin()`): hanya admin yang bisa tulis/edit/hapus (RLS + gating UI); user biasa read-only. Status disimpan sebagai label Indonesia (`Normal`, `Kurus`, `Gizi Buruk`, dst); `src/supabase/db.ts` memetakan kode↔label.
 5. **Supabase email confirmation ON** (`mailer_autoconfirm=false`) — akun baru lewat UI `/login` butuh konfirmasi email. Akun uji `e2e-kader@posyandu.test` dibuat manual (email_confirmed_at terisi + semua kolom token auth diisi string non-NULL).
 6. **Bug GoAuth scan:** bila kolom token di `auth.users` NULL (mis. user dibuat manual), login gagal dengan "Database error querying schema" / "converting NULL to string". Workaround: isi `confirmation_token`, `recovery_token`, `email_change`, dll dengan string kosong.
 7. **Migrasi:** `supabase/migrations/` dipakai untuk replikasi fresh; perubahan yang sudah diterapkan ke remote dicatat di `supabase_migrations.schema_migrations` (jalur CLI butuh password DB — kalau belum ada, apply via dashboard SQL Editor).

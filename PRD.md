@@ -1,7 +1,7 @@
 # PRD — Sistem Informasi Posyandu (PosyanduGizi)
 
 Dokumen ini adalah **living document**: terus diperbarui seiring perkembangan project.
-Status terakhir: **Fase 1 (MVP) — Pencatatan berjalan** (Auth + RLS + CRUD balita & kunjungan aktif di Supabase; form kunjungan lengkap + dashboard hub publik sudah jalan). Terakhir, landing page didesain ulang: font display Fredoka (menggantikan Varela Round) + animasi ketik judul hero "Posyandu Wapalo, Sehat, Mandiri" + navbar diringkas menjadi 3–4 tautan.
+Status terakhir: **Fase 1 (MVP) — Pencatatan berjalan** (Auth + RLS + CRUD balita & kunjungan aktif di Supabase; form kunjungan lengkap + dashboard hub publik sudah jalan). Terakhir: landing page didesain ulang dengan **motif kurva pertumbuhan WHO** sebagai elemen tanda tangan (hero split + panel kalkulator kilat interaktif), navbar **tanpa animasi ketik** (Typewriter dihapus; brand statis "Posyandu Wapalo" + state tautan aktif + tautan "Tentang"), dan **peran admin** aktif (admin satu-satunya yang bisa menulis; user biasa read-only) + link konfirmasi email diarahkan ke URL produksi (`VITE_APP_URL`).
 
 ## 1. Ringkasan Produk
 
@@ -31,6 +31,9 @@ autentikasi **Supabase Auth + RLS diterapkan sejak awal** karena data anak sensi
 | Kader posyandu | Input data balita, pengukuran, imunisasi & vitamin |
 | Petugas / bidan puskesmas | Memantau data dan menyusun laporan |
 
+Autentikasi berbasis peran sudah aktif: **admin** (tabel `user_peran` + fungsi `is_admin()`) dapat
+menambah/mengubah/menghapus data; **user biasa** (kader terautentikasi) read-only.
+
 ## 4. Ruang Lingkup
 
 - Satu unit posyandu (struktur data disiapkan agar dapat diperluas ke banyak posyandu).
@@ -48,6 +51,7 @@ autentikasi **Supabase Auth + RLS diterapkan sejak awal** karena data anak sensi
 - ⏳ UI bumil (schema `bumil_*` sudah ada di DB).
 - ✅ Halaman kalkulator tetap tersedia untuk hitung cepat tanpa menyimpan.
 - ✅ Dashboard hub publik: menu navigasi modul (Balita aktif; Bumil/Remaja/Dewasa & Lansia "Segera").
+- ✅ Peran admin vs user biasa: hanya admin (tabel `user_peran`) yang bisa tulis/edit/hapus (RLS `is_admin()` + gating UI); user biasa read-only. Pendaftaran baru diarahkan ke URL produksi via `emailRedirectTo` (`VITE_APP_URL`).
 
 ### Fase 2 — Analisis
 - Statistik & rekap: jumlah balita, distribusi status gizi, cakupan kunjungan (hub dashboard sudah ada sebagai navigasi).
@@ -57,7 +61,7 @@ autentikasi **Supabase Auth + RLS diterapkan sejak awal** karena data anak sensi
 
 ### Fase 3 — Operasional & Lanjutan
 - Jadwal posyandu dan pengingat kunjungan balita.
-- Login & autentikasi berbasis peran.
+- Peran lanjutan (admin posyandu vs puskesmas), reset password & pengelolaan akun.
 - (Potensi) dukungan banyak posyandu dan integrasi e-PPGBM.
 
 ## 6. Model Data
@@ -76,9 +80,10 @@ yang sudah berisi data eksisting (bukan dibuat baru). Semua relasi & audit bersi
 - **`bumil_identitas`** (13 baris) & **`bumil_kunjungan`** — schema siap, UI menyusul.
 - **`rekap_balita`** & **`rekap_bumil`** — rekap bulanan (Fase 2).
 - **RLS ketat:** policy `anon_*` dihapus (sebelumnya anon bisa baca semua data anak & INSERT kunjungan);
-  kini `authenticated` (kader terautentikasi) bisa SELECT/INSERT/UPDATE/DELETE; INSERT mewajibkan
-  `dibuat_oleh = auth.uid()` (diisi trigger). Env var: `VITE_SUPABASE_URL` & `VITE_SUPABASE_ANON_KEY`
-  (anon key publik, proteksi lewat RLS).
+  kini `authenticated` bisa SELECT semua; INSERT/UPDATE/DELETE **hanya untuk admin** (fungsi
+  `public.is_admin()` dari tabel `user_peran(email, peran)`); INSERT mewajibkan `dibuat_oleh = auth.uid()`
+  (diisi trigger). Env var: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (anon key publik, proteksi lewat
+  RLS) & `VITE_APP_URL` (redirect konfirmasi email).
 
 ## 7. Teknologi
 
@@ -106,7 +111,7 @@ yang sudah berisi data eksisting (bukan dibuat baru). Semua relasi & audit bersi
 ## 10. Roadmap & Prioritas
 
 1. **Fondasi (selesai):** SPA Vite + Vue 3, kalkulator client-side (TS, valid vs fixture Python), landing + kalkulator, shadcn-vue, deploy Vercel.
-2. **Fase 1 (MVP, berjalan):** schema Supabase diadaptasi dari data eksisting + Auth/RLS ketat + CRUD balita & kunjungan (aktif); form kunjungan lengkap + dashboard hub publik (selesai); menyusul: UI bumil.
+2. **Fase 1 (MVP, berjalan):** schema Supabase diadaptasi dari data eksisting + Auth/RLS ketat + CRUD balita & kunjungan (aktif); form kunjungan lengkap + dashboard hub publik (selesai); peran admin (admin tulis, user biasa read-only) + redirect konfirmasi email produksi (selesai); menyusul: UI bumil.
 3. **Fase 2:** dashboard, grafik tumbuh kembang, pemantauan stunting, laporan & ekspor.
 4. **Fase 3:** jadwal & pengingat, peran lanjutan, perluasan multi-posyandu.
 
@@ -120,7 +125,7 @@ yang sudah berisi data eksisting (bukan dibuat baru). Semua relasi & audit bersi
 
 ## 12. Pertanyaan Terbuka
 
-- Nama final produk (sementara: PosyanduGizi). Judul hero kini memakai "Posyandu Wapalo, Sehat, Mandiri" — **Wapalo adalah nama desa** tempat posyandu; kata "Sehat" & "Mandiri" diketik bergantian sebagai tagline.
+- Nama final produk (sementara: PosyanduGizi; brand UI & repo: **Posyandu Wapalo** — Wapalo adalah nama desa tempat posyandu). Tagline "Sehat" & "Mandiri" tidak lagi dianimasikan (animasi ketik dihapus).
 - Format laporan yang dibutuhkan puskesmas (kolom/bentuk rekap).
 - Daftar imunisasi & vitamin standar yang dicatat.
 - Cakupan wilayah/desa yang perlu direpresentasikan.
