@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { LogOut, Menu, Sprout } from '@lucide/vue'
 import { onMounted, ref } from 'vue'
-import { RouterLink } from 'vue-router'
-import Typewriter from '@/components/Typewriter.vue'
+import { RouterLink, useRoute } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -13,11 +12,18 @@ import {
 import { useAuth } from '@/supabase/useAuth'
 
 const buka = ref(false)
+const route = useRoute()
 const { isAutentikasi, user, inisialisasi, keluar } = useAuth()
 
 onMounted(() => {
   inisialisasi()
 })
+
+function isAktif(href: string) {
+  const path = route?.path ?? ''
+  if (href === '/') return path === '/'
+  return path.startsWith(href)
+}
 
 const TAUTAN = [
   { label: 'Beranda', href: '/' },
@@ -33,9 +39,7 @@ const TAUTAN = [
         <span class="bg-primary grid size-9 place-items-center rounded-xl text-white shadow-sm transition-transform group-hover:scale-105">
           <Sprout class="size-5" />
         </span>
-        <span class="font-display text-lg font-normal tracking-tight">
-          Posyandu<span class="text-primary">&nbsp;<Typewriter :words="['Wapalo', 'Sehat', 'Mandiri']" /></span>
-        </span>
+        <span class="font-display text-lg font-normal tracking-tight">Posyandu Wapalo</span>
       </RouterLink>
 
       <nav class="hidden items-center gap-1 md:flex" aria-label="Navigasi utama">
@@ -43,14 +47,18 @@ const TAUTAN = [
           v-for="t in TAUTAN"
           :key="t.href"
           :to="t.href"
-          class="text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+          :aria-current="isAktif(t.href) ? 'page' : undefined"
+          class="text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg px-3.5 py-2 text-sm font-medium transition-colors"
+          :class="isAktif(t.href) && 'bg-muted text-foreground'"
         >
           {{ t.label }}
         </RouterLink>
         <RouterLink
           v-if="isAutentikasi"
           to="/balita"
-          class="text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+          :aria-current="isAktif('/balita') ? 'page' : undefined"
+          class="text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg px-3.5 py-2 text-sm font-medium transition-colors"
+          :class="isAktif('/balita') && 'bg-muted text-foreground'"
         >
           Data Balita
         </RouterLink>
@@ -90,6 +98,7 @@ const TAUTAN = [
                 :key="t.href"
                 :to="t.href"
                 class="text-foreground hover:bg-muted rounded-lg px-4 py-3 text-base font-medium"
+                :class="isAktif(t.href) && 'bg-muted text-primary'"
                 @click="buka = false"
               >
                 {{ t.label }}
@@ -98,6 +107,7 @@ const TAUTAN = [
                 v-if="isAutentikasi"
                 to="/balita"
                 class="text-foreground hover:bg-muted rounded-lg px-4 py-3 text-base font-medium"
+                :class="isAktif('/balita') && 'bg-muted text-primary'"
                 @click="buka = false"
               >
                 Data Balita
