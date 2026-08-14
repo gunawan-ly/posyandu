@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Menu, Sprout } from '@lucide/vue'
-import { ref } from 'vue'
+import { LogOut, Menu, Sprout } from '@lucide/vue'
+import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import {
@@ -9,8 +9,14 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
+import { useAuth } from '@/supabase/useAuth'
 
 const buka = ref(false)
+const { isAutentikasi, user, inisialisasi, keluar } = useAuth()
+
+onMounted(() => {
+  inisialisasi()
+})
 
 const TAUTAN = [
   { label: 'Beranda', href: '/' },
@@ -41,11 +47,33 @@ const TAUTAN = [
         >
           {{ t.label }}
         </RouterLink>
+        <RouterLink
+          v-if="isAutentikasi"
+          to="/balita"
+          class="text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+        >
+          Data Balita
+        </RouterLink>
       </nav>
 
       <div class="flex items-center gap-2">
         <RouterLink to="/kalkulator" class="hidden md:block">
           <Button>Hitung Sekarang</Button>
+        </RouterLink>
+
+        <template v-if="isAutentikasi">
+          <span
+            class="text-muted-foreground hidden max-w-40 truncate text-sm font-medium lg:block"
+            :title="user?.email"
+          >
+            {{ user?.email }}
+          </span>
+          <Button variant="outline" size="icon" aria-label="Keluar" @click="keluar">
+            <LogOut class="size-4" />
+          </Button>
+        </template>
+        <RouterLink v-else to="/login" class="hidden md:block">
+          <Button variant="outline">Masuk</Button>
         </RouterLink>
 
         <Sheet v-model:open="buka">
@@ -66,6 +94,23 @@ const TAUTAN = [
               >
                 {{ t.label }}
               </RouterLink>
+              <RouterLink
+                v-if="isAutentikasi"
+                to="/balita"
+                class="text-foreground hover:bg-muted rounded-lg px-4 py-3 text-base font-medium"
+                @click="buka = false"
+              >
+                Data Balita
+              </RouterLink>
+              <div v-if="isAutentikasi" class="border-border/60 mt-2 flex items-center justify-between border-t px-4 pt-3">
+                <span class="text-muted-foreground truncate text-sm">{{ user?.email }}</span>
+                <Button variant="outline" size="sm" @click="buka = false; keluar()">Keluar</Button>
+              </div>
+              <div v-else class="px-1 pt-2">
+                <RouterLink to="/login" @click="buka = false">
+                  <Button variant="outline" class="w-full">Masuk</Button>
+                </RouterLink>
+              </div>
               <RouterLink to="/kalkulator" class="px-1 pt-2" @click="buka = false">
                 <Button class="w-full">Hitung Sekarang</Button>
               </RouterLink>

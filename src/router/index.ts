@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { supabase } from '@/supabase/client'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -13,8 +14,47 @@ const router = createRouter({
       name: 'kalkulator',
       component: () => import('@/views/KalkulatorView.vue'),
     },
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('@/views/LoginView.vue'),
+    },
+    {
+      path: '/balita',
+      name: 'balita',
+      component: () => import('@/views/BalitaListView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/balita/baru',
+      name: 'balita-baru',
+      component: () => import('@/views/BalitaFormView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/balita/:id/edit',
+      name: 'balita-edit',
+      component: () => import('@/views/BalitaFormView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/balita/:id',
+      name: 'balita-detail',
+      component: () => import('@/views/BalitaDetailView.vue'),
+      meta: { requiresAuth: true },
+    },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
+})
+
+router.beforeEach(async (to) => {
+  if (!to.meta.requiresAuth) return true
+  if (!supabase) return { name: 'landing' }
+  const { data } = await supabase.auth.getSession()
+  if (!data.session) {
+    return { name: 'login', query: { redirect: to.fullPath } }
+  }
+  return true
 })
 
 export default router

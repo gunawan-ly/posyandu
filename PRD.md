@@ -1,7 +1,7 @@
 # PRD — Sistem Informasi Posyandu (PosyanduGizi)
 
 Dokumen ini adalah **living document**: terus diperbarui seiring perkembangan project.
-Status terakhir: **Fondasi selesai** (SPA + kalkulator client-side) — lanjut ke **Fase 1 (MVP) — Pencatatan**.
+Status terakhir: **Fase 1 (MVP) — Pencatatan berjalan** (Auth + RLS + CRUD balita & kunjungan aktif di Supabase; imunisasi/vitamin/LiKA menyusul di form kunjungan).
 
 ## 1. Ringkasan Produk
 
@@ -41,14 +41,13 @@ autentikasi **Supabase Auth + RLS diterapkan sejak awal** karena data anak sensi
 ## 5. Fitur & Persyaratan
 
 ### Fase 1 (MVP) — Pencatatan
-- Supabase Auth + RLS (data sensitif dilindungi sejak awal).
-- CRUD data balita: nama, jenis kelamin, tanggal lahir, nama orang tua, alamat/kontak.
-- Pencatatan kunjungan & pengukuran: berat badan, panjang/tinggi badan, lingkar
-  lengan, lingkar kepala, checklist perkembangan; status gizi dihitung otomatis
-  di browser (metode LMS WHO: BB/U, TB/U, BB/TB) lalu disimpan.
-- Pencatatan imunisasi & vitamin: jenis, dosis, tanggal pemberian.
-- Daftar balita dan halaman detail dengan riwayat pengukuran.
-- Halaman kalkulator tetap tersedia untuk hitung cepat tanpa menyimpan.
+- ✅ Supabase Auth + RLS (data sensitif dilindungi sejak awal; anonim hanya bisa landing & kalkulator).
+- ✅ CRUD data balita: nama, jenis kelamin, tanggal lahir, nama orang tua, posyandu/dusun/alamat (sesuai tabel eksisting `balita_identitas`).
+- ✅ Pencatatan kunjungan & pengukuran: tanggal, berat badan, panjang/tinggi badan, lingkar lengan + status; status gizi dihitung otomatis di browser (metode LMS WHO: BB/U, TB/U, BB/TB) lalu disimpan.
+- ✅ Daftar balita (cari + hapus) dan halaman detail dengan kurva BB/U + riwayat kunjungan.
+- ⏳ Pencatatan imunisasi, vitamin A, ASI, MP-ASI, obat cacing, LiKA: kolom sudah ada di `balita_kunjungan` (data lama), form menyusul.
+- ⏳ UI bumil (schema `bumil_*` sudah ada di DB).
+- ✅ Halaman kalkulator tetap tersedia untuk hitung cepat tanpa menyimpan.
 
 ### Fase 2 — Analisis
 - Dashboard & statistik: jumlah balita, distribusi status gizi, cakupan kunjungan.
@@ -63,13 +62,23 @@ autentikasi **Supabase Auth + RLS diterapkan sejak awal** karena data anak sensi
 
 ## 6. Model Data
 
-Schema **Supabase (PostgreSQL)** dengan **Row Level Security** sejak awal.
+Schema **Supabase (PostgreSQL 17)** dengan **Row Level Security**. Diadaptasi dari schema
+yang sudah berisi data eksisting (bukan dibuat baru). Semua relasi & audit bersifat *additive*.
 
-- **`balita`**: id (uuid), nama, jenis_kelamin, tanggal_lahir, nama_orang_tua, alamat/kontak, posyandu_id, dibuat_oleh (FK ke auth.users), created_at.
-- **`pengukuran`**: id, balita_id (FK), waktu_kunjungan, umur_bulan (tersimpan untuk audit), berat_badan, panjang_badan, lingkar_lengan, lingkar_kepala, checklist_perkembangan, status_bb_u, status_tb_u, status_bb_tb, z_bb_u, z_tb_u, z_bb_tb, created_at. Skor-z dihitung client-side (kalkulator TS) lalu disimpan.
-- **`imunisasi`** & **`vitamin`** (Fase 1): id, balita_id, jenis, dosis, tanggal_pemberian.
-- **`posyandu`** (Fase 3): untuk skala multi-posyandu.
-- **RLS:** pemilik data (kader yang mencatat) + role admin dapat mengakses; publik tidak dapat menulis. Env var Supabase: `VITE_SUPABASE_URL` & `VITE_SUPABASE_ANON_KEY` (anon key publik, proteksi lewat RLS).
+- **`balita_identitas`** (eksisting, 63 baris): id (bigint identity), nama, nik, jenis_kelamin
+  (`Laki - Laki`/`Perempuan`), tanggal_lahir, tempat_lahir, anak_ke, nama_orang_tua, nik_orang_tua,
+  nomor_kk, dusun, alamat, bb_lahir, pb_lahir, posyandu, dibuat_oleh (FK auth.users, trigger → `auth.uid()`), created_at.
+- **`balita_kunjungan`** (eksisting, 162 baris): id, **balita_id (FK baru, backfill dari `nama_anak`)**, nama_anak (legacy), tanggal_kunjungan,
+  berat_badan, tinggi_badan, lingkar_lengan, lingkar_kepala, status_lingkar_*, ceklis_perkembangan,
+  **imunisasi, vitamin_a, asi_eksklusif, mp_asi, obat_cacing, gejala_tbc, edukasi** (kolom per-kunjungan),
+  status BB/U–TB/U–BB/TB **disimpan sebagai label Indonesia** (mis. `Normal`, `Kurus`, `Berat Berlebih`),
+  **umur_bulan + z_bb_u/tb_u/bb_tb** (dari kalkulator TS), dibuat_oleh, created_at.
+- **`bumil_identitas`** (13 baris) & **`bumil_kunjungan`** — schema siap, UI menyusul.
+- **`rekap_balita`** & **`rekap_bumil`** — rekap bulanan (Fase 2).
+- **RLS ketat:** policy `anon_*` dihapus (sebelumnya anon bisa baca semua data anak & INSERT kunjungan);
+  kini `authenticated` (kader terautentikasi) bisa SELECT/INSERT/UPDATE/DELETE; INSERT mewajibkan
+  `dibuat_oleh = auth.uid()` (diisi trigger). Env var: `VITE_SUPABASE_URL` & `VITE_SUPABASE_ANON_KEY`
+  (anon key publik, proteksi lewat RLS).
 
 ## 7. Teknologi
 
@@ -84,8 +93,8 @@ Schema **Supabase (PostgreSQL)** dengan **Row Level Security** sejak awal.
 - Cepat: muat dan input data tanpa hambatan berarti.
 - Mudah digunakan oleh pengguna non-teknis (kader).
 - Bahasa Indonesia konsisten di seluruh UI.
-- Keamanan & privasi data anak diperlakukan serius; tanpa autentikasi pada MVP,
-  perlu mitigasi sebelum data publik.
+- Keamanan & privasi data anak diperlakukan serius; autentikasi + RLS ketat aktif sejak fase data,
+  dan anonim tidak dapat mengakses data balita.
 
 ## 9. Metrik Keberhasilan
 
@@ -97,7 +106,7 @@ Schema **Supabase (PostgreSQL)** dengan **Row Level Security** sejak awal.
 ## 10. Roadmap & Prioritas
 
 1. **Fondasi (selesai):** SPA Vite + Vue 3, kalkulator client-side (TS, valid vs fixture Python), landing + kalkulator, shadcn-vue, deploy Vercel.
-2. **Fase 1 (MVP):** schema Supabase + Auth/RLS, CRUD balita & pengukuran, imunisasi & vitamin, daftar & detail balita (sedang dikerjakan).
+2. **Fase 1 (MVP, berjalan):** schema Supabase diadaptasi dari data eksisting + Auth/RLS ketat + CRUD balita & kunjungan (sudah aktif); menyusul: form imunisasi/vitamin/LiKA, UI bumil.
 3. **Fase 2:** dashboard, grafik tumbuh kembang, pemantauan stunting, laporan & ekspor.
 4. **Fase 3:** jadwal & pengingat, peran lanjutan, perluasan multi-posyandu.
 

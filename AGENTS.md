@@ -25,22 +25,28 @@ terdokumentasi di **PRD.md** (living document); jaga agar AGENTS.md dan PRD.md t
 - `npm run preview`                    # preview hasil build
 - `npm test`                           # vitest run (kalkulator + render)
 - Uji kalkulator cepat: `npx vitest run src/lib/kalkulator`
+- `npx supabase link --project-ref <ref>` # tautkan repo ke proyek Supabase
+- `npx supabase db push`               # terapkan migrasi `supabase/migrations/` ke remote (meminta password DB)
+- `.env.example`                       # templat env (VITE_SUPABASE_URL & VITE_SUPABASE_ANON_KEY)
 - Build ulang font/sumber data: `refrences/*.csv` → `src/lib/kalkulator/tabel.ts` (lihat skrip konversi)
 
 ## Struktur Proyek
 - `index.html` — entry HTML SPA (mount `#app`); `public/` (favicon, font woff2)
 - `src/main.ts` — bootstrap app + router
-- `src/router/index.ts` — rute `/` (landing) & `/kalkulator` (kalkulator), lazy-load, fallback `*` → `/`
-- `src/views/` — `LandingView.vue` (hero interaktif + kurva WHO), `KalkulatorView.vue` (form + hasil)
-- `src/components/` — `KurvaWHO.vue` (kurva WHO self-draw + titik z-score), `StatusBadge.vue`, `AppNavbar.vue`, `AppFooter.vue`, `Reveal.vue`, `ui/` (komponen shadcn-vue)
+- `src/router/index.ts` — rute `/` (landing), `/kalkulator`, `/login`, `/balita*` (guard `requiresAuth`), lazy-load, fallback `*` → `/`
+- `src/views/` — `LandingView.vue`, `KalkulatorView.vue`, `LoginView.vue` (masuk/daftar kader), `BalitaListView.vue`, `BalitaFormView.vue` (baru/edit), `BalitaDetailView.vue` (identitas + kurva + riwayat + form kunjungan)
+- `src/components/` — `KurvaWHO.vue` (kurva WHO self-draw + titik z-score), `StatusBadge.vue`, `AppNavbar.vue` (menu + status login), `AppFooter.vue`, `Reveal.vue`, `ui/` (komponen shadcn-vue)
 - `src/lib/kalkulator/index.ts` — port TS `hitungSemuaStatus(jk, umurBulan, beratBadan, panjangBadan)` → `{status_bb_u, status_tb_u, status_bb_tb, z_bb_u, z_tb_u, z_bb_tb, error}`
 - `src/lib/kalkulator/tabel.ts` — data WHO hasil konversi CSV (jangan edit manual)
 - `src/lib/kalkulator/__fixtures__/expected.json` — fixture output Python lama untuk validasi port
 - `src/lib/umur.ts` — hitung umur bulan (kalender) + parse tanggal lokal
 - `src/lib/status.ts` — metadata status (label, deskripsi, tone warna)
 - `src/supabase/client.ts` — klien Supabase (aktif hanya bila env var terisi)
+- `src/supabase/useAuth.ts` — composable auth (session, masuk, daftar, keluar) + guard route
+- `src/supabase/db.ts` — service CRUD balita & kunjungan; status dihitung kalkulator TS lalu disimpan sebagai label Indonesia
+- `supabase/` — CLI project (`config.toml`) + `migrations/*.sql` (schema, relasi, RLS); `.temp/` & `.branches` di-ignore
 - `refrences/` — CSV referensi WHO (sumber data `tabel.ts`; CATATAN: folder ditulis `refrences`, bukan `references`)
-- `.env` — `VITE_SUPABASE_URL` & `VITE_SUPABASE_ANON_KEY` (placeholder, fase data)
+- `.env` — `VITE_SUPABASE_URL` & `VITE_SUPABASE_ANON_KEY` (gitignored); templat di `.env.example`
 - `vercel.json` — SPA rewrite agar deep-link tidak 404
 
 ## Data & Klasifikasi Status
@@ -71,8 +77,11 @@ terdokumentasi di **PRD.md** (living document); jaga agar AGENTS.md dan PRD.md t
 
 ## Masalah Dikenal / Catatan
 1. Kalkulator TS sudah divalidasi vs fixture Python (20 kasus, toleransi z ±0.005)
-2. Lingkar lengan & kepala belum ada di UI (akan menyusul di fase data)
+2. Kolom kunjungan imunisasi/vitamin/ASI/MP-ASI/LiKA sudah ada di DB tapi belum di form (menyusul)
 3. `kesimpulan_bb_bulan_lalu` belum ada (butuh riwayat pengukuran sebelumnya)
 4. Umur < 13 minggu masih dihitung per bulan (tabel mingguan belum dipakai)
-5. Fase berikutnya: schema Supabase + Auth/RLS + CRUD balita/pengukuran (lihat PRD)
-6. Registry shadcn-vue tidak terjangkau dari environment ini — komponen `src/components/ui/` disalin manual dari repo `unovue/shadcn-vue` (branch `dev`, registry `new-york-v4`)
+5. **Fase data aktif:** Supabase Auth (email/password) + RLS ketat sudah jalan. `anon` hanya bisa landing & kalkulator; `/balita*` butuh login (guard redirect). Status disimpan sebagai label Indonesia (`Normal`, `Kurus`, `Berat Berlebih`, dst) agar konsisten dengan data lama; `src/supabase/db.ts` memetakan kode↔label.
+6. **Supabase email confirmation ON** (`mailer_autoconfirm=false`) — akun baru lewat UI `/login` butuh konfirmasi email. Akun uji `e2e-kader@posyandu.test` dibuat manual (email_confirmed_at terisi + semua kolom token auth diisi string non-NULL).
+7. **Bug GoAuth scan:** bila kolom token di `auth.users` NULL (mis. user dibuat manual), login gagal dengan "Database error querying schema" / "converting NULL to string". Workaround: isi `confirmation_token`, `recovery_token`, `email_change`, dll dengan string kosong.
+8. **Migrasi:** `supabase/migrations/` dipakai untuk replikasi fresh; perubahan yang sudah diterapkan ke remote dicatat di `supabase_migrations.schema_migrations` (jalur CLI butuh password DB — kalau belum ada, apply via dashboard SQL Editor).
+9. Registry shadcn-vue tidak terjangkau dari environment ini — komponen `src/components/ui/` disalin manual dari repo `unovue/shadcn-vue` (branch `dev`, registry `new-york-v4`)
