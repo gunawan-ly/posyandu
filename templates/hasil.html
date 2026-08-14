@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hasil Status Gizi</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}" />
+  </head>
+  <body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-lg p-8 w-full max-w-xl">
+      <h1 class="text-2xl font-bold text-slate-800 mb-6">Hasil Status Gizi</h1>
+
+      {% if error %}
+        <div class="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 mb-4">{{ error }}</div>
+      {% else %}
+        {% set label = {
+          'SK': 'Sangat Kurang', 'K': 'Kurang', 'N': 'Normal', 'RBL': 'Risiko BB Lebih',
+          'SP': 'Sangat Pendek', 'P': 'Pendek', 'T': 'Tinggi',
+          'GK': 'Gizi Kurang', 'GB': 'Gizi Baik', 'GL': 'Gizi Lebih', 'O': 'Obesitas'
+        } %}
+        {% set warna = {
+          'SK': 'bg-red-100 text-red-700', 'SP': 'bg-red-100 text-red-700', 'GK': 'bg-red-100 text-red-700',
+          'K': 'bg-orange-100 text-orange-700', 'P': 'bg-orange-100 text-orange-700',
+          'N': 'bg-emerald-100 text-emerald-700', 'GB': 'bg-emerald-100 text-emerald-700',
+          'RBL': 'bg-yellow-100 text-yellow-700', 'T': 'bg-sky-100 text-sky-700',
+          'GL': 'bg-yellow-100 text-yellow-700', 'O': 'bg-red-100 text-red-700'
+        } %}
+
+        <div class="bg-slate-50 rounded-lg p-4 mb-6 text-sm text-slate-700">
+          <p><span class="font-semibold">Nama:</span> {{ data.anak.nama }}</p>
+          <p><span class="font-semibold">Jenis Kelamin:</span> {{ 'Laki-laki' if data.anak.jenis_kelamin == 'L' else 'Perempuan' }}</p>
+          <p><span class="font-semibold">Umur:</span> {{ data.pengukuran.umur_bulan }} bulan</p>
+          <p><span class="font-semibold">Berat Badan:</span> {{ data.pengukuran.berat_badan }} kg</p>
+          <p><span class="font-semibold">Panjang/Tinggi Badan:</span> {{ data.pengukuran.panjang_badan }} cm</p>
+        </div>
+
+        {% set indikator = [
+          ('Berat Badan / Umur (BB/U)', data.hasil.status_bb_u, data.hasil.z_bb_u),
+          ('Tinggi Badan / Umur (TB/U)', data.hasil.status_tb_u, data.hasil.z_tb_u),
+          ('Berat Badan / Tinggi Badan (BB/TB)', data.hasil.status_bb_tb, data.hasil.z_bb_tb)
+        ] %}
+        <div class="space-y-3">
+          {% for judul, status, z in indikator %}
+            <div class="flex items-center justify-between border border-slate-200 rounded-lg px-4 py-3">
+              <div>
+                <p class="text-sm font-semibold text-slate-700">{{ judul }}</p>
+                <p class="text-xs text-slate-500">Z-score: {{ z }}</p>
+              </div>
+              <span class="px-3 py-1 rounded-full text-sm font-semibold {{ warna.get(status, 'bg-slate-100 text-slate-700') }}">
+                {{ status }} — {{ label.get(status, status) }}
+              </span>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <a href="{{ url_for('index') }}"
+         class="mt-6 inline-block w-full text-center bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold py-2.5 rounded-lg transition">
+        Hitung Lagi
+      </a>
+    </div>
+  </body>
+</html>

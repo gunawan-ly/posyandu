@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kalkulator Status Gizi Anak</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}" />
+  </head>
+  <body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-lg p-8 w-full max-w-xl">
+      <h1 class="text-2xl font-bold text-slate-800">Kalkulator Status Gizi Anak</h1>
+      <p class="text-slate-500 text-sm mb-6">Berdasarkan standar pertumbuhan WHO</p>
+
+      <form method="post" action="{{ url_for('hitung') }}" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1" for="nama">Nama Anak</label>
+          <input type="text" id="nama" name="nama" required
+                 class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1" for="jenis_kelamin">Jenis Kelamin</label>
+            <select id="jenis_kelamin" name="jenis_kelamin" required
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <option value="L">Laki-laki</option>
+              <option value="P">Perempuan</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1" for="waktu_kunjungan">Tanggal Kunjungan</label>
+            <input type="date" id="waktu_kunjungan" name="waktu_kunjungan"
+                   value="{{ today }}"
+                   required
+                   class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1" for="tanggal_lahir">Tanggal Lahir</label>
+          <input type="date" id="tanggal_lahir" name="tanggal_lahir" required
+                 class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1" for="berat_badan">Berat Badan (kg)</label>
+            <input type="number" id="berat_badan" name="berat_badan" step="0.1" min="0" required
+                   class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1" for="panjang_badan">Panjang/Tinggi (cm)</label>
+            <input type="number" id="panjang_badan" name="panjang_badan" step="0.1" min="0" required
+                   class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1" for="lingkar_lengan">Lingkar Lengan (cm)</label>
+            <input type="number" id="lingkar_lengan" name="lingkar_lengan" step="0.1" min="0"
+                   class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1" for="lingkar_kepala">Lingkar Kepala (cm)</label>
+            <input type="number" id="lingkar_kepala" name="lingkar_kepala" step="0.1" min="0"
+                   class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1" for="checklist_perkembangan">Checklist Perkembangan</label>
+          <input type="text" id="checklist_perkembangan" name="checklist_perkembangan" maxlength="2"
+                 class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+
+        <button type="submit"
+                class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg transition">
+          Hitung Status Gizi
+        </button>
+      </form>
+    </div>
+  </body>
+</html>
