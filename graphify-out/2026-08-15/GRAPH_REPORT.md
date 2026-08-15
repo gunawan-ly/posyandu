@@ -1,16 +1,16 @@
 # Graph Report - posyandu  (2026-08-15)
 
 ## Corpus Check
-- 101 files · ~43,189 words
+- 102 files · ~44,185 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 600 nodes · 606 edges · 53 communities (41 shown, 12 thin omitted)
+- 609 nodes · 616 edges · 53 communities (41 shown, 12 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 5 edges (avg confidence: 0.5)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `16821242`
+- Built from commit: `db33dd18`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -170,8 +170,8 @@ Cohesion: 0.22
 Nodes (8): graphify reference: extra exports and benchmark, Step 6b - Wiki (only if --wiki flag), Step 7 - Neo4j export (only if --neo4j or --neo4j-push flag), Step 7a - FalkorDB export (only if --falkordb or --falkordb-push flag), Step 7b - SVG export (only if --svg flag), Step 7c - GraphML export (only if --graphml flag), Step 7d - MCP server (only if --mcp flag), Step 8 - Token reduction benchmark (only if total_words > 5000)
 
 ### Community 22 - "src/views/LandingView.vue"
-Cohesion: 0.22
-Nodes (8): berat, hasil, INDIKATOR, jk, KET, LANGKAH, panjang, umur
+Cohesion: 0.12
+Nodes (17): berat, hasil, jk, KARTU_STATISTIK, labelBulan(), labelBulanIni, LANGKAH, LAYANAN (+9 more)
 
 ### Community 23 - "graphify reference: query, path, explain"
 Cohesion: 0.33
@@ -230,7 +230,7 @@ Cohesion: 0.22
 Nodes (7): cari, daftar, hapus(), { isAdmin }, muat(), pesanError, sibuk
 
 ## Knowledge Gaps
-- **371 isolated node(s):** `$schema`, `.opencode/plugins/graphify.js`, `name`, `private`, `version` (+366 more)
+- **378 isolated node(s):** `$schema`, `.opencode/plugins/graphify.js`, `name`, `private`, `version` (+373 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **12 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -240,7 +240,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `devDependencies` connect `devDependencies` to `dependencies`?**
   _High betweenness centrality (0.005) - this node is a cross-community bridge._
 - **What connects `$schema`, `.opencode/plugins/graphify.js`, `name` to the rest of the system?**
-  _371 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _378 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `src/modules/balita/views/BalitaDetailView.vue` be split into smaller, more focused modules?**
   _Cohesion score 0.045454545454545456 - nodes in this community are weakly interconnected._
 - **Should `select/index.ts` be split into smaller, more focused modules?**

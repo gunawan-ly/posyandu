@@ -241,3 +241,46 @@ export async function hapusKunjungan(id: number): Promise<void> {
   const { error } = await kl.from('balita_kunjungan').delete().eq('id', id)
   if (error) throw error
 }
+
+// ---- Dashboard kader: kunjungan terakhir per balita (via RPC security invoker) ----
+
+export interface KunjunganTerakhir {
+  balita_id: number
+  nama: string
+  tanggal_lahir: string | null
+  tanggal_kunjungan: string | null
+  bb_menurut_umur: string | null
+  pbtb_menurut_umur: string | null
+  bb_menurut_pbtb: string | null
+}
+
+export async function kunjunganTerakhir(): Promise<KunjunganTerakhir[]> {
+  const kl = wajibSupabase()
+  const { data, error } = await kl.rpc('kunjungan_terakhir')
+  if (error) throw error
+  return (data ?? []) as KunjunganTerakhir[]
+}
+
+// Kriteria "Perlu Perhatian": status kunjungan terakhir tidak normal (kurus/pendek/gizi buruk/kurang).
+const STATUS_PERLU_PERHATIAN = new Set([
+  'Sangat Kurang',
+  'Kurang',
+  'Sangat Pendek',
+  'Pendek',
+  'Gizi Buruk',
+  'Gizi Kurang',
+])
+
+function peringkatStatus(label: string | null): boolean {
+  return label != null && STATUS_PERLU_PERHATIAN.has(label)
+}
+
+export async function balitaPerluPerhatian(): Promise<KunjunganTerakhir[]> {
+  const daftar = await kunjunganTerakhir()
+  return daftar.filter(
+    (k) =>
+      peringkatStatus(k.bb_menurut_umur) ||
+      peringkatStatus(k.pbtb_menurut_umur) ||
+      peringkatStatus(k.bb_menurut_pbtb),
+  )
+}

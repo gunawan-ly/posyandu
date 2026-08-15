@@ -1,16 +1,16 @@
 # Graph Report - posyandu  (2026-08-15)
 
 ## Corpus Check
-- 102 files · ~44,185 words
+- 103 files · ~45,853 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 609 nodes · 616 edges · 53 communities (41 shown, 12 thin omitted)
+- 629 nodes · 638 edges · 53 communities (41 shown, 12 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 5 edges (avg confidence: 0.5)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `db33dd18`
+- Built from commit: `fcf8eaac`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -126,8 +126,8 @@ Cohesion: 0.09
 Nodes (19): alamat, anakKe, bbLahir, dusun, idEdit, jenisKelamin, memuat, nama (+11 more)
 
 ### Community 10 - "db.ts"
-Cohesion: 0.13
-Nodes (7): Balita, InputBalita, InputKunjungan, KODE_BULAN, kodeBulan(), Kunjungan, tambahKunjungan()
+Cohesion: 0.11
+Nodes (11): Balita, balitaPerluPerhatian(), InputBalita, InputKunjungan, KODE_BULAN, kodeBulan(), Kunjungan, kunjunganTerakhir (+3 more)
 
 ### Community 11 - "src/views/LoginView.vue"
 Cohesion: 0.18
@@ -218,8 +218,8 @@ Cohesion: 0.50
 Nodes (3): el, { stop }, terlihat
 
 ### Community 37 - "src/views/DashboardView.vue"
-Cohesion: 0.50
-Nodes (3): { isAutentikasi, user, inisialisasi }, MODUL, ModulPosyandu
+Cohesion: 0.11
+Nodes (14): { isAutentikasi, isAdmin, user, inisialisasi }, KARTU_STATISTIK, labelBulan(), labelBulanIni, MODUL, ModulLayanan, muatPerhatianError, NAMA_BULAN (+6 more)
 
 ### Community 42 - "umur.ts"
 Cohesion: 0.83
@@ -230,7 +230,7 @@ Cohesion: 0.22
 Nodes (7): cari, daftar, hapus(), { isAdmin }, muat(), pesanError, sibuk
 
 ## Knowledge Gaps
-- **378 isolated node(s):** `$schema`, `.opencode/plugins/graphify.js`, `name`, `private`, `version` (+373 more)
+- **389 isolated node(s):** `$schema`, `.opencode/plugins/graphify.js`, `name`, `private`, `version` (+384 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **12 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -240,7 +240,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `devDependencies` connect `devDependencies` to `dependencies`?**
   _High betweenness centrality (0.005) - this node is a cross-community bridge._
 - **What connects `$schema`, `.opencode/plugins/graphify.js`, `name` to the rest of the system?**
-  _378 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _389 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `src/modules/balita/views/BalitaDetailView.vue` be split into smaller, more focused modules?**
   _Cohesion score 0.045454545454545456 - nodes in this community are weakly interconnected._
 - **Should `select/index.ts` be split into smaller, more focused modules?**
