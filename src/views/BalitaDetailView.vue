@@ -384,7 +384,7 @@ const klsInput =
               <CardHeader>
                 <CardTitle class="font-display text-lg font-normal">Identitas</CardTitle>
               </CardHeader>
-              <CardContent class="gap-3">
+              <CardContent class="flex flex-col gap-3">
                 <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
                   <div>
                     <p class="text-muted-foreground text-xs font-bold uppercase">Posyandu</p>
@@ -430,7 +430,7 @@ const klsInput =
               <CardHeader>
                 <CardTitle class="font-display text-lg font-normal">Catat kunjungan</CardTitle>
               </CardHeader>
-              <CardContent class="gap-4">
+              <CardContent class="flex flex-col gap-4">
                 <form class="space-y-4" @submit.prevent="simpanKunjungan">
                   <div>
                     <label for="tgl-kunjungan" class="text-muted-foreground mb-1.5 block text-xs font-bold">Tanggal kunjungan</label>

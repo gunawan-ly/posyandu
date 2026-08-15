@@ -139,7 +139,7 @@ const klsInput =
           </CardTitle>
         </CardHeader>
 
-        <CardContent class="gap-5">
+        <CardContent class="flex flex-col gap-5">
           <p v-if="memuat" class="text-muted-foreground text-sm">Memuat data…</p>
 
           <form v-else class="space-y-5" @submit.prevent="simpan">

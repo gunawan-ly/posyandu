@@ -104,7 +104,7 @@ const MODUL: ModulPosyandu[] = [
               ? 'hover:border-primary/50 hover:shadow-primary/10 hover:shadow-lg'
               : 'opacity-80'"
           >
-            <CardContent class="gap-4">
+            <CardContent class="flex flex-col gap-4">
               <div class="flex items-start justify-between gap-3">
                 <span
                   class="grid size-12 place-items-center rounded-xl"

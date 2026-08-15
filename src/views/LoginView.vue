@@ -81,7 +81,7 @@ const klsInput =
           </CardDescription>
         </CardHeader>
 
-        <CardContent class="gap-5">
+        <CardContent class="flex flex-col gap-5">
           <div
             class="inline-flex w-full rounded-lg border border-emerald-200 bg-emerald-50 p-1"
             role="group"

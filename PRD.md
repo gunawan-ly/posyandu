@@ -1,7 +1,7 @@
 # PRD — Sistem Informasi Posyandu (PosyanduGizi)
 
 Dokumen ini adalah **living document**: terus diperbarui seiring perkembangan project.
-Status terakhir: **Fase 1 (MVP) — Pencatatan berjalan** (Auth + RLS + CRUD balita & kunjungan aktif di Supabase; form kunjungan lengkap + dashboard hub publik sudah jalan). Terakhir: landing page didesain ulang dengan **motif kurva pertumbuhan WHO** sebagai elemen tanda tangan (hero split + panel kalkulator kilat interaktif), navbar **tanpa animasi ketik** (Typewriter dihapus; brand statis "Posyandu Wapalo" + state tautan aktif + tautan "Tentang"), dan **peran admin** aktif (admin satu-satunya yang bisa menulis; user biasa read-only) + link konfirmasi email diarahkan ke URL produksi (`VITE_APP_URL`).
+Status terakhir: **Fase 1 (MVP) — Pencatatan berjalan** (Auth + RLS + CRUD balita & kunjungan aktif di Supabase; form kunjungan lengkap + dashboard hub publik sudah jalan). Terakhir: halaman kalkulator ditulis ulang menjadi **kalkulasi live** (hasil & kurva muncul otomatis saat data lengkap, tanpa tombol hitung) dengan **validasi per-field on-blur** (aksesibel: `aria-describedby`/`aria-invalid`/live region `role="status"`), **tabs kurva BB/U · TB/U · BB/TB**, **peringatan implausibel** (|z| > 5, non-blocking), serta **ringkasan hasil + tombol salin**; menyusul perbaikan **spacing konsisten antar elemen form** (CardContent kini `flex flex-col gap-*` sehingga jarak antar blok benar-benar aktif). Sebelumnya: landing page didesain ulang dengan **motif kurva pertumbuhan WHO** sebagai elemen tanda tangan, navbar **tanpa animasi ketik**, dan **peran admin** aktif (admin satu-satunya yang bisa menulis; user biasa read-only) + link konfirmasi email diarahkan ke URL produksi (`VITE_APP_URL`).
 
 ## 1. Ringkasan Produk
 
@@ -49,7 +49,7 @@ menambah/mengubah/menghapus data; **user biasa** (kader terautentikasi) read-onl
 - ✅ Pencatatan kunjungan & pengukuran lengkap: tanggal, BB, PB, lingkar lengan, lingkar kepala, imunisasi, vitamin A, ASI, MP-ASI, obat cacing, ceklis perkembangan, gejala TBC, edukasi; status gizi dihitung otomatis di browser (metode LMS WHO: BB/U, TB/U, BB/TB) lalu disimpan.
 - ✅ Daftar balita (cari + hapus) dan halaman detail dengan kurva tabs (BB/U · TB/U · BB/TB) + riwayat kunjungan kolom penuh (scroll horizontal).
 - ⏳ UI bumil (schema `bumil_*` sudah ada di DB).
-- ✅ Halaman kalkulator tetap tersedia untuk hitung cepat tanpa menyimpan.
+- ✅ Halaman kalkulator tetap tersedia untuk hitung cepat tanpa menyimpan. **Kalkulasi live** (tanpa tombol hitung): hasil & kurva otomatis saat data lengkap; validasi per-field on-blur (tanggal lahir/ukur, BB, PB; `aria-describedby` + live region `role="status"`); tabs kurva BB/U · TB/U · BB/TB; peringatan nilai di luar rentang kewajaran (|z| > 5) non-blocking; ringkasan hasil + tombol salin (clipboard).
 - ✅ Dashboard hub publik: menu navigasi modul (Balita aktif; Bumil/Remaja/Dewasa & Lansia "Segera").
 - ✅ Peran admin vs user biasa: hanya admin (tabel `user_peran`) yang bisa tulis/edit/hapus (RLS `is_admin()` + gating UI); user biasa read-only. Pendaftaran baru diarahkan ke URL produksi via `emailRedirectTo` (`VITE_APP_URL`).
 

@@ -14,7 +14,7 @@ describe('render komponen utama', () => {
     expect(wrapper.text()).toContain('Posyandu Wapalo')
   })
 
-  it('KalkulatorView ter-render tanpa error dan menghitung hasil', async () => {
+  it('KalkulatorView ter-render tanpa error dan menghitung hasil secara live', async () => {
     const wrapper = mount(KalkulatorView, {
       global: { stubs: { RouterLink: true, RouterView: true } },
     })
@@ -26,7 +26,6 @@ describe('render komponen utama', () => {
       tanggalPengukuran: string
       beratBadan: number | null
       panjangBadan: number | null
-      hitung: () => void
       hasil: ReturnType<typeof hitungSemuaStatus> | null
     }
     vm.jk = 'L'
@@ -34,7 +33,6 @@ describe('render komponen utama', () => {
     vm.tanggalPengukuran = '2025-08-14'
     vm.beratBadan = 9.6
     vm.panjangBadan = 75
-    vm.hitung()
     await wrapper.vm.$nextTick()
 
     expect(vm.hasil).not.toBeNull()
