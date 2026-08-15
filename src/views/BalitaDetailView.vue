@@ -257,7 +257,7 @@ const klsInput =
 
         <div class="mt-8 grid gap-6 lg:grid-cols-3">
           <!-- Kiri: kurva + riwayat -->
-          <div class="space-y-6 lg:col-span-2">
+          <div class="min-w-0 space-y-6 lg:col-span-2">
             <Card>
               <CardHeader class="flex flex-wrap items-center justify-between gap-3 sm:flex-row">
                 <CardTitle class="font-display text-lg font-normal">Kurva pertumbuhan</CardTitle>
@@ -308,7 +308,103 @@ const klsInput =
                 <div v-if="kunjungan.length === 0" class="text-muted-foreground text-sm">
                   Belum ada kunjungan tercatat.
                 </div>
-                <div v-else class="overflow-x-auto">
+
+                <template v-else>
+                  <!-- Mobile: kartu per kunjungan -->
+                  <div class="space-y-4 md:hidden">
+                  <div
+                    v-for="k in kunjungan"
+                    :key="k.id"
+                    class="rounded-xl border border-emerald-100 bg-white p-4 shadow-sm"
+                  >
+                    <div class="flex items-start justify-between gap-3">
+                      <div>
+                        <p class="font-bold">{{ formatTanggal(k.tanggal_kunjungan) }}</p>
+                        <p class="text-muted-foreground mt-0.5 text-xs">Umur {{ k.umur_bulan ?? '—' }} bulan</p>
+                      </div>
+                      <div v-if="isAdmin" class="flex shrink-0 items-center gap-2">
+                        <button
+                          type="button"
+                          class="text-muted-foreground hover:bg-red-50 hover:text-red-600 rounded-lg p-2 transition-colors"
+                          aria-label="Hapus kunjungan"
+                          title="Hapus kunjungan"
+                          @click="hapusKunj(balita.id, k)"
+                        >
+                          <Trash2 class="size-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="mt-3 grid grid-cols-3 gap-y-2 text-sm">
+                      <div>
+                        <p class="text-muted-foreground text-[11px] font-bold uppercase">BB (kg)</p>
+                        <p class="mt-0.5 font-medium">{{ k.berat_badan ?? '—' }}</p>
+                      </div>
+                      <div>
+                        <p class="text-muted-foreground text-[11px] font-bold uppercase">PB (cm)</p>
+                        <p class="mt-0.5 font-medium">{{ k.tinggi_badan ?? '—' }}</p>
+                      </div>
+                      <div>
+                        <p class="text-muted-foreground text-[11px] font-bold uppercase">BB naik</p>
+                        <p class="mt-0.5 font-medium">{{ k.bb_naik_tidak ?? '—' }}</p>
+                      </div>
+                      <div>
+                        <p class="text-muted-foreground text-[11px] font-bold uppercase">LiLA</p>
+                        <p class="mt-0.5 font-medium">
+                          {{ k.lingkar_lengan ?? '—' }}
+                          <span v-if="k.status_lingkar_lengan" class="text-muted-foreground text-xs">({{ k.status_lingkar_lengan }})</span>
+                        </p>
+                      </div>
+                      <div>
+                        <p class="text-muted-foreground text-[11px] font-bold uppercase">LiKA</p>
+                        <p class="mt-0.5 font-medium">
+                          {{ k.lingkar_kepala ?? '—' }}
+                          <span v-if="k.status_lingkar_kepala" class="text-muted-foreground text-xs">({{ k.status_lingkar_kepala }})</span>
+                        </p>
+                      </div>
+                      <div>
+                        <p class="text-muted-foreground text-[11px] font-bold uppercase">Vit. A</p>
+                        <p class="mt-0.5 font-medium">{{ labelYaTidak(k.vitamin_a) }}</p>
+                      </div>
+                      <div>
+                        <p class="text-muted-foreground text-[11px] font-bold uppercase">Imunisasi</p>
+                        <p class="mt-0.5 font-medium">{{ labelYaTidak(k.imunisasi) }}</p>
+                      </div>
+                      <div>
+                        <p class="text-muted-foreground text-[11px] font-bold uppercase">ASI</p>
+                        <p class="mt-0.5 font-medium">{{ labelYaTidak(k.asi_eksklusif) }}</p>
+                      </div>
+                      <div>
+                        <p class="text-muted-foreground text-[11px] font-bold uppercase">MP-ASI</p>
+                        <p class="mt-0.5 font-medium">{{ labelYaTidak(k.mp_asi) }}</p>
+                      </div>
+                      <div>
+                        <p class="text-muted-foreground text-[11px] font-bold uppercase">Cacing</p>
+                        <p class="mt-0.5 font-medium">{{ labelYaTidak(k.obat_cacing) }}</p>
+                      </div>
+                      <div>
+                        <p class="text-muted-foreground text-[11px] font-bold uppercase">Ceklis</p>
+                        <p class="mt-0.5 font-medium">{{ labelYaTidak(k.ceklis_perkembangan) }}</p>
+                      </div>
+                      <div>
+                        <p class="text-muted-foreground text-[11px] font-bold uppercase">TBC</p>
+                        <p class="mt-0.5 font-medium">{{ labelYaTidak(k.gejala_tbc) }}</p>
+                      </div>
+                    </div>
+
+                    <div class="border-border/60 flex flex-wrap items-center gap-2 border-t pt-3">
+                      <StatusBadge :kode="kodeDariLabel(k.bb_menurut_umur)" />
+                      <StatusBadge :kode="kodeDariLabel(k.pbtb_menurut_umur)" />
+                      <StatusBadge :kode="kodeDariLabel(k.bb_menurut_pbtb)" />
+                    </div>
+                    <p v-if="k.edukasi" class="text-muted-foreground border-border/60 mt-3 border-t pt-2 text-xs">
+                      Edukasi: {{ k.edukasi }}
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Desktop: tabel kolom penuh -->
+                <div class="hidden overflow-x-auto md:block">
                   <table class="w-full min-w-[1500px] text-sm">
                     <thead>
                       <tr class="text-muted-foreground border-border/60 border-b text-left text-xs font-bold tracking-wide uppercase">
@@ -374,6 +470,7 @@ const klsInput =
                     </tbody>
                   </table>
                 </div>
+                </template>
               </CardContent>
             </Card>
           </div>
@@ -436,7 +533,7 @@ const klsInput =
                     <label for="tgl-kunjungan" class="text-muted-foreground mb-1.5 block text-xs font-bold">Tanggal kunjungan</label>
                     <input id="tgl-kunjungan" v-model="tglKunjungan" type="date" class="w-full [color-scheme:light]" :class="klsInput" />
                   </div>
-                  <div class="grid grid-cols-2 gap-3">
+                  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div>
                       <label for="bb" class="text-muted-foreground mb-1.5 block text-xs font-bold">Berat badan (kg)</label>
                       <input id="bb" v-model="beratBadan" type="number" inputmode="decimal" step="0.1" min="0" placeholder="cth: 9,6" class="w-full" :class="klsInput" />
@@ -446,7 +543,7 @@ const klsInput =
                       <input id="pb" v-model="tinggiBadan" type="number" inputmode="decimal" step="0.1" min="0" placeholder="cth: 75" class="w-full" :class="klsInput" />
                     </div>
                   </div>
-                  <div class="grid grid-cols-2 gap-3">
+                  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div>
                       <label for="lila" class="text-muted-foreground mb-1.5 block text-xs font-bold">LiLA (cm)</label>
                       <input id="lila" v-model="lingkarLengan" type="number" inputmode="decimal" step="0.1" min="0" class="w-full" :class="klsInput" />
@@ -459,7 +556,7 @@ const klsInput =
                       </select>
                     </div>
                   </div>
-                  <div class="grid grid-cols-2 gap-3">
+                  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div>
                       <label for="lika" class="text-muted-foreground mb-1.5 block text-xs font-bold">LiKA (cm)</label>
                       <input id="lika" v-model="lingkarKepala" type="number" inputmode="decimal" step="0.1" min="0" class="w-full" :class="klsInput" />
@@ -475,7 +572,7 @@ const klsInput =
 
                   <div class="border-border/60 border-t pt-4">
                     <p class="text-muted-foreground mb-3 text-xs font-bold tracking-widest uppercase">Gizi & kesehatan</p>
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div>
                         <label for="bb-naik" class="text-muted-foreground mb-1.5 block text-xs font-bold">BB naik</label>
                         <select id="bb-naik" v-model="bbNaik" class="w-full" :class="klsInput">
