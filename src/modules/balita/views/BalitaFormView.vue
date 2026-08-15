@@ -6,7 +6,7 @@ import AppFooter from '@/components/AppFooter.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ambilBalita, buatBalita, ubahBalita, type Balita } from '@/supabase/db'
+import { ambilBalita, buatBalita, ubahBalita, type Balita } from '@/modules/balita/db'
 import { parseTanggal } from '@/lib/umur'
 
 const route = useRoute()

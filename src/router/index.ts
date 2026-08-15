@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { supabase } from '@/supabase/client'
+import { balitaRoutes } from '@/modules/balita/routes'
 
 const reduksiGerak =
   typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
@@ -34,30 +35,7 @@ const router = createRouter({
       name: 'dashboard',
       component: () => import('@/views/DashboardView.vue'),
     },
-    {
-      path: '/balita',
-      name: 'balita',
-      component: () => import('@/views/BalitaListView.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/balita/baru',
-      name: 'balita-baru',
-      component: () => import('@/views/BalitaFormView.vue'),
-      meta: { requiresAuth: true, requiresAdmin: true },
-    },
-    {
-      path: '/balita/:id/edit',
-      name: 'balita-edit',
-      component: () => import('@/views/BalitaFormView.vue'),
-      meta: { requiresAuth: true, requiresAdmin: true },
-    },
-    {
-      path: '/balita/:id',
-      name: 'balita-detail',
-      component: () => import('@/views/BalitaDetailView.vue'),
-      meta: { requiresAuth: true },
-    },
+    ...balitaRoutes,
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
 })

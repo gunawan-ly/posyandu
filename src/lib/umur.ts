@@ -17,3 +17,10 @@ export function hitungUmurBulan(tanggalLahir: Date, waktuKunjungan: Date): numbe
   }
   return Math.max(0, total)
 }
+
+// Umur dalam bulan dihitung dari tanggal lahir sampai hari ini.
+export function umurSaatIni(tanggalLahir: string): number | null {
+  const lahir = parseTanggal(tanggalLahir)
+  if (!lahir) return null
+  return hitungUmurBulan(lahir, new Date())
+}

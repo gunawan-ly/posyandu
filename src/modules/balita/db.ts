@@ -1,68 +1,27 @@
-import { supabase } from '@/supabase/client'
-import type { SupabaseClient } from '@supabase/supabase-js'
+import { wajibSupabase } from '@/supabase/client'
 import { hitungSemuaStatus, hitungZLik, hitungZLil, klasifikasiLika, klasifikasiLila } from '@/lib/kalkulator'
+import { labelStatus } from '@/lib/status'
 import { hitungUmurBulan, parseTanggal } from '@/lib/umur'
 
-// Lapisan akses data Posyandu — satu sumber kebenaran status adalah
+// Lapisan akses data modul Balita — satu sumber kebenaran status adalah
 // kalkulator TypeScript; hasilnya disimpan sebagai label Indonesia agar
 // konsisten dengan data eksisting di Supabase.
 
-function wajibSupabase(): SupabaseClient {
-  if (!supabase) throw new Error('Supabase belum dikonfigurasi.')
-  return supabase
+// Tampilkan nilai Ya/Tidak secara konsisten (data lama memakai Y/T).
+export function labelYaTidak(nilai: string | null | undefined): string {
+  if (nilai == null || nilai === '') return '—'
+  if (nilai === 'Y') return 'Ya'
+  if (nilai === 'T') return 'Tidak'
+  return nilai
 }
 
-// Pemetaan kode pendek → label Indonesia (sesuai data lama di database)
-const LABEL_STATUS: Record<string, string> = {
-  SK: 'Sangat Kurang',
-  K: 'Kurang',
-  N: 'Normal',
-  RBL: 'Risiko Berat Berlebih',
-  SP: 'Sangat Pendek',
-  P: 'Pendek',
-  T: 'Tinggi',
-  GB: 'Gizi Buruk',
-  GK: 'Gizi Kurang',
-  GN: 'Gizi Baik',
-  RGL: 'Risiko Gizi Lebih',
-  GL: 'Gizi Lebih',
-  O: 'Obesitas',
-  MS: 'Mikrosefali',
-  MK: 'Makrosefali',
-}
+const KODE_BULAN = ['JAN', 'FEB', 'MAR', 'APR', 'MEI', 'JUN', 'JUL', 'AGST', 'SEP', 'OKT', 'NOV', 'DES']
 
-export function labelStatus(kode: string): string {
-  return LABEL_STATUS[kode] ?? kode
-}
-
-// Balik: label Indonesia (termasuk varian data lama) → kode pendek (badge tampilan)
-const ALIAS_LABEL: Record<string, string> = {
-  'Sangat Kurus': 'SK',
-  'Sangat Kurang': 'SK',
-  Kurus: 'K',
-  Kurang: 'K',
-  Normal: 'N',
-  'Berat Berlebih': 'RBL',
-  'Risiko Berat Badan Lebih': 'RBL',
-  'Risiko Berat Lebih': 'RBL',
-  'Risiko Berat Berlebih': 'RBL',
-  'Sangat Pendek': 'SP',
-  Pendek: 'P',
-  Tinggi: 'T',
-  'Sangat Buruk': 'GB',
-  'Gizi Buruk': 'GB',
-  'Gizi Kurang': 'GK',
-  'Gizi Baik': 'GN',
-  'Risiko Gizi Lebih': 'RGL',
-  'Gizi Lebih': 'GL',
-  Obesitas: 'O',
-  Mikrosefali: 'MS',
-  Makrosefali: 'MK',
-}
-
-export function kodeDariLabel(label: string | null | undefined): string {
-  if (!label) return '_'
-  return ALIAS_LABEL[label] ?? label
+// Kode bulan (kolom legacy) diturunkan dari tanggal kunjungan agar konsisten.
+function kodeBulan(tgl: string): string | null {
+  const d = parseTanggal(tgl)
+  if (!d) return null
+  return KODE_BULAN[d.getMonth()]
 }
 
 export interface Balita {
@@ -152,23 +111,6 @@ export interface InputKunjungan {
   ceklis_perkembangan?: string | null
   gejala_tbc?: string | null
   edukasi?: string | null
-}
-
-// Tampilkan nilai Ya/Tidak secara konsisten (data lama memakai Y/T).
-export function labelYaTidak(nilai: string | null | undefined): string {
-  if (nilai == null || nilai === '') return '—'
-  if (nilai === 'Y') return 'Ya'
-  if (nilai === 'T') return 'Tidak'
-  return nilai
-}
-
-const KODE_BULAN = ['JAN', 'FEB', 'MAR', 'APR', 'MEI', 'JUN', 'JUL', 'AGST', 'SEP', 'OKT', 'NOV', 'DES']
-
-// Kode bulan (kolom legacy) diturunkan dari tanggal kunjungan agar konsisten.
-function kodeBulan(tgl: string): string | null {
-  const d = parseTanggal(tgl)
-  if (!d) return null
-  return KODE_BULAN[d.getMonth()]
 }
 
 export async function listBalita(cari = ''): Promise<Balita[]> {
@@ -298,11 +240,4 @@ export async function hapusKunjungan(id: number): Promise<void> {
   const kl = wajibSupabase()
   const { error } = await kl.from('balita_kunjungan').delete().eq('id', id)
   if (error) throw error
-}
-
-// Umur balita dalam bulan dihitung dari tanggal lahir sampai hari ini.
-export function umurSaatIni(tanggalLahir: string): number | null {
-  const lahir = parseTanggal(tanggalLahir)
-  if (!lahir) return null
-  return hitungUmurBulan(lahir, new Date())
 }

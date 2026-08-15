@@ -6,7 +6,8 @@ import AppFooter from '@/components/AppFooter.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { listBalita, hapusBalita, umurSaatIni, type Balita } from '@/supabase/db'
+import { listBalita, hapusBalita, type Balita } from '@/modules/balita/db'
+import { umurSaatIni } from '@/lib/umur'
 import { useAuth } from '@/supabase/useAuth'
 
 const { isAdmin } = useAuth()

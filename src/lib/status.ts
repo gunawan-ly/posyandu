@@ -34,6 +34,59 @@ export function infoStatus(kode: string | null | undefined): InfoStatus {
   )
 }
 
+// Pemetaan kode pendek → label Indonesia (sesuai data lama di database)
+const LABEL_STATUS: Record<string, string> = {
+  SK: 'Sangat Kurang',
+  K: 'Kurang',
+  N: 'Normal',
+  RBL: 'Risiko Berat Berlebih',
+  SP: 'Sangat Pendek',
+  P: 'Pendek',
+  T: 'Tinggi',
+  GB: 'Gizi Buruk',
+  GK: 'Gizi Kurang',
+  GN: 'Gizi Baik',
+  RGL: 'Risiko Gizi Lebih',
+  GL: 'Gizi Lebih',
+  O: 'Obesitas',
+  MS: 'Mikrosefali',
+  MK: 'Makrosefali',
+}
+
+export function labelStatus(kode: string): string {
+  return LABEL_STATUS[kode] ?? kode
+}
+
+// Balik: label Indonesia (termasuk varian data lama) → kode pendek (badge tampilan)
+const ALIAS_LABEL: Record<string, string> = {
+  'Sangat Kurus': 'SK',
+  'Sangat Kurang': 'SK',
+  Kurus: 'K',
+  Kurang: 'K',
+  Normal: 'N',
+  'Berat Berlebih': 'RBL',
+  'Risiko Berat Badan Lebih': 'RBL',
+  'Risiko Berat Lebih': 'RBL',
+  'Risiko Berat Berlebih': 'RBL',
+  'Sangat Pendek': 'SP',
+  Pendek: 'P',
+  Tinggi: 'T',
+  'Sangat Buruk': 'GB',
+  'Gizi Buruk': 'GB',
+  'Gizi Kurang': 'GK',
+  'Gizi Baik': 'GN',
+  'Risiko Gizi Lebih': 'RGL',
+  'Gizi Lebih': 'GL',
+  Obesitas: 'O',
+  Mikrosefali: 'MS',
+  Makrosefali: 'MK',
+}
+
+export function kodeDariLabel(label: string | null | undefined): string {
+  if (!label) return '_'
+  return ALIAS_LABEL[label] ?? label
+}
+
 export const TONE_BADGE: Record<ToneStatus, string> = {
   danger: 'bg-red-100 text-red-700 border-red-200',
   warning: 'bg-amber-100 text-amber-700 border-amber-200',

@@ -12,17 +12,15 @@ import {
   ambilBalita,
   hapusBalita,
   hapusKunjungan,
-  kodeDariLabel,
-  labelStatus,
   labelYaTidak,
   listKunjungan,
   tambahKunjungan,
-  umurSaatIni,
   type Balita,
   type Kunjungan,
-} from '@/supabase/db'
+} from '@/modules/balita/db'
 import { hitungZLik, hitungZLil, klasifikasiLika, klasifikasiLila } from '@/lib/kalkulator'
-import { parseTanggal } from '@/lib/umur'
+import { kodeDariLabel, labelStatus } from '@/lib/status'
+import { parseTanggal, umurSaatIni } from '@/lib/umur'
 import { useAuth } from '@/supabase/useAuth'
 
 const { isAdmin } = useAuth()

@@ -1,5 +1,5 @@
 {
-  "0": "src/modules/balita/views/BalitaDetailView.vue",
+  "0": "src/views/BalitaDetailView.vue",
   "1": "select/index.ts",
   "2": "dependencies",
   "3": "compilerOptions",
@@ -8,8 +8,8 @@
   "6": "devDependencies",
   "7": "What You Must Do When Invoked",
   "8": "KurvaWHO.vue",
-  "9": "src/modules/balita/views/BalitaFormView.vue",
-  "10": "db.ts",
+  "9": "db.ts",
+  "10": "src/views/BalitaFormView.vue",
   "11": "src/views/LoginView.vue",
   "12": "compilerOptions",
   "13": "PRD — Sistem Informasi Posyandu (PosyanduGizi)",
@@ -49,7 +49,5 @@
   "47": "AppFooter.vue",
   "48": "views.test.ts",
   "49": "vite-env.d.ts",
-  "50": "vite.config.ts",
-  "51": "src/modules/balita/views/BalitaListView.vue",
-  "52": "routes.ts"
+  "50": "vite.config.ts"
 }

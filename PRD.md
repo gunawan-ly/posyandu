@@ -158,6 +158,7 @@ yang sudah berisi data eksisting (bukan dibuat baru). Semua relasi & audit bersi
 ## 7. Teknologi
 
 - Frontend: **Vue 3 SPA + TypeScript + Vite 8**, Vue Router (lazy), Tailwind CSS v4, shadcn-vue, `@lucide/vue` icons; font Fredoka (display) + Nunito Sans (body) dibundel lokal woff2
+- **Struktur per-modul** (`src/modules/<modul>/`): tiap posyandu (balita, bumil, remaja, dewasa & lansia) punya folder sendiri berisi `views/` (list/form/detail), `db.ts` (lapisan data modul), dan `routes.ts` (rute + meta guard) yang didaftarkan di router via spread. `src/views/` hanya halaman app-level (landing, dashboard hub, kalkulator, login); helper lintas-modul di `src/lib/` (kalkulator, umur, status) dan `src/components/`. Modul baru cukup menyalin shape `src/modules/balita` tanpa mengubah struktur inti.
 - Perhitungan: **TypeScript client-side** (metode LMS WHO, z-score) di `src/lib/kalkulator/` — port dari kalkulator Python lama, tervalidasi vs fixture Python
 - Database & Auth: **Supabase** (PostgreSQL + Auth/RLS) via `@supabase/supabase-js`
 - Deploy: **GitHub Pages** aktif (URL sementara `gunawan-ly.github.io/posyandu`, workflow + `public/404.html` untuk deep-link); **Vercel** sebagai target final (static SPA; `vercel.json` rewrite siap)
@@ -181,7 +182,7 @@ yang sudah berisi data eksisting (bukan dibuat baru). Semua relasi & audit bersi
 ## 10. Roadmap & Prioritas
 
 1. **Fondasi (selesai):** SPA Vite + Vue 3, kalkulator client-side (TS, valid vs fixture Python), landing + kalkulator, shadcn-vue, deploy Vercel.
-2. **Fase 1 (MVP, berjalan):** schema Supabase diadaptasi dari data eksisting + Auth/RLS ketat + CRUD balita & kunjungan (aktif); form kunjungan lengkap + dashboard hub publik (selesai); peran admin (admin tulis, user biasa read-only) + redirect konfirmasi email produksi (selesai); menyusul: UI bumil.
+2. **Fase 1 (MVP, berjalan):** schema Supabase diadaptasi dari data eksisting + Auth/RLS ketat + CRUD balita & kunjungan (aktif); form kunjungan lengkap + dashboard hub publik (selesai); peran admin (admin tulis, user biasa read-only) + redirect konfirmasi email produksi (selesai); **struktur per-modul** (`src/modules/balita/`) sebagai fondasi multi-posyandu (selesai); menyusul: UI bumil.
 3. **Fase 2:** dashboard, grafik tumbuh kembang, pemantauan stunting, laporan & ekspor.
 4. **Fase 3:** jadwal & pengingat, peran lanjutan, perluasan multi-posyandu.
 
