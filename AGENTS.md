@@ -15,7 +15,7 @@ terdokumentasi di **PRD.md** (living document); jaga agar AGENTS.md dan PRD.md t
 - Perhitungan: TS port dari kalkulator Python (metode LMS WHO, z-score) di `src/lib/kalkulator/`
 - Font: Fredoka (display) + Nunito Sans (body) — bundel woff2 lokal di `public/fonts/`
 - Backend: Supabase (PostgreSQL + Auth/RLS) — fase data, lihat PRD; `@supabase/supabase-js` sudah terpasang
-- Deploy: Vercel (static SPA, lihat `vercel.json`)
+- Deploy: **GitHub Pages** aktif (lihat workflow + rincian di bawah); **Vercel** target final (SPA rewrite di `vercel.json` sudah siap)
 - Test: Vitest (unit kalkulator + smoke test render komponen)
 
 ## Setup & Perintah
@@ -29,7 +29,8 @@ terdokumentasi di **PRD.md** (living document); jaga agar AGENTS.md dan PRD.md t
 - `npx supabase db push`               # terapkan migrasi `supabase/migrations/` ke remote (meminta password DB)
 - `.env.example`                       # templat env (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_APP_URL)
 - Deploy GitHub Pages: `npm run build -- --base=/posyandu/` lalu push `main` → workflow `.github/workflows/deploy-pages.yml` (secret `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY`/`VITE_APP_URL` diteruskan ke build) otomatis deploy ke `gunawan-ly.github.io/posyandu` (deep-link ditangani `public/404.html` + restore di `src/main.ts`)
-- Build ulang font/sumber data: `refrences/*.csv` → `src/lib/kalkulator/tabel.ts` (lihat skrip konversi)
+- Alias import: `@` → `src` (vite.config.ts + tsconfig paths)
+- Sumber data `tabel.ts`: skrip konversi CSV **tidak dicommit** — regenerasi manual (buat skrip ad-hoc dari `refrences/*.csv`, lalu jalankan `npm test`)
 
 ## Struktur Proyek
 - `index.html` — entry HTML SPA (mount `#app`); `public/` (favicon, font woff2)
@@ -81,7 +82,7 @@ terdokumentasi di **PRD.md** (living document); jaga agar AGENTS.md dan PRD.md t
 2. `kesimpulan_bb_bulan_lalu` belum ada (butuh riwayat pengukuran sebelumnya)
 3. Umur < 13 minggu masih dihitung per bulan (tabel mingguan belum dipakai)
 4. **Fase data aktif:** Supabase Auth (email/password) + RLS ketat sudah jalan. `anon` bisa landing, kalkulator & `/dashboard` (hub publik); `/balita*` butuh login (guard redirect). **Peran admin** (`public.user_peran` + fungsi `is_admin()`): hanya admin yang bisa tulis/edit/hapus (RLS + gating UI); user biasa read-only. Status disimpan sebagai label Indonesia (`Normal`, `Kurus`, `Gizi Buruk`, dst); `src/supabase/db.ts` memetakan kode↔label.
-5. **Supabase email confirmation ON** (`mailer_autoconfirm=false`) — akun baru lewat UI `/login` butuh konfirmasi email. Akun uji `e2e-kader@posyandu.test` dibuat manual (email_confirmed_at terisi + semua kolom token auth diisi string non-NULL).
+5. **Supabase email confirmation ON di remote** (`mailer_autoconfirm=false`) — akun baru lewat UI `/login` butuh konfirmasi email. Catatan: `supabase/config.toml` lokal memakai `enable_confirmations = false` (tanpa konfirmasi), jadi perilaku lokal vs remote berbeda. Akun uji `e2e-kader@posyandu.test` dibuat manual (email_confirmed_at terisi + semua kolom token auth diisi string non-NULL).
 6. **Bug GoAuth scan:** bila kolom token di `auth.users` NULL (mis. user dibuat manual), login gagal dengan "Database error querying schema" / "converting NULL to string". Workaround: isi `confirmation_token`, `recovery_token`, `email_change`, dll dengan string kosong.
 7. **Migrasi:** `supabase/migrations/` dipakai untuk replikasi fresh; perubahan yang sudah diterapkan ke remote dicatat di `supabase_migrations.schema_migrations` (jalur CLI butuh password DB — kalau belum ada, apply via dashboard SQL Editor).
 8. Registry shadcn-vue tidak terjangkau dari environment ini — komponen `src/components/ui/` disalin manual dari repo `unovue/shadcn-vue` (branch `dev`, registry `new-york-v4`)
