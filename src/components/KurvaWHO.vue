@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref } from 'vue'
-import { klasifikasiBbu, klasifikasiBbtb, klasifikasiTbu } from '@/lib/kalkulator'
+import { klasifikasiBbu, klasifikasiBbtb, klasifikasiLika, klasifikasiLila, klasifikasiTbu } from '@/lib/kalkulator'
 import {
+  acfaBoy,
+  acfaGirl,
+  hcfaBoy,
+  hcfaGirl,
   lhfaBoy2y,
   lhfaBoy5y,
   lhfaGirl2y,
@@ -16,7 +20,7 @@ import {
 } from '@/lib/kalkulator/tabel'
 import { infoStatus, TONE_DOT } from '@/lib/status'
 
-type Indikator = 'bbu' | 'tbu' | 'bbtb'
+type Indikator = 'bbu' | 'tbu' | 'bbtb' | 'lika' | 'lila'
 
 const props = withDefaults(
   defineProps<{
@@ -64,6 +68,8 @@ const gabungLhfa = computed<readonly BarisUmur[]>(() => {
 const tabel = computed<readonly Baris[]>(() => {
   if (props.indikator === 'bbu') return props.jk === 'L' ? wfaBoy : wfaGirl
   if (props.indikator === 'tbu') return gabungLhfa.value
+  if (props.indikator === 'lika') return props.jk === 'L' ? hcfaBoy : hcfaGirl
+  if (props.indikator === 'lila') return props.jk === 'L' ? acfaBoy : acfaGirl
   const pakaiWfl = props.umurBulan < 24
   if (props.jk === 'L') return pakaiWfl ? wflBoy : wfhBoy
   return pakaiWfl ? wflGirl : wfhGirl
@@ -101,7 +107,12 @@ function pathZ(z: number): string {
   return `M ${pts[0]} L ${pts.join(' L ')}`
 }
 
-const STEP_Y = computed(() => (props.indikator === 'tbu' ? 10 : 2))
+const STEP_Y = computed(() => {
+  if (props.indikator === 'tbu') return 10
+  if (props.indikator === 'lika') return 5
+  if (props.indikator === 'lila') return 2
+  return 2
+})
 
 const garisGrid = computed(() => {
   const step = STEP_Y.value
@@ -158,7 +169,11 @@ const warnaTitik = computed(() => {
       ? klasifikasiBbu(props.z)
       : props.indikator === 'tbu'
         ? klasifikasiTbu(props.z)
-        : klasifikasiBbtb(props.z)
+        : props.indikator === 'lika'
+          ? klasifikasiLika(props.z)
+          : props.indikator === 'lila'
+            ? klasifikasiLila(props.z)
+            : klasifikasiBbtb(props.z)
   return TONE_DOT[infoStatus(kode).tone]
 })
 
@@ -166,6 +181,8 @@ const LABEL_KURVA: Record<Indikator, string> = {
   bbu: 'Kurva pertumbuhan berat badan menurut umur (BB/U) standar WHO',
   tbu: 'Kurva pertumbuhan panjang/tinggi badan menurut umur (TB/U) standar WHO',
   bbtb: 'Kurva pertumbuhan berat badan menurut panjang/tinggi (BB/TB) standar WHO',
+  lika: 'Kurva pertumbuhan lingkar kepala menurut umur (LiKA/U) standar WHO',
+  lila: 'Kurva pertumbuhan lingkar lengan atas menurut umur (LiLA/U) standar WHO',
 }
 
 const pathLength = 1600

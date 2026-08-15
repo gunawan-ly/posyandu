@@ -13,6 +13,7 @@ import {
   hapusBalita,
   hapusKunjungan,
   kodeDariLabel,
+  labelStatus,
   labelYaTidak,
   listKunjungan,
   tambahKunjungan,
@@ -20,6 +21,7 @@ import {
   type Balita,
   type Kunjungan,
 } from '@/supabase/db'
+import { hitungZLik, hitungZLil, klasifikasiLika, klasifikasiLila } from '@/lib/kalkulator'
 import { parseTanggal } from '@/lib/umur'
 import { useAuth } from '@/supabase/useAuth'
 
@@ -42,9 +44,7 @@ const tglKunjungan = ref(new Date().toISOString().slice(0, 10))
 const beratBadan = ref<string>('')
 const tinggiBadan = ref<string>('')
 const lingkarLengan = ref<string>('')
-const statusLila = ref('')
 const lingkarKepala = ref<string>('')
-const statusLika = ref('')
 const bbNaik = ref('')
 const imunisasi = ref('')
 const vitaminA = ref('')
@@ -79,15 +79,41 @@ async function muat() {
   }
 }
 
-const kunjunganTerbaru = computed<Kunjungan | null>(() => kunjungan.value[0] ?? null)
+const kunjunganTerbaru = computed<Kunjungan | null>(() => kunjungan.value.at(-1) ?? null)
 
 const jkKurva = computed<'L' | 'P'>(() => (balita.value?.jenis_kelamin === 'Perempuan' ? 'P' : 'L'))
 
-type TabKurva = 'bbu' | 'tbu' | 'bbtb'
+// Status LiLA/LiKA dihitung otomatis dari pengukuran (z-score WHO) saat form diisi.
+const zLilaLive = computed<number | null>(() => {
+  const nilai = Number(lingkarLengan.value)
+  if (!lingkarLengan.value || !(nilai > 0) || !balita.value) return null
+  const lahir = parseTanggal(balita.value.tanggal_lahir)
+  if (!lahir) return null
+  const umur = Math.max(0, Math.round((new Date(tglKunjungan.value).getTime() - lahir.getTime()) / (1000 * 60 * 60 * 24 * 30.4375)))
+  return hitungZLil(jkKurva.value, umur, nilai)
+})
+const statusLilaLive = computed<string>(() =>
+  zLilaLive.value != null ? labelStatus(klasifikasiLila(zLilaLive.value)) : '',
+)
+const zLikaLive = computed<number | null>(() => {
+  const nilai = Number(lingkarKepala.value)
+  if (!lingkarKepala.value || !(nilai > 0) || !balita.value) return null
+  const lahir = parseTanggal(balita.value.tanggal_lahir)
+  if (!lahir) return null
+  const umur = Math.max(0, Math.round((new Date(tglKunjungan.value).getTime() - lahir.getTime()) / (1000 * 60 * 60 * 24 * 30.4375)))
+  return hitungZLik(jkKurva.value, umur, nilai)
+})
+const statusLikaLive = computed<string>(() =>
+  zLikaLive.value != null ? labelStatus(klasifikasiLika(zLikaLive.value)) : '',
+)
+
+type TabKurva = 'bbu' | 'tbu' | 'bbtb' | 'lika' | 'lila'
 const TAB_KURVA: { kunci: TabKurva; label: string }[] = [
   { kunci: 'bbu', label: 'BB/U' },
   { kunci: 'tbu', label: 'TB/U' },
   { kunci: 'bbtb', label: 'BB/TB' },
+  { kunci: 'lika', label: 'LiKA' },
+  { kunci: 'lila', label: 'LiLA' },
 ]
 const tabKurva = ref<TabKurva>('bbu')
 
@@ -96,6 +122,14 @@ const kurvaProps = computed(() => {
   const umur = k?.umur_bulan ?? 0
   if (tabKurva.value === 'bbu') return { indikator: 'bbu' as const, umurBulan: umur, nilai: 0, z: k?.z_bb_u ?? null }
   if (tabKurva.value === 'tbu') return { indikator: 'tbu' as const, umurBulan: umur, nilai: 0, z: k?.z_tb_u ?? null }
+  if (tabKurva.value === 'lika') {
+    const z = k?.lingkar_kepala != null ? hitungZLik(jkKurva.value, umur, k.lingkar_kepala) : null
+    return { indikator: 'lika' as const, umurBulan: umur, nilai: 0, z }
+  }
+  if (tabKurva.value === 'lila') {
+    const z = k?.lingkar_lengan != null ? hitungZLil(jkKurva.value, umur, k.lingkar_lengan) : null
+    return { indikator: 'lila' as const, umurBulan: umur, nilai: 0, z }
+  }
   return { indikator: 'bbtb' as const, umurBulan: umur, nilai: k?.tinggi_badan ?? 0, z: k?.z_bb_tb ?? null }
 })
 
@@ -104,6 +138,14 @@ const keteranganKurva = computed(() => {
   if (!k) return ''
   if (tabKurva.value === 'bbu') return `z-score BB/U ${k.z_bb_u != null ? k.z_bb_u.toFixed(2) : '—'}`
   if (tabKurva.value === 'tbu') return `z-score TB/U ${k.z_tb_u != null ? k.z_tb_u.toFixed(2) : '—'}`
+  if (tabKurva.value === 'lika') {
+    const z = k.lingkar_kepala != null ? hitungZLik(jkKurva.value, k.umur_bulan ?? 0, k.lingkar_kepala) : null
+    return `lingkar kepala ${k.lingkar_kepala ?? '—'} cm · z-score ${z != null ? z.toFixed(2) : '—'}`
+  }
+  if (tabKurva.value === 'lila') {
+    const z = k.lingkar_lengan != null ? hitungZLil(jkKurva.value, k.umur_bulan ?? 0, k.lingkar_lengan) : null
+    return `lingkar lengan ${k.lingkar_lengan ?? '—'} cm · z-score ${z != null ? z.toFixed(2) : '—'}`
+  }
   return `panjang ${k.tinggi_badan ?? '—'} cm · z-score BB/TB ${k.z_bb_tb != null ? k.z_bb_tb.toFixed(2) : '—'}`
 })
 
@@ -146,9 +188,7 @@ async function simpanKunjungan() {
       berat_badan: bb,
       tinggi_badan: tb,
       lingkar_lengan: lingkarLengan.value ? Number(lingkarLengan.value) : null,
-      status_lingkar_lengan: statusLila.value || null,
       lingkar_kepala: lingkarKepala.value ? Number(lingkarKepala.value) : null,
-      status_lingkar_kepala: statusLika.value || null,
       bb_naik_tidak: bbNaik.value || null,
       imunisasi: imunisasi.value || null,
       vitamin_a: vitaminA.value || null,
@@ -163,9 +203,7 @@ async function simpanKunjungan() {
     beratBadan.value = ''
     tinggiBadan.value = ''
     lingkarLengan.value = ''
-    statusLila.value = ''
     lingkarKepala.value = ''
-    statusLika.value = ''
     bbNaik.value = ''
     imunisasi.value = ''
     vitaminA.value = ''
@@ -204,8 +242,6 @@ async function hapusBal() {
   }
 }
 
-const OPSI_STATUS_LILA = ['Normal', 'Gizi Kurang']
-const OPSI_STATUS_LIKA = ['Normal', 'Mikrosefali', 'Makrosefali']
 const OPSI_YA_TIDAK = ['Ya', 'Tidak']
 const OPSI_NAIK = ['Naik', 'Tidak Naik']
 const OPSI_CEKLIS = ['L', 'TL']
@@ -309,111 +345,21 @@ const klsInput =
                   Belum ada kunjungan tercatat.
                 </div>
 
-                <template v-else>
-                  <!-- Mobile: kartu per kunjungan -->
-                  <div class="space-y-4 md:hidden">
-                  <div
-                    v-for="k in kunjungan"
-                    :key="k.id"
-                    class="rounded-xl border border-emerald-100 bg-white p-4 shadow-sm"
-                  >
-                    <div class="flex items-start justify-between gap-3">
-                      <div>
-                        <p class="font-bold">{{ formatTanggal(k.tanggal_kunjungan) }}</p>
-                        <p class="text-muted-foreground mt-0.5 text-xs">Umur {{ k.umur_bulan ?? '—' }} bulan</p>
-                      </div>
-                      <div v-if="isAdmin" class="flex shrink-0 items-center gap-2">
-                        <button
-                          type="button"
-                          class="text-muted-foreground hover:bg-red-50 hover:text-red-600 rounded-lg p-2 transition-colors"
-                          aria-label="Hapus kunjungan"
-                          title="Hapus kunjungan"
-                          @click="hapusKunj(balita.id, k)"
-                        >
-                          <Trash2 class="size-4" />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div class="mt-3 grid grid-cols-3 gap-y-2 text-sm">
-                      <div>
-                        <p class="text-muted-foreground text-[11px] font-bold uppercase">BB (kg)</p>
-                        <p class="mt-0.5 font-medium">{{ k.berat_badan ?? '—' }}</p>
-                      </div>
-                      <div>
-                        <p class="text-muted-foreground text-[11px] font-bold uppercase">PB (cm)</p>
-                        <p class="mt-0.5 font-medium">{{ k.tinggi_badan ?? '—' }}</p>
-                      </div>
-                      <div>
-                        <p class="text-muted-foreground text-[11px] font-bold uppercase">BB naik</p>
-                        <p class="mt-0.5 font-medium">{{ k.bb_naik_tidak ?? '—' }}</p>
-                      </div>
-                      <div>
-                        <p class="text-muted-foreground text-[11px] font-bold uppercase">LiLA</p>
-                        <p class="mt-0.5 font-medium">
-                          {{ k.lingkar_lengan ?? '—' }}
-                          <span v-if="k.status_lingkar_lengan" class="text-muted-foreground text-xs">({{ k.status_lingkar_lengan }})</span>
-                        </p>
-                      </div>
-                      <div>
-                        <p class="text-muted-foreground text-[11px] font-bold uppercase">LiKA</p>
-                        <p class="mt-0.5 font-medium">
-                          {{ k.lingkar_kepala ?? '—' }}
-                          <span v-if="k.status_lingkar_kepala" class="text-muted-foreground text-xs">({{ k.status_lingkar_kepala }})</span>
-                        </p>
-                      </div>
-                      <div>
-                        <p class="text-muted-foreground text-[11px] font-bold uppercase">Vit. A</p>
-                        <p class="mt-0.5 font-medium">{{ labelYaTidak(k.vitamin_a) }}</p>
-                      </div>
-                      <div>
-                        <p class="text-muted-foreground text-[11px] font-bold uppercase">Imunisasi</p>
-                        <p class="mt-0.5 font-medium">{{ labelYaTidak(k.imunisasi) }}</p>
-                      </div>
-                      <div>
-                        <p class="text-muted-foreground text-[11px] font-bold uppercase">ASI</p>
-                        <p class="mt-0.5 font-medium">{{ labelYaTidak(k.asi_eksklusif) }}</p>
-                      </div>
-                      <div>
-                        <p class="text-muted-foreground text-[11px] font-bold uppercase">MP-ASI</p>
-                        <p class="mt-0.5 font-medium">{{ labelYaTidak(k.mp_asi) }}</p>
-                      </div>
-                      <div>
-                        <p class="text-muted-foreground text-[11px] font-bold uppercase">Cacing</p>
-                        <p class="mt-0.5 font-medium">{{ labelYaTidak(k.obat_cacing) }}</p>
-                      </div>
-                      <div>
-                        <p class="text-muted-foreground text-[11px] font-bold uppercase">Ceklis</p>
-                        <p class="mt-0.5 font-medium">{{ labelYaTidak(k.ceklis_perkembangan) }}</p>
-                      </div>
-                      <div>
-                        <p class="text-muted-foreground text-[11px] font-bold uppercase">TBC</p>
-                        <p class="mt-0.5 font-medium">{{ labelYaTidak(k.gejala_tbc) }}</p>
-                      </div>
-                    </div>
-
-                    <div class="border-border/60 flex flex-wrap items-center gap-2 border-t pt-3">
-                      <StatusBadge :kode="kodeDariLabel(k.bb_menurut_umur)" />
-                      <StatusBadge :kode="kodeDariLabel(k.pbtb_menurut_umur)" />
-                      <StatusBadge :kode="kodeDariLabel(k.bb_menurut_pbtb)" />
-                    </div>
-                    <p v-if="k.edukasi" class="text-muted-foreground border-border/60 mt-3 border-t pt-2 text-xs">
-                      Edukasi: {{ k.edukasi }}
-                    </p>
-                  </div>
-                </div>
-
-                <!-- Desktop: tabel kolom penuh -->
-                <div class="hidden overflow-x-auto md:block">
-                  <table class="w-full min-w-[1500px] text-sm">
+                <div v-else class="overflow-x-auto">
+                  <table class="w-full min-w-[1400px] text-sm">
                     <thead>
                       <tr class="text-muted-foreground border-border/60 border-b text-left text-xs font-bold tracking-wide uppercase">
                         <th class="py-2 pr-3 whitespace-nowrap">Tanggal</th>
                         <th class="py-2 pr-3">Umur</th>
                         <th class="py-2 pr-3">BB (kg)</th>
-                        <th class="py-2 pr-3">PB (cm)</th>
-                        <th class="py-2 pr-3">LiLA</th>
-                        <th class="py-2 pr-3">LiKA</th>
+                        <th class="py-2 pr-3">Status BB/U</th>
+                        <th class="py-2 pr-3">TB (cm)</th>
+                        <th class="py-2 pr-3">Status TB/U</th>
+                        <th class="py-2 pr-3">BB/TB</th>
+                        <th class="py-2 pr-3">LiKA (cm)</th>
+                        <th class="py-2 pr-3">Status LiKA</th>
+                        <th class="py-2 pr-3">LiLA (cm)</th>
+                        <th class="py-2 pr-3">Status LiLA</th>
                         <th class="py-2 pr-3">BB naik</th>
                         <th class="py-2 pr-3">Imunisasi</th>
                         <th class="py-2 pr-3">Vit. A</th>
@@ -423,9 +369,6 @@ const klsInput =
                         <th class="py-2 pr-3">Ceklis</th>
                         <th class="py-2 pr-3">TBC</th>
                         <th class="py-2 pr-3">Edukasi</th>
-                        <th class="py-2 pr-3">BB/U</th>
-                        <th class="py-2 pr-3">TB/U</th>
-                        <th class="py-2 pr-3">BB/TB</th>
                         <th class="py-2"></th>
                       </tr>
                     </thead>
@@ -434,15 +377,14 @@ const klsInput =
                         <td class="py-3 pr-3 font-medium whitespace-nowrap">{{ formatTanggal(k.tanggal_kunjungan) }}</td>
                         <td class="py-3 pr-3 text-muted-foreground whitespace-nowrap">{{ k.umur_bulan ?? '—' }} bln</td>
                         <td class="py-3 pr-3 whitespace-nowrap">{{ k.berat_badan ?? '—' }}</td>
+                        <td class="py-3 pr-3 whitespace-nowrap"><StatusBadge :kode="kodeDariLabel(k.bb_menurut_umur)" /></td>
                         <td class="py-3 pr-3 whitespace-nowrap">{{ k.tinggi_badan ?? '—' }}</td>
-                        <td class="py-3 pr-3 whitespace-nowrap">
-                          {{ k.lingkar_lengan ?? '—' }}
-                          <span v-if="k.status_lingkar_lengan" class="text-muted-foreground text-xs">({{ k.status_lingkar_lengan }})</span>
-                        </td>
-                        <td class="py-3 pr-3 whitespace-nowrap">
-                          {{ k.lingkar_kepala ?? '—' }}
-                          <span v-if="k.status_lingkar_kepala" class="text-muted-foreground text-xs">({{ k.status_lingkar_kepala }})</span>
-                        </td>
+                        <td class="py-3 pr-3 whitespace-nowrap"><StatusBadge :kode="kodeDariLabel(k.pbtb_menurut_umur)" /></td>
+                        <td class="py-3 pr-3 whitespace-nowrap"><StatusBadge :kode="kodeDariLabel(k.bb_menurut_pbtb)" /></td>
+                        <td class="py-3 pr-3 whitespace-nowrap">{{ k.lingkar_kepala ?? '—' }}</td>
+                        <td class="py-3 pr-3 whitespace-nowrap"><StatusBadge :kode="kodeDariLabel(k.status_lingkar_kepala)" /></td>
+                        <td class="py-3 pr-3 whitespace-nowrap">{{ k.lingkar_lengan ?? '—' }}</td>
+                        <td class="py-3 pr-3 whitespace-nowrap"><StatusBadge :kode="kodeDariLabel(k.status_lingkar_lengan)" /></td>
                         <td class="py-3 pr-3 whitespace-nowrap">{{ k.bb_naik_tidak ?? '—' }}</td>
                         <td class="py-3 pr-3 whitespace-nowrap">{{ labelYaTidak(k.imunisasi) }}</td>
                         <td class="py-3 pr-3 whitespace-nowrap">{{ labelYaTidak(k.vitamin_a) }}</td>
@@ -452,9 +394,6 @@ const klsInput =
                         <td class="py-3 pr-3 whitespace-nowrap">{{ labelYaTidak(k.ceklis_perkembangan) }}</td>
                         <td class="py-3 pr-3 whitespace-nowrap">{{ labelYaTidak(k.gejala_tbc) }}</td>
                         <td class="text-muted-foreground py-3 pr-3 max-w-[160px] truncate whitespace-nowrap" :title="k.edukasi || ''">{{ k.edukasi || '—' }}</td>
-                        <td class="py-3 pr-3 whitespace-nowrap"><StatusBadge :kode="kodeDariLabel(k.bb_menurut_umur)" /></td>
-                        <td class="py-3 pr-3 whitespace-nowrap"><StatusBadge :kode="kodeDariLabel(k.pbtb_menurut_umur)" /></td>
-                        <td class="py-3 pr-3 whitespace-nowrap"><StatusBadge :kode="kodeDariLabel(k.bb_menurut_pbtb)" /></td>
                         <td v-if="isAdmin" class="py-3 text-right">
                           <button
                             type="button"
@@ -470,7 +409,6 @@ const klsInput =
                     </tbody>
                   </table>
                 </div>
-                </template>
               </CardContent>
             </Card>
           </div>
@@ -549,25 +487,21 @@ const klsInput =
                       <input id="lila" v-model="lingkarLengan" type="number" inputmode="decimal" step="0.1" min="0" class="w-full" :class="klsInput" />
                     </div>
                     <div>
-                      <label for="status-lila" class="text-muted-foreground mb-1.5 block text-xs font-bold">Status LiLA</label>
-                      <select id="status-lila" v-model="statusLila" class="w-full" :class="klsInput">
-                        <option value="">— pilih —</option>
-                        <option v-for="s in OPSI_STATUS_LILA" :key="s" :value="s">{{ s }}</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div>
                       <label for="lika" class="text-muted-foreground mb-1.5 block text-xs font-bold">LiKA (cm)</label>
                       <input id="lika" v-model="lingkarKepala" type="number" inputmode="decimal" step="0.1" min="0" class="w-full" :class="klsInput" />
                     </div>
-                    <div>
-                      <label for="status-lika" class="text-muted-foreground mb-1.5 block text-xs font-bold">Status LiKA</label>
-                      <select id="status-lika" v-model="statusLika" class="w-full" :class="klsInput">
-                        <option value="">— pilih —</option>
-                        <option v-for="s in OPSI_STATUS_LIKA" :key="s" :value="s">{{ s }}</option>
-                      </select>
-                    </div>
+                  </div>
+
+                  <div v-if="statusLilaLive || statusLikaLive" class="rounded-lg border border-emerald-100 bg-emerald-50/60 px-3 py-2 text-sm">
+                    <span v-if="statusLilaLive">
+                      Status LiLA: <span class="font-bold">{{ statusLilaLive }}</span>
+                      <span v-if="zLilaLive != null" class="text-muted-foreground"> (z {{ zLilaLive.toFixed(2) }})</span>
+                    </span>
+                    <span v-if="statusLilaLive && statusLikaLive" class="mx-2 text-emerald-300">·</span>
+                    <span v-if="statusLikaLive">
+                      Status LiKA: <span class="font-bold">{{ statusLikaLive }}</span>
+                      <span v-if="zLikaLive != null" class="text-muted-foreground"> (z {{ zLikaLive.toFixed(2) }})</span>
+                    </span>
                   </div>
 
                   <div class="border-border/60 border-t pt-4">

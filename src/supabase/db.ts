@@ -1,6 +1,6 @@
 import { supabase } from '@/supabase/client'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { hitungSemuaStatus } from '@/lib/kalkulator'
+import { hitungSemuaStatus, hitungZLik, hitungZLil, klasifikasiLika, klasifikasiLila } from '@/lib/kalkulator'
 import { hitungUmurBulan, parseTanggal } from '@/lib/umur'
 
 // Lapisan akses data Posyandu — satu sumber kebenaran status adalah
@@ -25,6 +25,8 @@ const LABEL_STATUS: Record<string, string> = {
   GB: 'Gizi Baik',
   GL: 'Gizi Lebih',
   O: 'Obesitas',
+  MS: 'Mikrosefali',
+  MK: 'Makrosefali',
 }
 
 export function labelStatus(kode: string): string {
@@ -49,6 +51,8 @@ const ALIAS_LABEL: Record<string, string> = {
   'Gizi Baik': 'GB',
   'Gizi Lebih': 'GL',
   Obesitas: 'O',
+  Mikrosefali: 'MS',
+  Makrosefali: 'MK',
 }
 
 export function kodeDariLabel(label: string | null | undefined): string {
@@ -217,8 +221,8 @@ export async function listKunjungan(balitaId: number): Promise<Kunjungan[]> {
     .from('balita_kunjungan')
     .select('*')
     .eq('balita_id', balitaId)
-    .order('tanggal_kunjungan', { ascending: false })
-    .order('id', { ascending: false })
+    .order('tanggal_kunjungan', { ascending: true })
+    .order('id', { ascending: true })
   if (error) throw error
   return (data ?? []) as Kunjungan[]
 }
@@ -228,18 +232,26 @@ export async function tambahKunjungan(balita: Balita, input: InputKunjungan): Pr
 
   const lahir = parseTanggal(balita.tanggal_lahir)
   const kunjungan = parseTanggal(input.tanggal_kunjungan)
-  if (!lahir || !kunjungan) throw new Error('Tanggal tidak valid.')
-  if (kunjungan.getTime() < lahir.getTime()) {
+  if (!kunjungan) throw new Error('Tanggal kunjungan tidak valid.')
+  if (lahir && kunjungan.getTime() < lahir.getTime()) {
     throw new Error('Tanggal kunjungan tidak boleh sebelum tanggal lahir.')
   }
 
-  const umurBulan = hitungUmurBulan(lahir, kunjungan)
+  // Tanpa tanggal lahir: umur belum diketahui — status & z-score dikosongkan
+  // sampai tanggal lahir diperbarui.
   const jenis = balita.jenis_kelamin === 'Perempuan' ? 'P' : 'L'
-  const hasil = hitungSemuaStatus(jenis, umurBulan, input.berat_badan, input.tinggi_badan)
+  const umurBulan = lahir ? hitungUmurBulan(lahir, kunjungan) : null
+  const hasil = umurBulan != null ? hitungSemuaStatus(jenis, umurBulan, input.berat_badan, input.tinggi_badan) : null
 
-  if (hasil.error && (hasil.status_bb_u === '_' || hasil.status_tb_u === '_' || hasil.status_bb_tb === '_')) {
+  if (hasil?.error && (hasil.status_bb_u === '_' || hasil.status_tb_u === '_' || hasil.status_bb_tb === '_')) {
     throw new Error(hasil.error)
   }
+
+  // Status lingkar kepala & lengan dihitung otomatis dari pengukuran (jika ada).
+  const zLika = umurBulan != null && input.lingkar_kepala != null ? hitungZLik(jenis, umurBulan, input.lingkar_kepala) : null
+  const zLila = umurBulan != null && input.lingkar_lengan != null ? hitungZLil(jenis, umurBulan, input.lingkar_lengan) : null
+  const statusLika = zLika != null ? labelStatus(klasifikasiLika(zLika)) : (input.status_lingkar_kepala ?? null)
+  const statusLila = zLila != null ? labelStatus(klasifikasiLila(zLila)) : (input.status_lingkar_lengan ?? null)
 
   const { data, error } = await kl
     .from('balita_kunjungan')
@@ -251,9 +263,9 @@ export async function tambahKunjungan(balita: Balita, input: InputKunjungan): Pr
       berat_badan: input.berat_badan,
       tinggi_badan: input.tinggi_badan,
       lingkar_lengan: input.lingkar_lengan ?? null,
-      status_lingkar_lengan: input.status_lingkar_lengan ?? null,
+      status_lingkar_lengan: statusLila,
       lingkar_kepala: input.lingkar_kepala ?? null,
-      status_lingkar_kepala: input.status_lingkar_kepala ?? null,
+      status_lingkar_kepala: statusLika,
       imunisasi: input.imunisasi ?? null,
       vitamin_a: input.vitamin_a ?? null,
       asi_eksklusif: input.asi_eksklusif ?? null,
@@ -264,12 +276,12 @@ export async function tambahKunjungan(balita: Balita, input: InputKunjungan): Pr
       gejala_tbc: input.gejala_tbc ?? null,
       edukasi: input.edukasi ?? null,
       umur_bulan: umurBulan,
-      bb_menurut_umur: labelStatus(hasil.status_bb_u),
-      pbtb_menurut_umur: labelStatus(hasil.status_tb_u),
-      bb_menurut_pbtb: labelStatus(hasil.status_bb_tb),
-      z_bb_u: hasil.z_bb_u,
-      z_tb_u: hasil.z_tb_u,
-      z_bb_tb: hasil.z_bb_tb,
+      bb_menurut_umur: hasil ? labelStatus(hasil.status_bb_u) : null,
+      pbtb_menurut_umur: hasil ? labelStatus(hasil.status_tb_u) : null,
+      bb_menurut_pbtb: hasil ? labelStatus(hasil.status_bb_tb) : null,
+      z_bb_u: hasil?.z_bb_u ?? null,
+      z_tb_u: hasil?.z_tb_u ?? null,
+      z_bb_tb: hasil?.z_bb_tb ?? null,
     })
     .select()
     .single()

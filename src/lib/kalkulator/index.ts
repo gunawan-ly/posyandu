@@ -1,4 +1,8 @@
 import {
+  acfaBoy,
+  acfaGirl,
+  hcfaBoy,
+  hcfaGirl,
   lhfaBoy2y,
   lhfaBoy5y,
   lhfaGirl2y,
@@ -59,6 +63,37 @@ export function klasifikasiBbtb(z: number): string {
   if (z <= 1.0) return 'GB'
   if (z <= 3.0) return 'GL'
   return 'O'
+}
+
+// LiKA (lingkar kepala): Mikrosefali (<-2), Normal (-2 s/d +2), Makrosefali (>+2)
+export function klasifikasiLika(z: number): string {
+  if (z < -2.0) return 'MS' // Mikrosefali
+  if (z <= 2.0) return 'N' // Normal
+  return 'MK' // Makrosefali
+}
+
+// LiLA (lingkar lengan atas): Gizi Kurang (<-2), Normal (-2 ke atas)
+export function klasifikasiLila(z: number): string {
+  if (z < -2.0) return 'GK' // Gizi Kurang
+  return 'N' // Normal
+}
+
+// Hitung z-score lingkar kepala (HC/A) dari tabel hcfa (0-60 bulan).
+export function hitungZLik(jk: string, umurBulan: number, lingkarKepala: number): number | null {
+  const tabel = jk === 'L' ? hcfaBoy : jk === 'P' ? hcfaGirl : null
+  if (!tabel || !lingkarKepala) return null
+  const baris = cariBarisUmur(tabel, umurBulan)
+  if (!baris) return null
+  return bulatkan2(hitungZScoreLms(lingkarKepala, baris.L, baris.M, baris.S))
+}
+
+// Hitung z-score lingkar lengan (MUAC/A) dari tabel acfa (3-60 bulan).
+export function hitungZLil(jk: string, umurBulan: number, lingkarLengan: number): number | null {
+  const tabel = jk === 'L' ? acfaBoy : jk === 'P' ? acfaGirl : null
+  if (!tabel || !lingkarLengan) return null
+  const baris = cariBarisUmur(tabel, umurBulan)
+  if (!baris) return null
+  return bulatkan2(hitungZScoreLms(lingkarLengan, baris.L, baris.M, baris.S))
 }
 
 function cariBarisUmur(tabel: readonly BarisUmur[], bulan: number): BarisUmur | undefined {
