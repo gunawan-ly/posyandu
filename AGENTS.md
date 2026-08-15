@@ -36,10 +36,10 @@ terdokumentasi di **PRD.md** (living document); jaga agar AGENTS.md dan PRD.md t
 - `index.html` — entry HTML SPA (mount `#app`); `public/` (favicon, font woff2)
 - `src/main.ts` — bootstrap app + router
 - `src/router/index.ts` — rute `/` (landing), `/kalkulator`, `/login`, `/dashboard` (publik), `/balita*` (guard `requiresAuth` + `requiresAdmin`), lazy-load, fallback `*` → `/`; `scrollBehavior` (scroll ke anchor `/#indikator`, `/#tentang`; selain itu ke atas; hormati `prefers-reduced-motion`)
-- `src/views/` — `LandingView.vue` (hero split dengan motif kurva pertumbuhan WHO sebagai elemen tanda tangan + kalkulator kilat interaktif + seksi indikator/cara pakai/tentang/CTA), `DashboardView.vue` (hub publik: modul Balita aktif + Bumil/Remaja/Dewasa & Lansia "Segera"), `KalkulatorView.vue` (kalkulasi live tanpa tombol hitung: hasil & kurva otomatis saat data lengkap; validasi per-field on-blur dengan `aria-describedby`/`aria-invalid`/live region `role="status"`; tabs kurva BB/U · TB/U · BB/TB; peringatan implausibel |z| > 5 non-blocking; ringkasan + tombol salin), `LoginView.vue` (masuk/daftar kader; redirect default `/dashboard`), `BalitaListView.vue`, `BalitaFormView.vue` (baru/edit), `BalitaDetailView.vue` (identitas + kurva tabs + riwayat + form kunjungan lengkap; riwayat responsif dua mode: kartu per kunjungan di mobile `<md`, tabel kolom penuh dengan scroll horizontal internal di `md+`; grid item kiri wajib `min-w-0` agar halaman tidak melebar horizontal)
-- `src/components/` — `KurvaWHO.vue` (kurva WHO self-draw + titik z-score; mode `bbu`/`tbu`/`bbtb`), `StatusBadge.vue` (label lengkap saja, tanpa kode), `AppNavbar.vue` (brand statis "Posyandu Wapalo", tautan Beranda/Tentang/Dashboard + Data Balita saat login, state tautan aktif), `AppFooter.vue`, `Reveal.vue`, `ui/` (komponen shadcn-vue)
-- `src/lib/kalkulator/index.ts` — port TS `hitungSemuaStatus(jk, umurBulan, beratBadan, panjangBadan)` → `{status_bb_u, status_tb_u, status_bb_tb, z_bb_u, z_tb_u, z_bb_tb, error}`
-- `src/lib/kalkulator/tabel.ts` — data WHO hasil konversi CSV (jangan edit manual)
+- `src/views/` — `LandingView.vue` (hero split dengan motif kurva pertumbuhan WHO sebagai elemen tanda tangan + kalkulator kilat interaktif + seksi indikator/cara pakai/tentang/CTA), `DashboardView.vue` (hub publik: modul Balita aktif + Bumil/Remaja/Dewasa & Lansia "Segera"), `KalkulatorView.vue` (kalkulasi live tanpa tombol hitung: hasil & kurva otomatis saat data lengkap; validasi per-field on-blur dengan `aria-describedby`/`aria-invalid`/live region `role="status"`; tabs kurva BB/U · TB/U · BB/TB; peringatan implausibel |z| > 5 non-blocking; ringkasan + tombol salin), `LoginView.vue` (masuk/daftar kader; redirect default `/dashboard`), `BalitaListView.vue`, `BalitaFormView.vue` (baru/edit), `BalitaDetailView.vue` (identitas + kurva tabs + riwayat + form kunjungan lengkap; riwayat **satu tabel dengan scroll horizontal internal** (min-w tinggi) diurutkan **kronologis naik** (Januari→Desember), status LiKA/LiLA dihitung otomatis saat form kunjungan diisi; grid item kiri wajib `min-w-0` agar halaman tidak melebar horizontal)
+- `src/components/` — `KurvaWHO.vue` (kurva WHO self-draw + titik z-score; mode `bbu`/`tbu`/`bbtb`/`lika`/`lila`), `StatusBadge.vue` (label lengkap saja, tanpa kode), `AppNavbar.vue` (brand statis "Posyandu Wapalo", tautan Beranda/Tentang/Dashboard + Data Balita saat login, state tautan aktif), `AppFooter.vue`, `Reveal.vue`, `ui/` (komponen shadcn-vue)
+- `src/lib/kalkulator/index.ts` — port TS `hitungSemuaStatus(jk, umurBulan, beratBadan, panjangBadan)` → `{status_bb_u, status_tb_u, status_bb_tb, z_bb_u, z_tb_u, z_bb_tb, error}`; plus `hitungZLik`/`hitungZLil` (lingkar kepala/lengan) & `klasifikasiLika`/`klasifikasiLila`
+- `src/lib/kalkulator/tabel.ts` — data WHO hasil konversi CSV (jangan edit manual): `wfa`, `lhfa*2y/5y`, `wfl/wfh`, `hcfa*`, `acfa*`
 - `src/lib/kalkulator/__fixtures__/expected.json` — fixture output Python lama untuk validasi port
 - `src/lib/umur.ts` — hitung umur bulan (kalender) + parse tanggal lokal
 - `src/lib/status.ts` — metadata status (label, deskripsi, tone warna)
@@ -52,19 +52,41 @@ terdokumentasi di **PRD.md** (living document); jaga agar AGENTS.md dan PRD.md t
 - `vercel.json` — SPA rewrite agar deep-link tidak 404
 
 ## Data & Klasifikasi Status
-- Indikator: BB/U (wfa), TB/U (lhfa), BB/TB (wfl < 24 bln, wfh >= 24 bln)
+- Indikator: BB/U (wfa), TB/U (lhfa), BB/TB (wfl < 24 bln, wfh >= 24 bln), LiKA (hcfa), LiLA (acfa)
 - BB/U: SK (<-3), K (-3..-2), N (-2..+1), RBL (>+1)
 - TB/U: SP, P, N, T (batas sama dgn BB/U)
-- BB/TB: GK (<-2, label "Gizi Buruk"), GB (-2..+1), GL (>+1..+3), O (>+3)
+- BB/TB (6 kategori): GB (<-3 "Gizi Buruk"), GK (-3..-2 "Gizi Kurang"), GN (-2..+1 "Gizi Baik"), RGL (>+1..+2 "Risiko Gizi Lebih"), GL (>+2..+3 "Gizi Lebih"), O (>+3 "Obesitas")
+- LiKA: MS (<-2), N (-2..+2), MK (>+2); LiLA: GK (<-2), N (>= -2)
 - BB/TB dicari berdasarkan panjang/tinggi badan (baris terdekat), bukan umur
 - Umur < 24 bulan: tabel lhfa/wfl versi `2_years`; >= 24 bulan: versi `5_years`
 - Umur < 13 minggu: tabel mingguan (`*_13_weeks.csv`, kolom `Week`) tersedia tapi belum dipakai
+- Umur dihitung otomatis dari tanggal lahir vs tanggal kunjungan (kalender); bila tanggal lahir kosong, `umur_bulan` + status BB/U·TB/U·BB/TB disimpan `null` sampai tanggal lahir diisi
 - Skor-z dibulatkan 2 desimal untuk tampilan; klasifikasi memakai skor-z mentah
 - Rumus LMS: `l==0 → ln(x/M)/S`; selain itu `((x/M)^l - 1)/(l*s)`
 
+## Modul Antropometri (standar WHO)
+Sistem menerapkan klasifikasi antropometri **WHO Child Growth Standards (0–60 bulan)** dengan 3 indikator
+independen + 2 indikator lingkar yang tidak pernah digabung menjadi satu z-score:
+- **BB/U** — berat menurut umur (wfa): indikator berat; tidak dipakai untuk stunting/wasting/obesitas
+- **TB/U (PB/U)** — panjang/tinggi menurut umur (lhfa): indikator pertumbuhan linear/stunting;
+  `TB/U < -2` = stunting (`SP` = stunting berat, `P` = pendek) — **bukan** "gizi buruk"
+- **BB/TB (BB/PB)** — berat menurut panjang/tinggi (wfl/wfh): indikator wasting/overweight/obesitas;
+  lookup berdasarkan panjang/tinggi (baris terdekat), **bukan umur**
+- **LiKA/U** — lingkar kepala menurut umur (hcfa): MS/MK
+- **LiLA/U** — lingkar lengan atas (MUAC) menurut umur (acfa): GK/N
+
+Pemilihan PB vs TB mengikuti umur (< 24 bln → PB, >= 24 bln → TB); `measurement_type` eksplisit
+belum disimpan di DB (kolomnya tidak ada). Status disimpan **terpisah per indikator** sebagai label
+Indonesia (mis. `Normal`, `Pendek`, `Gizi Buruk`) + z-score mentah (untuk kurva).
+
+Referensi data WHO (`tabel.ts` dari `refrences/*.csv`) **dipisah dari logika klasifikasi**; pembaruan
+standar cukup mengganti data tabel tanpa mengubah fungsi klasifikasi. Validasi sebelum klasifikasi:
+jk wajib, tanggal lahir wajib valid, tanggal pengukuran tidak boleh sebelum tanggal lahir, BB > 0,
+PB/TB > 0; data tidak valid → tidak diklasifikasi (error).
+
 ## Konvensi
 - Bahasa Indonesia untuk kode, komentar, dan pesan
-- Class status: string pendek seperti `SK`, `K`, `N`, `RBL`, `SP`, `P`, `T`, `GK`, `GB`, `GL`, `O`
+- Class status: string pendek seperti `SK`, `K`, `N`, `RBL`, `SP`, `P`, `T`, `GB`, `GK`, `GN`, `RGL`, `GL`, `O`
 - Git commit: `(Update vX.Y.Z) Deskripsi singkat`
 - Seluruh perhitungan di sisi klien (browser) — jangan pindahkan ke server tanpa alasan
 - Komponen UI baru: pakai primitif shadcn-vue di `src/components/ui/` bila ada, selain itu pola cva (class-variance-authority)
@@ -81,7 +103,7 @@ terdokumentasi di **PRD.md** (living document); jaga agar AGENTS.md dan PRD.md t
 1. Kalkulator TS sudah divalidasi vs fixture Python (20 kasus, toleransi z ±0.005)
 2. `kesimpulan_bb_bulan_lalu` belum ada (butuh riwayat pengukuran sebelumnya)
 3. Umur < 13 minggu masih dihitung per bulan (tabel mingguan belum dipakai)
-4. **Fase data aktif:** Supabase Auth (email/password) + RLS ketat sudah jalan. `anon` bisa landing, kalkulator & `/dashboard` (hub publik); `/balita*` butuh login (guard redirect). **Peran admin** (`public.user_peran` + fungsi `is_admin()`): hanya admin yang bisa tulis/edit/hapus (RLS + gating UI); user biasa read-only. Status disimpan sebagai label Indonesia (`Normal`, `Kurus`, `Gizi Buruk`, dst); `src/supabase/db.ts` memetakan kode↔label.
+4. **Fase data aktif:** Supabase Auth (email/password) + RLS ketat sudah jalan. `anon` bisa landing, kalkulator & `/dashboard` (hub publik); `/balita*` butuh login (guard redirect). **Peran admin** (`public.user_peran` + fungsi `is_admin()`): hanya admin yang bisa tulis/edit/hapus (RLS + gating UI); user biasa read-only. Status disimpan sebagai label Indonesia (`Normal`, `Kurang`, `Gizi Buruk`, dst); `src/supabase/db.ts` memetakan kode↔label.
 5. **Supabase email confirmation ON di remote** (`mailer_autoconfirm=false`) — akun baru lewat UI `/login` butuh konfirmasi email. Catatan: `supabase/config.toml` lokal memakai `enable_confirmations = false` (tanpa konfirmasi), jadi perilaku lokal vs remote berbeda. Akun uji `e2e-kader@posyandu.test` dibuat manual (email_confirmed_at terisi + semua kolom token auth diisi string non-NULL).
 6. **Bug GoAuth scan:** bila kolom token di `auth.users` NULL (mis. user dibuat manual), login gagal dengan "Database error querying schema" / "converting NULL to string". Workaround: isi `confirmation_token`, `recovery_token`, `email_change`, dll dengan string kosong.
 7. **Migrasi:** `supabase/migrations/` dipakai untuk replikasi fresh; perubahan yang sudah diterapkan ke remote dicatat di `supabase_migrations.schema_migrations` (jalur CLI butuh password DB — kalau belum ada, apply via dashboard SQL Editor).

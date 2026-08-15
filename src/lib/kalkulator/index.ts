@@ -57,12 +57,15 @@ export function klasifikasiTbu(z: number): string {
   return 'T'
 }
 
-// BB/TB: GK (<-2), GB (-2 s/d +1), GL (>+1 s/d +3), O (>+3)
+// BB/TB: GB (<-3 "Gizi Buruk"), GK (-3 s/d <-2 "Gizi Kurang"), GN (-2 s/d +1 "Gizi Baik"),
+// RGL (>+1 s/d +2 "Risiko Gizi Lebih"), GL (>+2 s/d +3 "Gizi Lebih"), O (>+3 "Obesitas")
 export function klasifikasiBbtb(z: number): string {
-  if (z < -2.0) return 'GK'
-  if (z <= 1.0) return 'GB'
-  if (z <= 3.0) return 'GL'
-  return 'O'
+  if (z < -3.0) return 'GB' // Gizi Buruk
+  if (z < -2.0) return 'GK' // Gizi Kurang
+  if (z <= 1.0) return 'GN' // Gizi Baik
+  if (z <= 2.0) return 'RGL' // Risiko Gizi Lebih
+  if (z <= 3.0) return 'GL' // Gizi Lebih
+  return 'O' // Obesitas
 }
 
 // LiKA (lingkar kepala): Mikrosefali (<-2), Normal (-2 s/d +2), Makrosefali (>+2)

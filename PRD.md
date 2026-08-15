@@ -1,7 +1,7 @@
 # PRD — Sistem Informasi Posyandu (PosyanduGizi)
 
 Dokumen ini adalah **living document**: terus diperbarui seiring perkembangan project.
-Status terakhir: **Fase 1 (MVP) — Pencatatan berjalan** (Auth + RLS + CRUD balita & kunjungan aktif di Supabase; form kunjungan lengkap + dashboard hub publik sudah jalan). Terakhir: **halaman detail balita ramah mobile** — riwayat kunjungan kini dua mode (kartu per kunjungan di ponsel, tabel kolom penuh di desktop; perbaikan `min-w-0` pada grid item yang sebelumnya membuat halaman melebar horizontal di mobile), form kunjungan bertumpuk 1 kolom di layar kecil, dan kelas `flex flex-col gap-*` pada CardContent diterapkan di seluruh halaman agar jarak antar elemen benar-benar aktif. Sebelumnya: halaman kalkulator ditulis ulang menjadi **kalkulasi live** (tanpa tombol hitung) dengan validasi per-field on-blur, tabs kurva BB/U · TB/U · BB/TB, peringatan implausibel (|z| > 5) non-blocking, serta ringkasan hasil + tombol salin; landing page didesain ulang dengan **motif kurva pertumbuhan WHO** sebagai elemen tanda tangan, navbar **tanpa animasi ketik**, dan **peran admin** aktif (admin satu-satunya yang bisa menulis; user biasa read-only) + link konfirmasi email diarahkan ke URL produksi (`VITE_APP_URL`).
+Status terakhir: **Fase 1 (MVP) — Pencatatan berjalan** (Auth + RLS + CRUD balita & kunjungan aktif di Supabase; form kunjungan lengkap + dashboard hub publik sudah jalan). Terakhir: **modul antropometri diperluas ke LiKA/LiLA** — status lingkar kepala & lingkar lengan kini dihitung otomatis dari pengukuran (z-score WHO `hcfa`/`acfa`) saat form kunjungan diisi, riwayat kunjungan diubah menjadi **satu tabel dengan scroll horizontal internal** yang diurutkan **kronologis naik** (Januari→Desember), **umur dihitung otomatis** dari tanggal lahir vs tanggal kunjungan (bila tanggal lahir kosong, umur + status BB/U·TB/U·BB/TB dikosongkan sampai tanggal lahir diisi), dan **tabs kurva pertumbuhan bertambah LiKA & LiLA** (total 5 tabs). Sebelumnya: halaman kalkulator ditulis ulang menjadi **kalkulasi live** (tanpa tombol hitung) dengan validasi per-field on-blur, tabs kurva BB/U · TB/U · BB/TB, peringatan implausibel (|z| > 5) non-blocking, serta ringkasan hasil + tombol salin; landing page didesain ulang dengan **motif kurva pertumbuhan WHO** sebagai elemen tanda tangan, navbar **tanpa animasi ketik**, dan **peran admin** aktif (admin satu-satunya yang bisa menulis; user biasa read-only) + link konfirmasi email diarahkan ke URL produksi (`VITE_APP_URL`).
 
 ## 1. Ringkasan Produk
 
@@ -46,8 +46,8 @@ menambah/mengubah/menghapus data; **user biasa** (kader terautentikasi) read-onl
 ### Fase 1 (MVP) — Pencatatan
 - ✅ Supabase Auth + RLS (data sensitif dilindungi sejak awal; anonim hanya bisa landing, kalkulator & dashboard hub).
 - ✅ CRUD data balita: nama, jenis kelamin, tanggal lahir, nama orang tua, posyandu/dusun/alamat (sesuai tabel eksisting `balita_identitas`).
-- ✅ Pencatatan kunjungan & pengukuran lengkap: tanggal, BB, PB, lingkar lengan, lingkar kepala, imunisasi, vitamin A, ASI, MP-ASI, obat cacing, ceklis perkembangan, gejala TBC, edukasi; status gizi dihitung otomatis di browser (metode LMS WHO: BB/U, TB/U, BB/TB) lalu disimpan.
-- ✅ Daftar balita (cari + hapus) dan halaman detail dengan kurva tabs (BB/U · TB/U · BB/TB) + riwayat kunjungan. Riwayat kini **responsif dua mode**: kartu per kunjungan di ponsel (<md, dengan badge status + hapus) dan tabel kolom penuh di desktop (md+, scroll horizontal internal).
+- ✅ Pencatatan kunjungan & pengukuran lengkap: tanggal, BB, PB, lingkar lengan, lingkar kepala, imunisasi, vitamin A, ASI, MP-ASI, obat cacing, ceklis perkembangan, gejala TBC, edukasi; status gizi dihitung otomatis di browser (metode LMS WHO: BB/U, TB/U, BB/TB + LiKA/LiLA) lalu disimpan.
+- ✅ Daftar balita (cari + hapus) dan halaman detail dengan kurva tabs (BB/U · TB/U · BB/TB · LiKA · LiLA) + riwayat kunjungan. Riwayat kini **satu tabel dengan scroll horizontal internal** (min-w tinggi) diurutkan **kronologis naik** (Januari→Desember), kolom nilai diikuti statusnya (BB | Status BB/U | TB | Status TB/U | BB/TB | LiKA | Status LiKA | LiLA | Status LiLA | …), status LiKA/LiLA dihitung otomatis saat form kunjungan diisi, dan umur dihitung otomatis dari tanggal lahir vs tanggal kunjungan (dikosongkan bila tanggal lahir belum ada).
 - ⏳ UI bumil (schema `bumil_*` sudah ada di DB).
 - ✅ Halaman kalkulator tetap tersedia untuk hitung cepat tanpa menyimpan. **Kalkulasi live** (tanpa tombol hitung): hasil & kurva otomatis saat data lengkap; validasi per-field on-blur (tanggal lahir/ukur, BB, PB; `aria-describedby` + live region `role="status"`); tabs kurva BB/U · TB/U · BB/TB; peringatan nilai di luar rentang kewajaran (|z| > 5) non-blocking; ringkasan hasil + tombol salin (clipboard).
 - ✅ Dashboard hub publik: menu navigasi modul (Balita aktif; Bumil/Remaja/Dewasa & Lansia "Segera").
@@ -64,6 +64,76 @@ menambah/mengubah/menghapus data; **user biasa** (kader terautentikasi) read-onl
 - Peran lanjutan (admin posyandu vs puskesmas), reset password & pengelolaan akun.
 - (Potensi) dukungan banyak posyandu dan integrasi e-PPGBM.
 
+### Modul Antropometri — Klasifikasi Status Gizi Anak (WHO)
+
+Klasifikasi mengikuti **WHO Child Growth Standards (0–60 bulan)** metode **LMS (z-score)**, dihitung
+**client-side (TypeScript)** di `src/lib/kalkulator/` — port dari kalkulator Python lama yang tervalidasi
+vs fixture Python.
+
+**Data input (dari form balita + form kunjungan):** `jenis_kelamin`, `tanggal_lahir`,
+`tanggal_kunjungan` (tanggal pengukuran), `berat_badan`, `panjang/tinggi_badan`, `lingkar_kepala`,
+`lingkar_lengan`. Validasi sebelum klasifikasi: jenis kelamin wajib; tanggal lahir wajib valid;
+tanggal pengukuran tidak boleh sebelum tanggal lahir; berat > 0; panjang/tinggi > 0; bila data tidak
+valid → **tidak diklasifikasi** (error). Umur dihitung otomatis dari tanggal lahir vs tanggal kunjungan
+(kalender); bila tanggal lahir kosong, umur & status BB/U·TB/U·BB/TB dikosongkan sampai tanggal lahir
+diisi.
+
+**Jenis pengukuran PB vs TB:** dipilih berdasarkan umur — < 24 bulan → panjang badan (PB), ≥ 24 bulan →
+tinggi badan (TB) — untuk memilih tabel `lhfa*`/`wfl*` vs `wfh*`. `measurement_type` ("PB"/"TB") eksplisit
+**belum disimpan** di DB (kolomnya tidak ada).
+
+**Prinsip perhitungan:**
+- Z-score memakai rumus LMS: `l==0 → ln(x/M)/S`; selain itu `((x/M)^l − 1)/(l·S)`.
+- Tabel referensi WHO dipisah dari logika klasifikasi (`src/lib/kalkulator/tabel.ts` dari `refrences/*.csv`);
+  update standar cukup mengganti data tabel tanpa mengubah fungsi.
+- Ketiga indikator (BB/U, TB/U, BB/TB) dihitung **independen** dan **tidak pernah digabung** menjadi satu
+  z-score/status. Skor-z mentah dipakai untuk klasifikasi; pembulatan 2 desimal hanya untuk tampilan.
+- **Tidak memakai BMI** untuk BB/TB; BB/TB di-lookup berdasarkan panjang/tinggi (baris terdekat), **bukan umur**.
+- Tabel laki-laki/perempuan terpisah (`*Boy`/`*Girl`); tabel mingguan `< 13 minggu` tersedia tapi belum dipakai.
+
+**Klasifikasi per indikator (kode → label Indonesia, batas non-overlap):**
+
+| Indikator | Kategori | Batas z-score |
+|---|---|---|
+| BB/U (wfa) | `SK` Sangat Kurang | < −3 |
+| | `K` Kurang | −3 s/d < −2 |
+| | `N` Normal | −2 s/d ≤ +1 |
+| | `RBL` Risiko Berat Berlebih | > +1 |
+| TB/U (lhfa) | `SP` Sangat Pendek | < −3 |
+| | `P` Pendek | −3 s/d < −2 |
+| | `N` Normal | −2 s/d ≤ +1 |
+| | `T` Tinggi | > +1 |
+| BB/TB (wfl/wfh) | `GB` Gizi Buruk | < −3 |
+| | `GK` Gizi Kurang | −3 s/d < −2 |
+| | `GN` Gizi Baik | −2 s/d ≤ +1 |
+| | `RGL` Risiko Gizi Lebih | > +1 s/d ≤ +2 |
+| | `GL` Gizi Lebih | > +2 s/d ≤ +3 |
+| | `O` Obesitas | > +3 |
+| LiKA/U (hcfa) | `MS` Mikrosefali | < −2 |
+| | `N` Normal | −2 s/d ≤ +2 |
+| | `MK` Makrosefali | > +2 |
+| LiLA/U (acfa) | `GK` Gizi Kurang | < −2 |
+| | `N` Normal | ≥ −2 |
+
+**Pemaknaan indikator (jangan dicampur):**
+- `BB/U` = indikator berat; **tidak** dipakai menentukan stunting, wasting, atau obesitas.
+- `TB/U` = pertumbuhan linear / stunting; `TB/U < −2` = stunting (`SP` stunting berat, `P` pendek);
+  **bukan** "gizi buruk".
+- `BB/TB` = wasting / overweight / obesitas; lookup berdasarkan panjang/tinggi.
+- `LiKA/U` = MS/MK; `LiLA/U` = GK/N.
+- Contoh hasil independen yang sah: BB/U = Normal, TB/U = Pendek, BB/TB = Gizi Baik — ketiganya
+  disimpan & ditampilkan terpisah.
+
+**Fungsi (struktur agar mudah dites):** `hitungSemuaStatus(jk, umurBulan, beratBadan, panjangBadan)` →
+`{status_bb_u, status_tb_u, status_bb_tb, z_bb_u, z_tb_u, z_bb_tb, error}`; plus `hitungZLik`/`hitungZLil`
+(lingkar kepala/lengan) & `klasifikasiLika`/`klasifikasiLila`. Status disimpan **terpisah per indikator**
+sebagai label Indonesia + z-score mentah; hasil tersimpan terpisah dari pengukuran mentah (raw measurement
+di kolom `berat_badan`/`tinggi_badan`/`lingkar_*`, hasil di kolom `bb_menurut_umur`/`z_*`/`umur_bulan`).
+
+**Pengujian:** unit test Vitest `src/lib/kalkulator/index.test.ts` (validasi vs fixture Python, 20 kasus,
+toleransi z ±0.005) + smoke test render komponen; boundary klasifikasi BB/TB (6 kategori) & indikator lain
+diuji eksplisit (z = ±3.01/±3.00/±2.99/…, data tidak lengkap, umur 0).
+
 ## 6. Model Data
 
 Schema **Supabase (PostgreSQL 17)** dengan **Row Level Security**. Diadaptasi dari schema
@@ -75,7 +145,7 @@ yang sudah berisi data eksisting (bukan dibuat baru). Semua relasi & audit bersi
 - **`balita_kunjungan`** (eksisting, 162 baris): id, **balita_id (FK baru, backfill dari `nama_anak`)**, nama_anak (legacy), tanggal_kunjungan,
   berat_badan, tinggi_badan, lingkar_lengan, lingkar_kepala, status_lingkar_*, ceklis_perkembangan,
   **imunisasi, vitamin_a, asi_eksklusif, mp_asi, obat_cacing, gejala_tbc, edukasi** (kolom per-kunjungan),
-  status BB/U–TB/U–BB/TB **disimpan sebagai label Indonesia** (mis. `Normal`, `Kurus`, `Berat Berlebih`),
+  status BB/U–TB/U–BB/TB **disimpan sebagai label Indonesia** (mis. `Normal`, `Kurang`, `Risiko Berat Berlebih`),
   **umur_bulan + z_bb_u/tb_u/bb_tb** (dari kalkulator TS), dibuat_oleh, created_at.
 - **`bumil_identitas`** (13 baris) & **`bumil_kunjungan`** — schema siap, UI menyusul.
 - **`rekap_balita`** & **`rekap_bumil`** — rekap bulanan (Fase 2).

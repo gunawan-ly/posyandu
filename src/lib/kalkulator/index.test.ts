@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import expected from './__fixtures__/expected.json'
-import { hitungSemuaStatus } from './index'
+import { hitungSemuaStatus, klasifikasiBbtb, klasifikasiBbu, klasifikasiLika, klasifikasiLila, klasifikasiTbu } from './index'
 
 interface KasusFixture {
   jk: string
@@ -50,5 +50,53 @@ describe('validasi rumus dasar', () => {
   it('data tidak lengkap mengembalikan error', () => {
     const z = hitungSemuaStatus('L', 12, 0, 75)
     expect(z.error).toBe('Data tidak lengkap')
+  })
+})
+
+// Boundary klasifikasi BB/TB — 6 kategori, non-overlap (tidak ada z masuk dua kategori).
+describe('boundary klasifikasi BB/TB (6 kategori)', () => {
+  const kasus: [number, string][] = [
+    [-3.01, 'GB'], // Gizi Buruk
+    [-3.0, 'GK'], // Gizi Kurang
+    [-2.99, 'GK'],
+    [-2.0, 'GN'], // Gizi Baik
+    [-1.99, 'GN'],
+    [1.0, 'GN'],
+    [1.01, 'RGL'], // Risiko Gizi Lebih
+    [2.0, 'RGL'],
+    [2.01, 'GL'], // Gizi Lebih
+    [3.0, 'GL'],
+    [3.01, 'O'], // Obesitas
+  ]
+  it.each(kasus)('z = %s → %s', (z, kode) => {
+    expect(klasifikasiBbtb(z)).toBe(kode)
+  })
+})
+
+// Boundary klasifikasi BB/U, TB/U, LiKA, LiLA — pastikan tidak overlap.
+describe('boundary klasifikasi indikator lain', () => {
+  it('BB/U: z=-3 → K, z=-2 → N, z=1 → N, z=1.01 → RBL', () => {
+    expect(klasifikasiBbu(-3.0)).toBe('K')
+    expect(klasifikasiBbu(-2.0)).toBe('N')
+    expect(klasifikasiBbu(1.0)).toBe('N')
+    expect(klasifikasiBbu(1.01)).toBe('RBL')
+  })
+
+  it('TB/U: z=-3 → P, z=-2 → N, z=1 → N, z=1.01 → T', () => {
+    expect(klasifikasiTbu(-3.0)).toBe('P')
+    expect(klasifikasiTbu(-2.0)).toBe('N')
+    expect(klasifikasiTbu(1.0)).toBe('N')
+    expect(klasifikasiTbu(1.01)).toBe('T')
+  })
+
+  it('LiKA: z=-2 → N, z=2 → N, z=2.01 → MK', () => {
+    expect(klasifikasiLika(-2.0)).toBe('N')
+    expect(klasifikasiLika(2.0)).toBe('N')
+    expect(klasifikasiLika(2.01)).toBe('MK')
+  })
+
+  it('LiLA: z=-2 → N, z=-2.01 → GK', () => {
+    expect(klasifikasiLila(-2.0)).toBe('N')
+    expect(klasifikasiLila(-2.01)).toBe('GK')
   })
 })

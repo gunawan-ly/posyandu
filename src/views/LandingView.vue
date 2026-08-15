@@ -75,15 +75,17 @@ const LANGKAH = [
 ]
 
 const KET = [
-  { kode: 'SK', label: 'Sangat Kurus' },
-  { kode: 'K', label: 'Kurus' },
+  { kode: 'SK', label: 'Sangat Kurang' },
+  { kode: 'K', label: 'Kurang' },
   { kode: 'N', label: 'Normal' },
-  { kode: 'RBL', label: 'Risiko Berat Lebih' },
+  { kode: 'RBL', label: 'Risiko Berat Berlebih' },
   { kode: 'SP', label: 'Sangat Pendek' },
   { kode: 'P', label: 'Pendek' },
   { kode: 'T', label: 'Tinggi' },
-  { kode: 'GK', label: 'Gizi Buruk' },
-  { kode: 'GB', label: 'Gizi Baik' },
+  { kode: 'GB', label: 'Gizi Buruk' },
+  { kode: 'GK', label: 'Gizi Kurang' },
+  { kode: 'GN', label: 'Gizi Baik' },
+  { kode: 'RGL', label: 'Risiko Gizi Lebih' },
   { kode: 'GL', label: 'Gizi Lebih' },
   { kode: 'O', label: 'Obesitas' },
 ]

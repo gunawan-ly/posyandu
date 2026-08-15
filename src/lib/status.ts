@@ -8,15 +8,17 @@ export interface InfoStatus {
 }
 
 export const DAFTAR_STATUS: Record<string, InfoStatus> = {
-  SK: { kode: 'SK', label: 'Sangat Kurus', deskripsi: 'Berat badan sangat jauh di bawah standar seusianya', tone: 'danger' },
-  K: { kode: 'K', label: 'Kurus', deskripsi: 'Berat badan di bawah standar seusianya', tone: 'warning' },
+  SK: { kode: 'SK', label: 'Sangat Kurang', deskripsi: 'Berat badan sangat jauh di bawah standar seusianya', tone: 'danger' },
+  K: { kode: 'K', label: 'Kurang', deskripsi: 'Berat badan di bawah standar seusianya', tone: 'warning' },
   N: { kode: 'N', label: 'Normal', deskripsi: 'Berat badan sesuai standar seusianya', tone: 'ok' },
-  RBL: { kode: 'RBL', label: 'Risiko Berat Lebih', deskripsi: 'Berat badan di atas standar seusianya', tone: 'warning' },
+  RBL: { kode: 'RBL', label: 'Risiko Berat Berlebih', deskripsi: 'Berat badan di atas standar seusianya', tone: 'warning' },
   SP: { kode: 'SP', label: 'Sangat Pendek', deskripsi: 'Tinggi badan sangat jauh di bawah standar seusianya', tone: 'danger' },
   P: { kode: 'P', label: 'Pendek', deskripsi: 'Tinggi badan di bawah standar seusianya', tone: 'warning' },
   T: { kode: 'T', label: 'Tinggi', deskripsi: 'Tinggi badan di atas standar seusianya', tone: 'ok' },
-  GK: { kode: 'GK', label: 'Gizi Buruk', deskripsi: 'Proporsi berat terhadap tinggi sangat jauh di bawah standar', tone: 'danger' },
-  GB: { kode: 'GB', label: 'Gizi Baik', deskripsi: 'Proporsi berat terhadap tinggi sesuai standar', tone: 'ok' },
+  GB: { kode: 'GB', label: 'Gizi Buruk', deskripsi: 'Proporsi berat terhadap tinggi sangat jauh di bawah standar', tone: 'danger' },
+  GK: { kode: 'GK', label: 'Gizi Kurang', deskripsi: 'Proporsi berat terhadap tinggi di bawah standar', tone: 'warning' },
+  GN: { kode: 'GN', label: 'Gizi Baik', deskripsi: 'Proporsi berat terhadap tinggi sesuai standar', tone: 'ok' },
+  RGL: { kode: 'RGL', label: 'Risiko Gizi Lebih', deskripsi: 'Proporsi berat terhadap tinggi sedikit di atas standar', tone: 'warning' },
   GL: { kode: 'GL', label: 'Gizi Lebih', deskripsi: 'Proporsi berat terhadap tinggi di atas standar', tone: 'warning' },
   O: { kode: 'O', label: 'Obesitas', deskripsi: 'Proporsi berat terhadap tinggi jauh di atas standar', tone: 'danger' },
 }
