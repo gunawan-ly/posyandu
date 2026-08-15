@@ -1,7 +1,7 @@
 # PRD — Sistem Informasi Posyandu (PosyanduGizi)
 
 Dokumen ini adalah **living document**: terus diperbarui seiring perkembangan project.
-Status terakhir: **Fase 1 (MVP) — Pencatatan berjalan** (Auth + RLS + CRUD balita & kunjungan aktif di Supabase; form kunjungan lengkap + dashboard hub publik sudah jalan). Terakhir: **klasifikasi BB/TB diperluas ke 6 kategori** (GB/GK/GN/RGL/GL/O) & **label BB/U disesuaikan** (Sangat Kurang/Kurang/Normal/Risiko Berat Berlebih), lalu **backfill data produksi** — 161 kunjungan valid dihitung ulang `umur_bulan` + z-score (BB/U·TB/U·BB/TB) + status (termasuk LiKA/LiLA & `bulan`); 76 label berubah ke klasifikasi baru (2 data uji di-skip). Setelahnya: **fondasi multi-posyandu** — kode ditata ulang menjadi **struktur per-modul** (`src/modules/balita/` berisi `views/`, `db.ts`, `routes.ts`), helper shared dipindah ke `src/lib/status.ts`, `src/lib/umur.ts`, `src/supabase/client.ts`; modul lain (bumil, remaja, dewasa & lansia) tinggal menyalin shape folder ini. Sebelumnya: **modul antropometri diperluas ke LiKA/LiLA** — status lingkar kepala & lingkar lengan dihitung otomatis (z-score WHO `hcfa`/`acfa`) saat form kunjungan diisi, riwayat kunjungan **satu tabel scroll horizontal internal** diurutkan **kronologis naik** (Januari→Desember), **umur dihitung otomatis** dari tanggal lahir vs tanggal kunjungan (dikosongkan bila tanggal lahir kosong), dan **tabs kurva pertumbuhan bertambah LiKA & LiLA** (total 5 tabs). Sebelumnya: kalkulator **kalkulasi live** (tanpa tombol hitung, validasi per-field on-blur, peringatan implausibel |z| > 5 non-blocking, ringkasan + tombol salin); landing page dengan **motif kurva pertumbuhan WHO**, navbar **tanpa animasi ketik**, dan **peran admin** aktif (admin tulis, user biasa read-only) + link konfirmasi email ke URL produksi (`VITE_APP_URL`).
+Status terakhir: **Fase 1 (MVP) — Pencatatan berjalan** (Auth + RLS + CRUD balita & kunjungan aktif di Supabase; form kunjungan lengkap + dashboard hub publik sudah jalan). Terakhir: **landing page didesain ulang menjadi sistem informasi posyandu digital** — hero narasi keseluruhan posyandu dengan motto **"Sehat & mandiri untuk semua"**, seksi **statistik bulan berjalan** dari fungsi publik `statistik_publik()` (COUNT agregat: balita, bumil, kunjungan bulan ini + persentase cakupan, total kunjungan — hanya angka, tanpa data perorangan), seksi **layanan 4 sasaran** (Balita aktif; Bumil/Remaja/Dewasa & Lansia "Segera"), **kalkulator kilat dipindah** dari hero jadi seksi tersendiri, dan **font diubah ke IBM Plex Sans** (formal, display & body konsisten). Sebelumnya: **klasifikasi BB/TB 6 kategori** (GB/GK/GN/RGL/GL/O) & **label BB/U disesuaikan**, lalu **backfill data produksi** (161 kunjungan valid dihitung ulang `umur_bulan` + z-score + status; 76 label berubah) dan **fondasi multi-posyandu** (struktur per-modul `src/modules/balita/`). Sebelumnya: **modul antropometri diperluas ke LiKA/LiLA** — status lingkar kepala & lengan dihitung otomatis (z-score WHO `hcfa`/`acfa`), riwayat kunjungan **satu tabel scroll horizontal internal** diurutkan **kronologis naik**, **umur dihitung otomatis** dari tanggal lahir vs tanggal kunjungan (dikosongkan bila tanggal lahir kosong), dan **tabs kurva pertumbuhan bertambah LiKA & LiLA** (total 5 tabs). Sebelumnya: kalkulator **kalkulasi live** (tanpa tombol hitung, validasi per-field on-blur, peringatan implausibel |z| > 5 non-blocking, ringkasan + tombol salin); landing dengan **motif kurva pertumbuhan WHO**, navbar **tanpa animasi ketik**, dan **peran admin** aktif (admin tulis, user biasa read-only) + link konfirmasi email ke URL produksi (`VITE_APP_URL`).
 
 ## 1. Ringkasan Produk
 
@@ -51,6 +51,7 @@ menambah/mengubah/menghapus data; **user biasa** (kader terautentikasi) read-onl
 - ⏳ UI bumil (schema `bumil_*` sudah ada di DB).
 - ✅ Halaman kalkulator tetap tersedia untuk hitung cepat tanpa menyimpan. **Kalkulasi live** (tanpa tombol hitung): hasil & kurva otomatis saat data lengkap; validasi per-field on-blur (tanggal lahir/ukur, BB, PB; `aria-describedby` + live region `role="status"`); tabs kurva BB/U · TB/U · BB/TB; peringatan nilai di luar rentang kewajaran (|z| > 5) non-blocking; ringkasan hasil + tombol salin (clipboard).
 - ✅ Dashboard hub publik: menu navigasi modul (Balita aktif; Bumil/Remaja/Dewasa & Lansia "Segera").
+- ✅ Landing page sistem informasi posyandu digital: hero keseluruhan posyandu + motto "Sehat & mandiri untuk semua", seksi **statistik bulan berjalan** (fungsi `statistik_publik()` — COUNT agregat balita/bumil/kunjungan bulan ini + persentase cakupan; hanya angka, privasi aman), seksi layanan 4 sasaran, kalkulator kilat interaktif, cara pakai, tentang standar WHO & privasi.
 - ✅ Peran admin vs user biasa: hanya admin (tabel `user_peran`) yang bisa tulis/edit/hapus (RLS `is_admin()` + gating UI); user biasa read-only. Pendaftaran baru diarahkan ke URL produksi via `emailRedirectTo` (`VITE_APP_URL`).
 
 ### Fase 2 — Analisis
@@ -152,12 +153,16 @@ yang sudah berisi data eksisting (bukan dibuat baru). Semua relasi & audit bersi
 - **RLS ketat:** policy `anon_*` dihapus (sebelumnya anon bisa baca semua data anak & INSERT kunjungan);
   kini `authenticated` bisa SELECT semua; INSERT/UPDATE/DELETE **hanya untuk admin** (fungsi
   `public.is_admin()` dari tabel `user_peran(email, peran)`); INSERT mewajibkan `dibuat_oleh = auth.uid()`
-  (diisi trigger). Env var: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (anon key publik, proteksi lewat
+  (diisi trigger). Statistik publik landing via fungsi **`public.statistik_publik()`** (SECURITY DEFINER,
+  `search_path=public`) yang mengembalikan COUNT agregat saja (total_balita, total_bumil,
+  kunjungan_bulan_ini, total_kunjungan, bulan_ini) — `revoke` dari public, `grant execute` ke
+  anon/authenticated, sehingga anonim tak bisa membaca baris data tapi tetap dapat angka ringkas.
+  Env var: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (anon key publik, proteksi lewat
   RLS) & `VITE_APP_URL` (redirect konfirmasi email).
 
 ## 7. Teknologi
 
-- Frontend: **Vue 3 SPA + TypeScript + Vite 8**, Vue Router (lazy), Tailwind CSS v4, shadcn-vue, `@lucide/vue` icons; font Fredoka (display) + Nunito Sans (body) dibundel lokal woff2
+- Frontend: **Vue 3 SPA + TypeScript + Vite 8**, Vue Router (lazy), Tailwind CSS v4, shadcn-vue, `@lucide/vue` icons; font **IBM Plex Sans** (formal, variabel 400–700) dibundel lokal woff2 di `public/fonts/`
 - **Struktur per-modul** (`src/modules/<modul>/`): tiap posyandu (balita, bumil, remaja, dewasa & lansia) punya folder sendiri berisi `views/` (list/form/detail), `db.ts` (lapisan data modul), dan `routes.ts` (rute + meta guard) yang didaftarkan di router via spread. `src/views/` hanya halaman app-level (landing, dashboard hub, kalkulator, login); helper lintas-modul di `src/lib/` (kalkulator, umur, status) dan `src/components/`. Modul baru cukup menyalin shape `src/modules/balita` tanpa mengubah struktur inti.
 - Perhitungan: **TypeScript client-side** (metode LMS WHO, z-score) di `src/lib/kalkulator/` — port dari kalkulator Python lama, tervalidasi vs fixture Python
 - Database & Auth: **Supabase** (PostgreSQL + Auth/RLS) via `@supabase/supabase-js`
@@ -182,7 +187,7 @@ yang sudah berisi data eksisting (bukan dibuat baru). Semua relasi & audit bersi
 ## 10. Roadmap & Prioritas
 
 1. **Fondasi (selesai):** SPA Vite + Vue 3, kalkulator client-side (TS, valid vs fixture Python), landing + kalkulator, shadcn-vue, deploy Vercel.
-2. **Fase 1 (MVP, berjalan):** schema Supabase diadaptasi dari data eksisting + Auth/RLS ketat + CRUD balita & kunjungan (aktif); form kunjungan lengkap + dashboard hub publik (selesai); peran admin (admin tulis, user biasa read-only) + redirect konfirmasi email produksi (selesai); **struktur per-modul** (`src/modules/balita/`) sebagai fondasi multi-posyandu (selesai); menyusul: UI bumil.
+2. **Fase 1 (MVP, berjalan):** schema Supabase diadaptasi dari data eksisting + Auth/RLS ketat + CRUD balita & kunjungan (aktif); form kunjungan lengkap + dashboard hub publik (selesai); peran admin (admin tulis, user biasa read-only) + redirect konfirmasi email produksi (selesai); **struktur per-modul** (`src/modules/balita/`) sebagai fondasi multi-posyandu (selesai); **landing page sistem informasi posyandu + statistik bulan berjalan + font formal IBM Plex Sans** (selesai); menyusul: UI bumil.
 3. **Fase 2:** dashboard, grafik tumbuh kembang, pemantauan stunting, laporan & ekspor.
 4. **Fase 3:** jadwal & pengingat, peran lanjutan, perluasan multi-posyandu.
 

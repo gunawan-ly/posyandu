@@ -13,7 +13,7 @@ terdokumentasi di **PRD.md** (living document); jaga agar AGENTS.md dan PRD.md t
 - UI: shadcn-vue (komponen `src/components/ui/`) + Tailwind CSS v4 (`@tailwindcss/vite`)
 - Ikon: `@lucide/vue`
 - Perhitungan: TS port dari kalkulator Python (metode LMS WHO, z-score) di `src/lib/kalkulator/`
-- Font: Fredoka (display) + Nunito Sans (body) — bundel woff2 lokal di `public/fonts/`
+- Font: **IBM Plex Sans** (formal, variabel 400–700, bundel woff2 lokal di `public/fonts/`) — dipakai untuk display & body (konsisten, mudah dibaca semua orang)
 - Backend: Supabase (PostgreSQL + Auth/RLS) — fase data, lihat PRD; `@supabase/supabase-js` sudah terpasang
 - Deploy: **GitHub Pages** aktif (lihat workflow + rincian di bawah); **Vercel** target final (SPA rewrite di `vercel.json` sudah siap)
 - Test: Vitest (unit kalkulator + smoke test render komponen)
@@ -40,8 +40,8 @@ terdokumentasi di **PRD.md** (living document); jaga agar AGENTS.md dan PRD.md t
   - `src/modules/balita/views/` — `BalitaListView.vue`, `BalitaFormView.vue` (baru/edit), `BalitaDetailView.vue` (identitas + kurva tabs + riwayat + form kunjungan lengkap; riwayat **satu tabel dengan scroll horizontal internal** (min-w tinggi) diurutkan **kronologis naik** (Januari→Desember), status LiKA/LiLA dihitung otomatis saat form kunjungan diisi; grid item kiri wajib `min-w-0` agar halaman tidak melebar horizontal)
   - `src/modules/balita/db.ts` — service CRUD balita & kunjungan; status dihitung kalkulator TS lalu disimpan sebagai label Indonesia
   - `src/modules/balita/routes.ts` — rute `/balita*` (`requiresAuth` + `requiresAdmin` di meta)
-- `src/views/` — halaman app-level (bukan per-modul): `LandingView.vue` (hero split dengan motif kurva pertumbuhan WHO sebagai elemen tanda tangan + kalkulator kilat interaktif + seksi indikator/cara pakai/tentang/CTA), `DashboardView.vue` (hub publik: modul Balita aktif + Bumil/Remaja/Dewasa & Lansia "Segera"), `KalkulatorView.vue` (kalkulasi live tanpa tombol hitung: hasil & kurva otomatis saat data lengkap; validasi per-field on-blur dengan `aria-describedby`/`aria-invalid`/live region `role="status"`; tabs kurva BB/U · TB/U · BB/TB; peringatan implausibel |z| > 5 non-blocking; ringkasan + tombol salin), `LoginView.vue` (masuk/daftar kader; redirect default `/dashboard`)
-- `src/components/` — `KurvaWHO.vue` (kurva WHO self-draw + titik z-score; mode `bbu`/`tbu`/`bbtb`/`lika`/`lila`), `StatusBadge.vue` (label lengkap saja, tanpa kode), `AppNavbar.vue` (brand statis "Posyandu Wapalo", tautan Beranda/Tentang/Dashboard + Data Balita saat login, state tautan aktif), `AppFooter.vue`, `Reveal.vue`, `ui/` (komponen shadcn-vue)
+- `src/views/` — halaman app-level (bukan per-modul): `LandingView.vue` (hero sistem informasi posyandu digital + motto "Sehat & mandiri untuk semua", seksi statistik bulan berjalan via RPC publik `statistik_publik()` (angka agregat, fallback `–`/tersembunyi bila DB tak tersedia), seksi layanan 4 sasaran (Balita aktif, Bumil/Remaja/Dewasa & Lansia "Segera"), kalkulator kilat interaktif (dipindah dari hero), cara pakai, tentang standar WHO + privasi, CTA masuk kader), `DashboardView.vue` (hub publik: modul Balita aktif + Bumil/Remaja/Dewasa & Lansia "Segera"), `KalkulatorView.vue` (kalkulasi live tanpa tombol hitung: hasil & kurva otomatis saat data lengkap; validasi per-field on-blur dengan `aria-describedby`/`aria-invalid`/live region `role="status"`; tabs kurva BB/U · TB/U · BB/TB; peringatan implausibel |z| > 5 non-blocking; ringkasan + tombol salin), `LoginView.vue` (masuk/daftar kader; redirect default `/dashboard`)
+- `src/components/` — `KurvaWHO.vue` (kurva WHO self-draw + titik z-score; mode `bbu`/`tbu`/`bbtb`/`lika`/`lila`), `StatusBadge.vue` (label lengkap saja, tanpa kode), `AppNavbar.vue` (brand statis "Posyandu Wapalo", tautan Beranda/Tentang/Dashboard + Data Balita saat login, state tautan aktif), `AppFooter.vue` (info © + credit "Dikembangkan oleh Awan" di baris paling bawah), `Reveal.vue`, `ui/` (komponen shadcn-vue)
 - `src/lib/kalkulator/index.ts` — port TS `hitungSemuaStatus(jk, umurBulan, beratBadan, panjangBadan)` → `{status_bb_u, status_tb_u, status_bb_tb, z_bb_u, z_tb_u, z_bb_tb, error}`; plus `hitungZLik`/`hitungZLil` (lingkar kepala/lengan) & `klasifikasiLika`/`klasifikasiLila`
 - `src/lib/kalkulator/tabel.ts` — data WHO hasil konversi CSV (jangan edit manual): `wfa`, `lhfa*2y/5y`, `wfl/wfh`, `hcfa*`, `acfa*`
 - `src/lib/kalkulator/__fixtures__/expected.json` — fixture output Python lama untuk validasi port
@@ -49,7 +49,7 @@ terdokumentasi di **PRD.md** (living document); jaga agar AGENTS.md dan PRD.md t
 - `src/lib/status.ts` — metadata status (label, deskripsi, tone warna) + `labelStatus`/`kodeDariLabel` (kode↔label Indonesia, termasuk varian data lama)
 - `src/supabase/client.ts` — klien Supabase (aktif hanya bila env var terisi) + `wajibSupabase()` (lapisan data per modul)
 - `src/supabase/useAuth.ts` — composable auth (session, masuk, daftar, keluar) + `isAdmin` via `rpc('is_admin')`; `signUp` memakai `emailRedirectTo = VITE_APP_URL || origin + BASE_URL`
-- `supabase/` — CLI project (`config.toml`) + `migrations/*.sql` (schema, relasi, RLS); `.temp/` & `.branches` di-ignore
+- `supabase/` — CLI project (`config.toml`) + `migrations/*.sql` (schema, relasi, RLS, fungsi publik); `.temp/` & `.branches` di-ignore
 - `refrences/` — CSV referensi WHO (sumber data `tabel.ts`; CATATAN: folder ditulis `refrences`, bukan `references`)
 - `.env` — `VITE_SUPABASE_URL` & `VITE_SUPABASE_ANON_KEY` (gitignored); templat di `.env.example`
 - `vercel.json` — SPA rewrite agar deep-link tidak 404
@@ -112,6 +112,7 @@ PB/TB > 0; data tidak valid → tidak diklasifikasi (error).
 7. **Migrasi:** `supabase/migrations/` dipakai untuk replikasi fresh; perubahan yang sudah diterapkan ke remote dicatat di `supabase_migrations.schema_migrations` (jalur CLI butuh password DB — kalau belum ada, apply via dashboard SQL Editor).
 8. Registry shadcn-vue tidak terjangkau dari environment ini — komponen `src/components/ui/` disalin manual dari repo `unovue/shadcn-vue` (branch `dev`, registry `new-york-v4`)
 9. **Spacing CardContent:** komponen `CardContent` hanya merender `<div class="px-6">` tanpa flex/grid — `gap-*` di class-nya tidak bekerja. Gunakan `CardContent class="flex flex-col gap-N"` bila ingin jarak antar anak (telah diterapkan di KalkulatorView/LoginView/DashboardView/BalitaListView/BalitaFormView/BalitaDetailView; `gap-0` di LandingView sengaja tanpa jarak).
+10. **Statistik publik (landing):** anonim tidak punya SELECT ke tabel data anak (RLS ketat), jadi statistik landing memakai fungsi `public.statistik_publik()` (SECURITY DEFINER, `search_path=public`, revoke public + grant anon/authenticated) yang hanya mengembalikan COUNT agregat (total_balita, total_bumil, kunjungan_bulan_ini, total_kunjungan, bulan_ini) — tanpa data perorangan. Landing fetch via `supabase.rpc('statistik_publik')` di `onMounted`; bila env Supabase kosong/error → seksi statistik disembunyikan.
 
 ## graphify
 

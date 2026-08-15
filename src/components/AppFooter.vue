@@ -14,7 +14,8 @@ import { RouterLink } from 'vue-router'
           <span class="font-display text-lg font-normal">Posyandu Wapalo</span>
         </div>
         <p class="text-muted-foreground max-w-xs text-sm">
-          Kalkulator status gizi anak berbasis standar pertumbuhan WHO untuk kader dan orang tua.
+          Sistem informasi posyandu digital: pencatatan data balita &amp; kunjungan, pemantauan
+          tumbuh kembang, dan kalkulator status gizi berbasis standar WHO.
         </p>
       </div>
 
@@ -22,8 +23,9 @@ import { RouterLink } from 'vue-router'
         <p class="text-sm font-bold">Navigasi</p>
         <ul class="text-muted-foreground mt-3 space-y-2 text-sm">
           <li><RouterLink to="/" class="hover:text-foreground transition-colors">Beranda</RouterLink></li>
-          <li><RouterLink to="/kalkulator" class="hover:text-foreground transition-colors">Kalkulator</RouterLink></li>
-          <li><RouterLink to="/#indikator" class="hover:text-foreground transition-colors">Indikator</RouterLink></li>
+          <li><RouterLink to="/#layanan" class="hover:text-foreground transition-colors">Layanan</RouterLink></li>
+          <li><RouterLink to="/#kalkulator" class="hover:text-foreground transition-colors">Kalkulator</RouterLink></li>
+          <li><RouterLink to="/#tentang" class="hover:text-foreground transition-colors">Tentang</RouterLink></li>
         </ul>
       </div>
 
@@ -37,6 +39,11 @@ import { RouterLink } from 'vue-router'
     <div class="border-border/60 border-t">
       <p class="text-muted-foreground mx-auto max-w-6xl px-4 py-4 text-center text-xs sm:px-6">
         © {{ new Date().getFullYear() }} Posyandu Wapalo — dibuat dengan standar WHO.
+      </p>
+    </div>
+    <div class="bg-primary/5 border-border/60 border-t">
+      <p class="text-muted-foreground mx-auto max-w-6xl px-4 py-2.5 text-center text-xs sm:px-6">
+        Dikembangkan oleh Awan
       </p>
     </div>
   </footer>

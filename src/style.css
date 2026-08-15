@@ -27,8 +27,8 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --font-sans: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Fredoka", var(--font-sans);
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "IBM Plex Sans", var(--font-sans);
 }
 
 :root {
@@ -55,25 +55,9 @@
 }
 
 @font-face {
-  font-family: "Fredoka";
-  src: url("/fonts/fredoka-latin.woff2") format("woff2");
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/ibm-plex-sans-latin.woff2") format("woff2");
   font-weight: 400 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Varela Round";
-  src: url("/fonts/varela-round-latin.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Nunito Sans";
-  src: url("/fonts/nunito-sans-latin.woff2") format("woff2");
-  font-weight: 400 800;
   font-style: normal;
   font-display: swap;
 }

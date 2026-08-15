@@ -3,15 +3,18 @@ import {
   Activity,
   ArrowRight,
   Baby,
+  BarChart3,
   CalendarDays,
   HeartPulse,
-  Ruler,
-  Scale,
+  LayoutDashboard,
+  Lock,
   ShieldCheck,
   Sparkles,
   TrendingUp,
+  UserRound,
+  Users,
 } from '@lucide/vue'
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import AppFooter from '@/components/AppFooter.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
@@ -21,7 +24,7 @@ import StatusBadge from '@/components/StatusBadge.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { hitungSemuaStatus } from '@/lib/kalkulator'
-import { infoStatus, TONE_BADGE } from '@/lib/status'
+import { supabase } from '@/supabase/client'
 
 const jk = ref<'L' | 'P'>('L')
 const umur = ref(24)
@@ -32,62 +35,174 @@ const hasil = computed(() =>
   hitungSemuaStatus(jk.value, umur.value, berat.value, panjang.value),
 )
 
-const INDIKATOR = [
+// ---- Statistik publik (bulan berjalan) ----
+interface StatistikPublik {
+  total_balita: number
+  total_bumil: number
+  kunjungan_bulan_ini: number
+  total_kunjungan: number
+  bulan_ini: string
+}
+
+const statistik = ref<StatistikPublik | null>(null)
+const statistikError = ref(false)
+
+const NAMA_BULAN = [
+  'Januari',
+  'Februari',
+  'Maret',
+  'April',
+  'Mei',
+  'Juni',
+  'Juli',
+  'Agustus',
+  'September',
+  'Oktober',
+  'November',
+  'Desember',
+]
+
+function labelBulan(ym: string): string {
+  const [y, m] = ym.split('-')
+  const idx = Number(m) - 1
+  return idx >= 0 && idx < 12 ? `${NAMA_BULAN[idx]} ${y}` : ym
+}
+
+const labelBulanIni = computed(() =>
+  statistik.value ? labelBulan(statistik.value.bulan_ini) : labelBulan(new Date().toISOString().slice(0, 7)),
+)
+
+const persentaseCakupan = computed(() => {
+  const s = statistik.value
+  if (!s || s.total_balita <= 0) return 0
+  return Math.round((s.kunjungan_bulan_ini / s.total_balita) * 100)
+})
+
+onMounted(async () => {
+  if (!supabase) {
+    statistikError.value = true
+    return
+  }
+  try {
+    const { data, error } = await supabase.rpc('statistik_publik')
+    if (error) throw error
+    statistik.value = data as StatistikPublik
+  } catch {
+    statistikError.value = true
+  }
+})
+
+const KARTU_STATISTIK = computed(() => {
+  const s = statistik.value
+  return [
+    {
+      ikon: Baby,
+      label: 'Balita terdata',
+      nilai: s?.total_balita ?? null,
+      akhiran: 'anak',
+      keterangan: 'sasaran balita 0–60 bulan',
+    },
+    {
+      ikon: HeartPulse,
+      label: 'Ibu hamil terdata',
+      nilai: s?.total_bumil ?? null,
+      akhiran: 'ibu',
+      keterangan: 'sasaran bumil',
+    },
+    {
+      ikon: CalendarDays,
+      label: 'Kunjungan bulan ini',
+      nilai: s?.kunjungan_bulan_ini ?? null,
+      akhiran: 'kunjungan',
+      keterangan: 'cakupan ±' + persentaseCakupan.value + '% dari sasaran',
+    },
+    {
+      ikon: BarChart3,
+      label: 'Total kunjungan',
+      nilai: s?.total_kunjungan ?? null,
+      akhiran: 'kunjungan',
+      keterangan: 'akumulasi sejak awal',
+    },
+  ]
+})
+
+// ---- Layanan posyandu ----
+interface ModulLayanan {
+  kunci: string
+  nama: string
+  deskripsi: string
+  ikon: typeof Baby
+  aktif: boolean
+  href?: string
+}
+
+const LAYANAN: ModulLayanan[] = [
   {
-    ikon: Scale,
-    nama: 'BB/U',
-    judul: 'Berat Badan per Umur',
-    tabel: 'wfa',
-    deskripsi: 'Menakar berat badan terhadap umur anak. Deteksi dini kurang gizi, kurus, hingga risiko berat lebih.',
+    kunci: 'balita',
+    nama: 'Balita',
+    deskripsi: 'Identitas, pengukuran, kurva pertumbuhan, dan riwayat kunjungan balita 0–60 bulan.',
+    ikon: Baby,
+    aktif: true,
+    href: '/balita',
   },
   {
-    ikon: Ruler,
-    nama: 'TB/U',
-    judul: 'Tinggi Badan per Umur',
-    tabel: 'lhfa',
-    deskripsi: 'Membandingkan tinggi atau panjang badan dengan usianya. Tolok ukur utama deteksi stunting.',
+    kunci: 'bumil',
+    nama: 'Bumil',
+    deskripsi: 'Pemantauan ibu hamil: identitas, kunjungan, dan status kesehatan.',
+    ikon: HeartPulse,
+    aktif: false,
+  },
+  {
+    kunci: 'remaja',
+    nama: 'Remaja',
+    deskripsi: 'Pencatatan tumbuh kembang dan kesehatan remaja.',
+    ikon: UserRound,
+    aktif: false,
+  },
+  {
+    kunci: 'lansia',
+    nama: 'Dewasa & Lansia',
+    deskripsi: 'Pemantauan kesehatan dewasa dan lansia di posyandu.',
+    ikon: Users,
+    aktif: false,
+  },
+]
+
+// ---- Cara pakai ----
+const MANFAAT = [
+  {
+    ikon: BarChart3,
+    judul: 'Pencatatan digital',
+    teks: 'Data balita dan kunjungan tersimpan rapi di satu tempat — pengganti Buku KMS manual yang mudah hilang.',
   },
   {
     ikon: TrendingUp,
-    nama: 'BB/TB',
-    judul: 'Berat Badan per Tinggi',
-    tabel: 'wfl / wfh',
-    deskripsi: 'Proporsi berat terhadap panjang (di bawah 2 tahun) atau tinggi badan. Menandai gizi kurang hingga obesitas.',
+    judul: 'Status gizi otomatis',
+    teks: 'Setiap pengukuran langsung dihitung memakai kurva pertumbuhan WHO dan tersimpan sebagai riwayat.',
+  },
+  {
+    ikon: Lock,
+    judul: 'Privasi terjaga',
+    teks: 'Data anak dilindungi autentikasi dan aturan akses ketat. Hanya kader terdaftar yang dapat mengelolanya.',
   },
 ]
 
 const LANGKAH = [
   {
     nomor: '1',
-    judul: 'Siapkan data',
-    teks: 'Catat berat badan (kg), panjang/tinggi badan (cm), dan tanggal lahir anak dari hasil penimbangan.',
+    judul: 'Catat pengukuran',
+    teks: 'Berat, tinggi, dan lingkar tubuh dicatat langsung dari hasil penimbangan posyandu.',
   },
   {
     nomor: '2',
-    judul: 'Isi di kalkulator',
-    teks: 'Pilih jenis kelamin, masukkan tanggal, dan nilai pengukuran. Hasil dihitung langsung di perangkat Anda.',
+    judul: 'Status dihitung otomatis',
+    teks: 'Sistem membandingkan dengan kurva WHO dan menyimpan status serta riwayat pertumbuhan anak.',
   },
   {
     nomor: '3',
-    judul: 'Baca status & tindak lanjut',
-    teks: 'Lihat status ketiga indikator. Bila tidak normal, kunjungi posyandu atau fasilitas kesehatan terdekat.',
+    judul: 'Pantau & tindak lanjuti',
+    teks: 'Kader dan orang tua melihat riwayat; bila tidak normal, segera konsultasikan ke tenaga kesehatan.',
   },
-]
-
-const KET = [
-  { kode: 'SK', label: 'Sangat Kurang' },
-  { kode: 'K', label: 'Kurang' },
-  { kode: 'N', label: 'Normal' },
-  { kode: 'RBL', label: 'Risiko Berat Berlebih' },
-  { kode: 'SP', label: 'Sangat Pendek' },
-  { kode: 'P', label: 'Pendek' },
-  { kode: 'T', label: 'Tinggi' },
-  { kode: 'GB', label: 'Gizi Buruk' },
-  { kode: 'GK', label: 'Gizi Kurang' },
-  { kode: 'GN', label: 'Gizi Baik' },
-  { kode: 'RGL', label: 'Risiko Gizi Lebih' },
-  { kode: 'GL', label: 'Gizi Lebih' },
-  { kode: 'O', label: 'Obesitas' },
 ]
 </script>
 
@@ -141,201 +256,279 @@ const KET = [
         </svg>
 
         <div
-          class="mx-auto grid max-w-6xl items-center gap-12 px-4 pt-16 pb-16 sm:px-6 sm:pt-20 sm:pb-20 lg:grid-cols-[1.04fr_0.96fr] lg:gap-16 lg:pt-24 lg:pb-28"
+          class="mx-auto max-w-6xl px-4 pt-16 pb-16 sm:px-6 sm:pt-20 sm:pb-20 lg:pt-24 lg:pb-24"
         >
           <Reveal>
-            <p class="text-primary inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50/80 px-3.5 py-1.5 text-xs font-bold tracking-wide shadow-sm">
-              <Sparkles class="size-3.5" />
-              Standar WHO · Metode LMS
-            </p>
+            <div class="mx-auto max-w-3xl text-center">
+              <p class="text-primary inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50/80 px-3.5 py-1.5 text-xs font-bold tracking-wide shadow-sm">
+                <Sparkles class="size-3.5" />
+                Sistem informasi posyandu digital
+              </p>
 
-            <h1 class="font-display mt-6 text-[2.9rem] leading-[1.06] font-semibold text-balance sm:text-6xl lg:text-[4.1rem]">
-              Tumbuh kembang anak,
-              <span class="relative inline-block text-primary">
-                terukur dengan akurat.
-                <svg
-                  class="absolute -bottom-2 left-0 w-full sm:-bottom-3"
-                  viewBox="0 0 220 12"
-                  fill="none"
-                  preserveAspectRatio="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M 4 9 C 60 3, 160 3, 216 8"
-                    stroke="#0d9488"
-                    stroke-width="4"
-                    stroke-linecap="round"
-                    vector-effect="non-scaling-stroke"
-                  />
-                </svg>
-              </span>
-            </h1>
+              <h1 class="font-display mt-6 text-[2.6rem] leading-[1.1] font-semibold text-balance sm:text-5xl lg:text-[3.6rem]">
+                Satu catatan digital untuk tumbuh kembang
+                <span class="relative inline-block text-primary">
+                  seluruh warga.
+                  <svg
+                    class="absolute -bottom-2 left-0 w-full sm:-bottom-3"
+                    viewBox="0 0 220 12"
+                    fill="none"
+                    preserveAspectRatio="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M 4 9 C 60 3, 160 3, 216 8"
+                      stroke="#0d9488"
+                      stroke-width="4"
+                      stroke-linecap="round"
+                      vector-effect="non-scaling-stroke"
+                    />
+                  </svg>
+                </span>
+              </h1>
 
-            <p class="text-muted-foreground mt-6 max-w-md text-lg leading-relaxed">
-              Masukkan berat badan, tinggi badan, dan umur — hasil status gizi muncul seketika, mengikuti kurva pertumbuhan WHO untuk anak 0–60 bulan.
-            </p>
+              <p class="text-muted-foreground mx-auto mt-6 max-w-xl text-lg leading-relaxed">
+                Posyandu Wapalo membantu kader mencatat pengukuran, memantau status gizi, dan menjaga
+                riwayat tumbuh kembang — dari balita, ibu hamil, hingga dewasa dan lansia.
+              </p>
 
-            <div class="mt-9 flex flex-wrap items-center gap-3">
-              <RouterLink to="/kalkulator">
-                <Button size="lg" class="gap-2 shadow-lg shadow-primary/25">
-                  Hitung Sekarang
-                  <ArrowRight class="size-4" />
-                </Button>
-              </RouterLink>
-              <RouterLink to="/#indikator">
-                <Button variant="outline" size="lg">Pelajari Indikator</Button>
-              </RouterLink>
-            </div>
-
-            <dl class="mt-12 grid max-w-md grid-cols-3 gap-x-4 border-t border-border pt-6">
-              <div>
-                <dt class="text-muted-foreground text-xs font-bold tracking-wide uppercase">Cakupan</dt>
-                <dd class="font-display mt-1 text-2xl font-semibold tabular-nums">0–60 bln</dd>
+              <div class="mt-9 flex flex-wrap items-center justify-center gap-3">
+                <RouterLink to="/dashboard">
+                  <Button size="lg" class="gap-2 shadow-lg shadow-primary/25">
+                    <LayoutDashboard class="size-4" />
+                    Jelajahi Layanan
+                  </Button>
+                </RouterLink>
+                <RouterLink to="/kalkulator">
+                  <Button variant="outline" size="lg">
+                    Coba Kalkulator Status Gizi
+                    <ArrowRight class="size-4" />
+                  </Button>
+                </RouterLink>
               </div>
-              <div>
-                <dt class="text-muted-foreground text-xs font-bold tracking-wide uppercase">Indikator</dt>
-                <dd class="font-display mt-1 text-2xl font-semibold tabular-nums">3 status</dd>
-              </div>
-              <div>
-                <dt class="text-muted-foreground text-xs font-bold tracking-wide uppercase">Dasar</dt>
-                <dd class="font-display mt-1 text-2xl font-semibold">WHO 2006</dd>
-              </div>
-            </dl>
-          </Reveal>
-
-          <Reveal :delay="140">
-            <div class="relative">
-              <div
-                class="absolute -inset-3 -z-10 rounded-[2rem] bg-gradient-to-br from-primary/25 to-accent/20 blur-xl"
-                aria-hidden="true"
-              />
-              <Card class="rounded-3xl border-emerald-100 py-0 shadow-2xl shadow-primary/10">
-                <CardContent class="gap-0 p-6 sm:p-7">
-                  <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-                    <p class="font-display flex items-center gap-2 text-lg font-semibold">
-                      <HeartPulse class="text-primary size-5" />
-                      Kalkulator kilat
-                    </p>
-                    <div
-                      class="inline-flex rounded-xl border border-emerald-200 bg-emerald-50 p-1"
-                      role="group"
-                      aria-label="Jenis kelamin"
-                    >
-                      <button
-                        v-for="(label, k) in { L: 'Laki-laki', P: 'Perempuan' }"
-                        :key="k"
-                        type="button"
-                        :class="jk === k
-                          ? 'bg-primary text-primary-foreground shadow-sm'
-                          : 'text-muted-foreground hover:text-foreground'"
-                        class="rounded-lg px-3 py-1.5 text-sm font-bold transition-colors"
-                        @click="jk = k"
-                      >
-                        {{ label }}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div class="rounded-2xl border border-border bg-white p-3 sm:p-4">
-                    <KurvaWHO :jk="jk" :umur-bulan="umur" :z="hasil?.z_bb_u ?? null" />
-                  </div>
-
-                  <div class="mt-7 grid gap-5 sm:grid-cols-3">
-                    <div>
-                      <label for="mini-umur" class="text-muted-foreground mb-2 flex justify-between text-xs font-bold">
-                        <span>Umur</span><span class="text-foreground tabular-nums">{{ umur }} bln</span>
-                      </label>
-                      <input id="mini-umur" v-model.number="umur" type="range" min="0" max="60" step="1" class="accent-primary w-full" />
-                    </div>
-                    <div>
-                      <label for="mini-berat" class="text-muted-foreground mb-2 flex justify-between text-xs font-bold">
-                        <span>Berat</span><span class="text-foreground tabular-nums">{{ berat }} kg</span>
-                      </label>
-                      <input id="mini-berat" v-model.number="berat" type="range" min="2" max="25" step="0.1" class="accent-primary w-full" />
-                    </div>
-                    <div>
-                      <label for="mini-panjang" class="text-muted-foreground mb-2 flex justify-between text-xs font-bold">
-                        <span>Panjang</span><span class="text-foreground tabular-nums">{{ panjang }} cm</span>
-                      </label>
-                      <input id="mini-panjang" v-model.number="panjang" type="range" min="45" max="120" step="0.5" class="accent-primary w-full" />
-                    </div>
-                  </div>
-
-                  <div v-if="hasil" class="mt-6 grid gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 sm:grid-cols-3">
-                    <div>
-                      <p class="text-muted-foreground text-xs font-bold">BB/U</p>
-                      <StatusBadge class="mt-1" :kode="hasil.status_bb_u" />
-                      <p class="text-muted-foreground mt-1.5 text-xs tabular-nums">z = {{ hasil.z_bb_u?.toFixed(2) }}</p>
-                    </div>
-                    <div>
-                      <p class="text-muted-foreground text-xs font-bold">TB/U</p>
-                      <StatusBadge class="mt-1" :kode="hasil.status_tb_u" />
-                      <p class="text-muted-foreground mt-1.5 text-xs tabular-nums">z = {{ hasil.z_tb_u?.toFixed(2) }}</p>
-                    </div>
-                    <div>
-                      <p class="text-muted-foreground text-xs font-bold">BB/TB</p>
-                      <StatusBadge class="mt-1" :kode="hasil.status_bb_tb" />
-                      <p class="text-muted-foreground mt-1.5 text-xs tabular-nums">z = {{ hasil.z_bb_tb?.toFixed(2) }}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </Reveal>
         </div>
       </section>
 
-      <!-- ===== INDIKATOR ===== -->
-      <section id="indikator" class="border-border/60 bg-card/60 scroll-mt-20 border-y">
+      <!-- ===== STATISTIK BULAN INI ===== -->
+      <section v-if="!statistikError" class="relative -mt-6 pb-16 sm:pb-20">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6">
+          <Reveal>
+            <Card class="rounded-2xl border-emerald-100 shadow-lg shadow-primary/5">
+              <CardContent class="flex flex-col gap-6 p-6 sm:p-7">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <p class="text-muted-foreground text-xs font-bold tracking-widest uppercase">
+                    Statistik posyandu · {{ labelBulanIni }}
+                  </p>
+                  <span class="text-primary inline-flex items-center gap-1.5 text-xs font-bold">
+                    <BarChart3 class="size-3.5" />
+                    angka agregat publik
+                  </span>
+                </div>
+                <dl class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                  <div v-for="k in KARTU_STATISTIK" :key="k.label" class="flex items-start gap-3">
+                    <span class="bg-primary/10 text-primary grid size-11 shrink-0 place-items-center rounded-xl">
+                      <component :is="k.ikon" class="size-5" />
+                    </span>
+                    <div>
+                      <dt class="text-muted-foreground text-xs font-bold">{{ k.label }}</dt>
+                      <dd class="mt-0.5">
+                        <span class="font-display text-2xl font-semibold tabular-nums">
+                          {{ k.nilai ?? '–' }}
+                        </span>
+                        <span class="text-muted-foreground text-sm"> {{ k.akhiran }}</span>
+                      </dd>
+                      <dd class="text-muted-foreground mt-0.5 text-xs">{{ k.keterangan }}</dd>
+                    </div>
+                  </div>
+                </dl>
+              </CardContent>
+            </Card>
+          </Reveal>
+        </div>
+      </section>
+
+      <!-- ===== LAYANAN POSYANDU ===== -->
+      <section id="layanan" class="border-border/60 bg-card/60 scroll-mt-20 border-y">
         <div class="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
           <Reveal>
-            <p class="text-primary text-xs font-bold tracking-widest uppercase">Tiga sudut pandang</p>
+            <p class="text-primary text-xs font-bold tracking-widest uppercase">Layanan terpadu</p>
             <h2 class="font-display mt-4 max-w-xl text-3xl leading-tight font-semibold text-balance sm:text-4xl">
-              Status gizi dinilai dari tiga indikator.
+              Satu posyandu, empat sasaran kesehatan.
             </h2>
+            <p class="text-muted-foreground mt-4 max-w-2xl text-sm leading-relaxed">
+              Setiap kelompok warga memiliki pencatatan dan pemantauan sendiri dalam satu sistem.
+              Balita sudah berjalan; layanan lainnya menyusul.
+            </p>
           </Reveal>
-          <div class="mt-12 grid gap-6 md:grid-cols-3">
-            <Reveal v-for="(ind, i) in INDIKATOR" :key="ind.nama" :delay="i * 100">
-              <Card class="group h-full rounded-2xl border-emerald-100 py-0 transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
-                <CardContent class="gap-0 p-6 sm:p-7">
-                  <span class="bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground grid size-13 place-items-center rounded-2xl transition-colors duration-300">
-                    <component :is="ind.ikon" class="size-6" />
-                  </span>
-                  <p class="text-muted-foreground mt-6 text-xs font-bold tracking-wide uppercase">
-                    {{ ind.nama }} · tabel {{ ind.tabel }}
-                  </p>
-                  <h3 class="font-display mt-1.5 text-xl font-semibold">{{ ind.judul }}</h3>
-                  <p class="text-muted-foreground mt-2 text-sm leading-relaxed">{{ ind.deskripsi }}</p>
-                </CardContent>
-              </Card>
+
+          <div class="mt-12 grid gap-5 md:grid-cols-2">
+            <Reveal v-for="(m, i) in LAYANAN" :key="m.kunci" :delay="i * 80">
+              <component :is="m.aktif ? RouterLink : 'div'" :to="m.aktif ? m.href : null" class="block h-full">
+                <Card
+                  class="h-full rounded-2xl py-0 transition-all duration-300"
+                  :class="m.aktif
+                    ? 'border-emerald-100 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10'
+                    : 'opacity-80'"
+                >
+                  <CardContent class="flex flex-col gap-4 p-6 sm:p-7">
+                    <div class="flex items-start justify-between gap-3">
+                      <span
+                        class="grid size-12 place-items-center rounded-xl"
+                        :class="m.aktif ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'"
+                      >
+                        <component :is="m.ikon" class="size-6" />
+                      </span>
+                      <span
+                        v-if="m.aktif"
+                        class="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700"
+                      >
+                        Aktif
+                      </span>
+                      <span
+                        v-else
+                        class="inline-flex items-center gap-1 rounded-full border border-transparent bg-muted px-2.5 py-0.5 text-xs font-bold text-muted-foreground"
+                      >
+                        Segera
+                      </span>
+                    </div>
+                    <div>
+                      <h3 class="font-display text-xl font-semibold">{{ m.nama }}</h3>
+                      <p class="text-muted-foreground mt-1.5 text-sm leading-relaxed">{{ m.deskripsi }}</p>
+                    </div>
+                    <p v-if="m.aktif" class="text-primary inline-flex items-center gap-1.5 text-sm font-bold">
+                      Buka layanan
+                      <ArrowRight class="size-4" />
+                    </p>
+                  </CardContent>
+                </Card>
+              </component>
             </Reveal>
           </div>
+        </div>
+      </section>
 
-          <Reveal :delay="150">
-            <div class="mt-10 rounded-2xl border border-emerald-100 bg-white p-6 sm:p-7">
-              <p class="text-muted-foreground text-xs font-bold tracking-widest uppercase">Status gizi</p>
-              <div class="mt-4 flex flex-wrap gap-2">
-                <span
-                  v-for="k in KET"
-                  :key="k.kode"
-                  class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
-                  :class="TONE_BADGE[infoStatus(k.kode).tone]"
-                >
-                  {{ k.label }}
-                </span>
+      <!-- ===== KALKULATOR KILAT ===== -->
+      <section id="kalkulator" class="scroll-mt-20">
+        <div class="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
+          <div class="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+            <Reveal>
+              <p class="text-primary text-xs font-bold tracking-widest uppercase">Coba sekarang</p>
+              <h2 class="font-display mt-4 max-w-md text-3xl leading-tight font-semibold text-balance sm:text-4xl">
+                Cek status gizi anak, gratis tanpa daftar.
+              </h2>
+              <p class="text-muted-foreground mt-6 max-w-md text-sm leading-relaxed">
+                Masukkan jenis kelamin, umur, berat, dan tinggi badan. Hasil status gizi dan kurva
+                pertumbuhan WHO muncul seketika di perangkat Anda — cukup dari Buku KMS atau hasil
+                penimbangan posyandu.
+              </p>
+              <ul class="mt-8 space-y-4">
+                <li v-for="(m, i) in MANFAAT" :key="m.judul" class="flex gap-3" :style="{ transitionDelay: `${i * 60}ms` }">
+                  <span class="bg-primary/10 text-primary grid size-10 shrink-0 place-items-center rounded-xl">
+                    <component :is="m.ikon" class="size-5" />
+                  </span>
+                  <p class="text-sm leading-relaxed"><span class="font-bold">{{ m.judul }}.</span> {{ m.teks }}</p>
+                </li>
+              </ul>
+              <RouterLink to="/kalkulator" class="mt-9 inline-block">
+                <Button size="lg" class="gap-2 shadow-lg shadow-primary/25">
+                  Buka Kalkulator Lengkap
+                  <ArrowRight class="size-4" />
+                </Button>
+              </RouterLink>
+            </Reveal>
+
+            <Reveal :delay="140">
+              <div class="relative">
+                <div
+                  class="absolute -inset-3 -z-10 rounded-[2rem] bg-gradient-to-br from-primary/25 to-accent/20 blur-xl"
+                  aria-hidden="true"
+                />
+                <Card class="rounded-3xl border-emerald-100 py-0 shadow-2xl shadow-primary/10">
+                  <CardContent class="gap-0 p-6 sm:p-7">
+                    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+                      <p class="font-display flex items-center gap-2 text-lg font-semibold">
+                        <HeartPulse class="text-primary size-5" />
+                        Kalkulator kilat
+                      </p>
+                      <div
+                        class="inline-flex rounded-xl border border-emerald-200 bg-emerald-50 p-1"
+                        role="group"
+                        aria-label="Jenis kelamin"
+                      >
+                        <button
+                          v-for="(label, k) in { L: 'Laki-laki', P: 'Perempuan' }"
+                          :key="k"
+                          type="button"
+                          :class="jk === k
+                            ? 'bg-primary text-primary-foreground shadow-sm'
+                            : 'text-muted-foreground hover:text-foreground'"
+                          class="rounded-lg px-3 py-1.5 text-sm font-bold transition-colors"
+                          @click="jk = k"
+                        >
+                          {{ label }}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="rounded-2xl border border-border bg-white p-3 sm:p-4">
+                      <KurvaWHO :jk="jk" :umur-bulan="umur" :z="hasil?.z_bb_u ?? null" />
+                    </div>
+
+                    <div class="mt-7 grid gap-5 sm:grid-cols-3">
+                      <div>
+                        <label for="mini-umur" class="text-muted-foreground mb-2 flex justify-between text-xs font-bold">
+                          <span>Umur</span><span class="text-foreground tabular-nums">{{ umur }} bln</span>
+                        </label>
+                        <input id="mini-umur" v-model.number="umur" type="range" min="0" max="60" step="1" class="accent-primary w-full" />
+                      </div>
+                      <div>
+                        <label for="mini-berat" class="text-muted-foreground mb-2 flex justify-between text-xs font-bold">
+                          <span>Berat</span><span class="text-foreground tabular-nums">{{ berat }} kg</span>
+                        </label>
+                        <input id="mini-berat" v-model.number="berat" type="range" min="2" max="25" step="0.1" class="accent-primary w-full" />
+                      </div>
+                      <div>
+                        <label for="mini-panjang" class="text-muted-foreground mb-2 flex justify-between text-xs font-bold">
+                          <span>Panjang</span><span class="text-foreground tabular-nums">{{ panjang }} cm</span>
+                        </label>
+                        <input id="mini-panjang" v-model.number="panjang" type="range" min="45" max="120" step="0.5" class="accent-primary w-full" />
+                      </div>
+                    </div>
+
+                    <div v-if="hasil" class="mt-6 grid gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 sm:grid-cols-3">
+                      <div>
+                        <p class="text-muted-foreground text-xs font-bold">BB/U</p>
+                        <StatusBadge class="mt-1" :kode="hasil.status_bb_u" />
+                        <p class="text-muted-foreground mt-1.5 text-xs tabular-nums">z = {{ hasil.z_bb_u?.toFixed(2) }}</p>
+                      </div>
+                      <div>
+                        <p class="text-muted-foreground text-xs font-bold">TB/U</p>
+                        <StatusBadge class="mt-1" :kode="hasil.status_tb_u" />
+                        <p class="text-muted-foreground mt-1.5 text-xs tabular-nums">z = {{ hasil.z_tb_u?.toFixed(2) }}</p>
+                      </div>
+                      <div>
+                        <p class="text-muted-foreground text-xs font-bold">BB/TB</p>
+                        <StatusBadge class="mt-1" :kode="hasil.status_bb_tb" />
+                        <p class="text-muted-foreground mt-1.5 text-xs tabular-nums">z = {{ hasil.z_bb_tb?.toFixed(2) }}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-            </div>
-          </Reveal>
+            </Reveal>
+          </div>
         </div>
       </section>
 
       <!-- ===== CARA PAKAI ===== -->
-      <section id="cara-pakai" class="scroll-mt-20">
+      <section id="cara-pakai" class="border-border/60 bg-card/60 scroll-mt-20 border-y">
         <div class="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
           <Reveal>
             <p class="text-primary text-xs font-bold tracking-widest uppercase">Langkah sederhana</p>
             <h2 class="font-display mt-4 max-w-xl text-3xl leading-tight font-semibold text-balance sm:text-4xl">
-              Tiga langkah, semua di tangan Anda.
+              Dari penimbangan hingga riwayat lengkap.
             </h2>
           </Reveal>
 
@@ -358,7 +551,7 @@ const KET = [
       </section>
 
       <!-- ===== TENTANG ===== -->
-      <section id="tentang" class="border-border/60 bg-card/60 scroll-mt-20 border-y">
+      <section id="tentang" class="scroll-mt-20">
         <div class="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
           <div class="grid items-start gap-12 md:grid-cols-2 lg:gap-16">
             <Reveal>
@@ -429,7 +622,7 @@ const KET = [
       </section>
 
       <!-- ===== CTA ===== -->
-      <section>
+      <section class="border-border/60 bg-card/60 border-t">
         <div class="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
           <Reveal>
             <div class="from-primary to-accent relative overflow-hidden rounded-[2rem] bg-gradient-to-br p-10 text-center shadow-2xl shadow-primary/25 sm:p-16">
@@ -459,19 +652,27 @@ const KET = [
                 />
               </svg>
               <div class="relative">
-                <p class="text-xs font-bold tracking-widest text-white/70 uppercase">Gratis · Tanpa daftar</p>
+                <p class="text-xs font-bold tracking-widest text-white/70 uppercase">Sehat &amp; mandiri untuk semua</p>
                 <h2 class="font-display mx-auto mt-4 max-w-2xl text-3xl leading-tight font-semibold text-white text-balance sm:text-4xl">
-                  Cek status gizi anak sekarang, gratis.
+                  Mulai kelola data posyandu secara digital.
                 </h2>
                 <p class="mx-auto mt-5 max-w-lg text-sm leading-relaxed text-white/80">
-                  Hasil langsung di browser tanpa perlu daftar. Cukup masukkan pengukuran dari Buku KMS atau hasil penimbangan posyandu.
+                  Kader dapat masuk untuk mencatat dan memantau kunjungan. Pengunjung lain bebas mencoba kalkulator status gizi tanpa daftar.
                 </p>
-                <RouterLink to="/kalkulator" class="mt-10 inline-block">
-                  <Button size="lg" variant="secondary" class="gap-2 bg-white text-emerald-700 shadow-lg hover:bg-emerald-50">
-                    Buka Kalkulator
-                    <ArrowRight class="size-4" />
-                  </Button>
-                </RouterLink>
+                <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
+                  <RouterLink to="/dashboard">
+                    <Button size="lg" variant="secondary" class="gap-2 bg-white text-emerald-700 shadow-lg hover:bg-emerald-50">
+                      Jelajahi Layanan
+                      <ArrowRight class="size-4" />
+                    </Button>
+                  </RouterLink>
+                  <RouterLink to="/login">
+                    <Button size="lg" variant="outline" class="border-white/40 bg-transparent text-white shadow-lg hover:bg-white/10">
+                      <Lock class="size-4" />
+                      Masuk sebagai Kader
+                    </Button>
+                  </RouterLink>
+                </div>
               </div>
             </div>
           </Reveal>
