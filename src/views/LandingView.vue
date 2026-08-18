@@ -150,7 +150,8 @@ const LAYANAN: ModulLayanan[] = [
     nama: 'Bumil',
     deskripsi: 'Pemantauan ibu hamil: identitas, kunjungan, dan status kesehatan.',
     ikon: HeartPulse,
-    aktif: false,
+    aktif: true,
+    href: '/bumil',
   },
   {
     kunci: 'remaja',
@@ -359,7 +360,7 @@ const LANGKAH = [
             </h2>
             <p class="text-muted-foreground mt-4 max-w-2xl text-sm leading-relaxed">
               Setiap kelompok warga memiliki pencatatan dan pemantauan sendiri dalam satu sistem.
-              Balita sudah berjalan; layanan lainnya menyusul.
+              Balita & bumil sudah berjalan; layanan lainnya menyusul.
             </p>
           </Reveal>
 

@@ -152,7 +152,8 @@ const MODUL: ModulLayanan[] = [
     nama: 'Bumil',
     deskripsi: 'Pemantauan ibu hamil: identitas, kunjungan, dan status kesehatan.',
     ikon: HeartPulse,
-    aktif: false,
+    aktif: true,
+    href: '/bumil',
   },
   {
     kunci: 'remaja',

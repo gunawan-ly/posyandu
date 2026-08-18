@@ -51,10 +51,5 @@
   "49": "vite-env.d.ts",
   "50": "vite.config.ts",
   "51": "src/modules/balita/views/BalitaListView.vue",
-  "52": "routes.ts",
-  "53": "src/modules/bumil/views/BumilDetailView.vue",
-  "54": "src/modules/bumil/views/BumilFormView.vue",
-  "55": "bumil/db.ts",
-  "56": "src/modules/bumil/views/BumilListView.vue",
-  "57": "bumil/routes.ts"
+  "52": "routes.ts"
 }

@@ -1,0 +1,212 @@
+import { wajibSupabase } from '@/supabase/client'
+import { parseTanggal } from '@/lib/umur'
+
+// Lapisan akses data modul Bumil. Tidak ada kalkulator z-score WHO untuk
+// kehamilan, jadi status (BB sesuai kurva KIA, LILA hijau/merah, TD sesuai
+// kurva KIA) disimpan sebagai pilihan manual dari daftar label standar.
+
+// Opsi label standar untuk field kunjungan.
+export const KATEGORI_BUMIL = ['Hamil', 'Menyusui'] as const
+
+export const OPSI_BB_KURVA = ['Sesuai', 'Tidak Sesuai'] as const
+export const OPSI_LILA = ['Hijau', 'Merah'] as const
+export const OPSI_TD_KURVA = ['Normal', 'Tinggi'] as const
+export const OPSI_YA_TIDAK = ['Ya', 'Tidak'] as const
+
+// Tampilkan nilai Ya/Tidak secara konsisten (data lama memakai Y/T).
+export function labelYaTidak(nilai: string | null | undefined): string {
+  if (nilai == null || nilai === '') return '—'
+  if (nilai === 'Y') return 'Ya'
+  if (nilai === 'T') return 'Tidak'
+  return nilai
+}
+
+export interface Bumil {
+  id: number
+  nama: string | null
+  nik: string | null
+  tanggal_lahir: string | null
+  umur: string | null
+  nama_suami: string | null
+  nomor_kk: string | null
+  alamat: string | null
+  dusun: string | null
+  hamil_anak_ke: string | null
+  jarak_dengan_anak_sebelumnya: string | null
+  tanggal_bersalin: string | null
+  tempat_bersalin: string | null
+  cara_persalin: string | null
+  anak_ke: string | null
+  kategori: string | null
+  created_at: string
+}
+
+export interface KunjunganBumil {
+  id: number
+  bumil_id: number | null
+  nama: string | null
+  tanggal_kunjungan: string | null
+  usia_kehamilan_minggu: number | null
+  berat_badan: number | null
+  bb_sesuai_kurva_kia: string | null
+  lingkaran_lengan_atas: number | null
+  lila_hijau_merah: string | null
+  tekanan_darah: string | null
+  td_sesuai_kurva_kia: string | null
+  batuk_terus_menerus: string | null
+  demam_lebih_dua_minggu: string | null
+  bb_tidak_naik_dua_bulan: string | null
+  kontak_tbc: string | null
+  dapat_tablet_ttd: string | null
+  konsumsi_ttd: string | null
+  mt_kek_diberikan: string | null
+  konsumsi_mt_kek: string | null
+  kelas_bumil: string | null
+  dapat_edukasi: string | null
+  dirujuk: string | null
+  created_at: string
+}
+
+export interface InputBumil {
+  nama: string
+  nik?: string | null
+  tanggal_lahir?: string | null
+  umur?: string | null
+  nama_suami?: string | null
+  nomor_kk?: string | null
+  alamat?: string | null
+  dusun?: string | null
+  hamil_anak_ke?: string | null
+  jarak_dengan_anak_sebelumnya?: string | null
+  tanggal_bersalin?: string | null
+  tempat_bersalin?: string | null
+  cara_persalin?: string | null
+  anak_ke?: string | null
+  kategori?: string | null
+}
+
+export interface InputKunjunganBumil {
+  tanggal_kunjungan: string
+  usia_kehamilan_minggu?: number | null
+  berat_badan?: number | null
+  bb_sesuai_kurva_kia?: string | null
+  lingkaran_lengan_atas?: number | null
+  lila_hijau_merah?: string | null
+  tekanan_darah?: string | null
+  td_sesuai_kurva_kia?: string | null
+  batuk_terus_menerus?: string | null
+  demam_lebih_dua_minggu?: string | null
+  bb_tidak_naik_dua_bulan?: string | null
+  kontak_tbc?: string | null
+  dapat_tablet_ttd?: string | null
+  konsumsi_ttd?: string | null
+  mt_kek_diberikan?: string | null
+  konsumsi_mt_kek?: string | null
+  kelas_bumil?: string | null
+  dapat_edukasi?: string | null
+  dirujuk?: string | null
+}
+
+export async function listBumil(cari = ''): Promise<Bumil[]> {
+  const kl = wajibSupabase()
+  let q = kl.from('bumil_identitas').select('*').order('nama')
+  if (cari.trim()) q = q.ilike('nama', `%${cari.trim()}%`)
+  const { data, error } = await q
+  if (error) throw error
+  return (data ?? []) as Bumil[]
+}
+
+export async function ambilBumil(id: number): Promise<Bumil | null> {
+  const kl = wajibSupabase()
+  const { data, error } = await kl
+    .from('bumil_identitas')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle()
+  if (error) throw error
+  return (data ?? null) as Bumil | null
+}
+
+export async function buatBumil(input: InputBumil): Promise<Bumil> {
+  const kl = wajibSupabase()
+  const { data, error } = await kl
+    .from('bumil_identitas')
+    .insert(input)
+    .select()
+    .single()
+  if (error) throw error
+  return data as Bumil
+}
+
+export async function ubahBumil(id: number, patch: Partial<InputBumil>): Promise<Bumil> {
+  const kl = wajibSupabase()
+  const { data, error } = await kl
+    .from('bumil_identitas')
+    .update(patch)
+    .eq('id', id)
+    .select()
+    .single()
+  if (error) throw error
+  return data as Bumil
+}
+
+export async function hapusBumil(id: number): Promise<void> {
+  const kl = wajibSupabase()
+  const { error } = await kl.from('bumil_identitas').delete().eq('id', id)
+  if (error) throw error
+}
+
+export async function listKunjunganBumil(bumilId: number): Promise<KunjunganBumil[]> {
+  const kl = wajibSupabase()
+  const { data, error } = await kl
+    .from('bumil_kunjungan')
+    .select('*')
+    .eq('bumil_id', bumilId)
+    .order('tanggal_kunjungan', { ascending: true })
+    .order('id', { ascending: true })
+  if (error) throw error
+  return (data ?? []) as KunjunganBumil[]
+}
+
+export async function tambahKunjunganBumil(bumil: Bumil, input: InputKunjunganBumil): Promise<KunjunganBumil> {
+  const kl = wajibSupabase()
+
+  const kunjungan = parseTanggal(input.tanggal_kunjungan)
+  if (!kunjungan) throw new Error('Tanggal kunjungan tidak valid.')
+
+  const { data, error } = await kl
+    .from('bumil_kunjungan')
+    .insert({
+      bumil_id: bumil.id,
+      nama: bumil.nama,
+      tanggal_kunjungan: input.tanggal_kunjungan,
+      usia_kehamilan_minggu: input.usia_kehamilan_minggu ?? null,
+      berat_badan: input.berat_badan ?? null,
+      bb_sesuai_kurva_kia: input.bb_sesuai_kurva_kia ?? null,
+      lingkaran_lengan_atas: input.lingkaran_lengan_atas ?? null,
+      lila_hijau_merah: input.lila_hijau_merah ?? null,
+      tekanan_darah: input.tekanan_darah ?? null,
+      td_sesuai_kurva_kia: input.td_sesuai_kurva_kia ?? null,
+      batuk_terus_menerus: input.batuk_terus_menerus ?? null,
+      demam_lebih_dua_minggu: input.demam_lebih_dua_minggu ?? null,
+      bb_tidak_naik_dua_bulan: input.bb_tidak_naik_dua_bulan ?? null,
+      kontak_tbc: input.kontak_tbc ?? null,
+      dapat_tablet_ttd: input.dapat_tablet_ttd ?? null,
+      konsumsi_ttd: input.konsumsi_ttd ?? null,
+      mt_kek_diberikan: input.mt_kek_diberikan ?? null,
+      konsumsi_mt_kek: input.konsumsi_mt_kek ?? null,
+      kelas_bumil: input.kelas_bumil ?? null,
+      dapat_edukasi: input.dapat_edukasi ?? null,
+      dirujuk: input.dirujuk ?? null,
+    })
+    .select()
+    .single()
+  if (error) throw error
+  return data as KunjunganBumil
+}
+
+export async function hapusKunjunganBumil(id: number): Promise<void> {
+  const kl = wajibSupabase()
+  const { error } = await kl.from('bumil_kunjungan').delete().eq('id', id)
+  if (error) throw error
+}

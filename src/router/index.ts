@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { supabase } from '@/supabase/client'
 import { balitaRoutes } from '@/modules/balita/routes'
+import { bumilRoutes } from '@/modules/bumil/routes'
 
 const reduksiGerak =
   typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
@@ -36,6 +37,7 @@ const router = createRouter({
       component: () => import('@/views/DashboardView.vue'),
     },
     ...balitaRoutes,
+    ...bumilRoutes,
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
 })
