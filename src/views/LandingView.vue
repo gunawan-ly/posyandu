@@ -26,6 +26,22 @@ import { Card, CardContent } from '@/components/ui/card'
 import { hitungSemuaStatus } from '@/lib/kalkulator'
 import { supabase } from '@/supabase/client'
 
+// ============================================================
+// LAPISAN KAMPANYE HUT KE-81 RI (2026)
+// ------------------------------------------------------------
+// Seluruh elemen perayaan (badge HUT, angka 81, pita merah,
+// aksen CTA, copy kampanye) dibungkus satu flag di bawah ini.
+// Ubah ke `false` setelah periode perayaan → halaman kembali ke
+// identitas hijau klinis tanpa perlu mendesain ulang apa pun.
+// ============================================================
+const KAMPANYE_HUT = true
+
+const TEX_KAMPANYE = {
+  badge: 'HUT Ke-81 RI · Merdeka Melayani',
+  garis: '81 Tahun Indonesia Merdeka — saatnya posyandu melangkah lebih digital.',
+  cta: 'HUT Ke-81 RI · Merdeka Melayani, Merdeka Berkembang',
+}
+
 const jk = ref<'L' | 'P'>('L')
 const umur = ref(24)
 const berat = ref(12.2)
@@ -221,10 +237,26 @@ const LANGKAH = [
           />
           <div class="bg-primary/10 absolute -top-28 right-[8%] size-96 rounded-full blur-3xl" />
           <div class="bg-accent/10 absolute -bottom-32 -left-24 size-80 rounded-full blur-3xl" />
+          <!-- Cahaya merah halus (lapisan kampanye) -->
+          <div
+            v-if="KAMPANYE_HUT"
+            class="anim-melayang bg-red-500/10 absolute -top-24 right-[14%] size-72 rounded-full blur-3xl"
+          />
           <div
             class="absolute inset-0 opacity-[0.035]"
             style="background-image: radial-gradient(circle, #059669 1px, transparent 1px); background-size: 28px 28px"
           />
+        </div>
+
+        <!-- Angka 81 sebagai watermark elegan (lapisan kampanye, desktop) -->
+        <div
+          v-if="KAMPANYE_HUT"
+          aria-hidden="true"
+          class="pointer-events-none absolute -top-8 right-[-3%] -z-10 hidden select-none lg:block"
+        >
+          <span class="font-display anim-melayang text-red-600/[0.10] text-[22rem] leading-none font-bold">
+            81
+          </span>
         </div>
 
         <svg
@@ -261,16 +293,31 @@ const LANGKAH = [
         >
           <Reveal>
             <div class="mx-auto max-w-3xl text-center">
+              <!-- Badge kampanye HUT ke-81 RI -->
+              <div v-if="KAMPANYE_HUT" class="mb-4 flex justify-center">
+                <span class="inline-flex items-center gap-2 rounded-full border border-red-200 bg-white px-3.5 py-1.5 text-xs font-bold tracking-wide text-red-700 shadow-sm">
+                  <svg class="size-3.5 shrink-0" viewBox="0 0 16 10" aria-hidden="true">
+                    <rect width="16" height="3.4" rx="0.6" fill="#dc2626" />
+                    <rect y="6.6" width="16" height="3.4" rx="0.6" fill="#ffffff" stroke="#dc2626" stroke-width="0.6" />
+                  </svg>
+                  {{ TEX_KAMPANYE.badge }}
+                </span>
+              </div>
+
               <p class="text-primary inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50/80 px-3.5 py-1.5 text-xs font-bold tracking-wide shadow-sm">
                 <Sparkles class="size-3.5" />
-                Sistem informasi posyandu digital
+                PosyanduGizi — Platform digital untuk posyandu
               </p>
 
               <h1 class="font-display mt-6 text-[2.6rem] leading-[1.1] font-semibold text-balance sm:text-5xl lg:text-[3.6rem]">
                 Satu catatan digital untuk tumbuh kembang
-                <span class="relative inline-block text-primary">
+                <span
+                  :class="KAMPANYE_HUT ? 'text-red-600' : 'text-primary'"
+                  class="relative inline-block"
+                >
                   seluruh warga.
                   <svg
+                    :stroke="KAMPANYE_HUT ? '#dc2626' : '#0d9488'"
                     class="absolute -bottom-2 left-0 w-full sm:-bottom-3"
                     viewBox="0 0 220 12"
                     fill="none"
@@ -279,7 +326,6 @@ const LANGKAH = [
                   >
                     <path
                       d="M 4 9 C 60 3, 160 3, 216 8"
-                      stroke="#0d9488"
                       stroke-width="4"
                       stroke-linecap="round"
                       vector-effect="non-scaling-stroke"
@@ -288,16 +334,26 @@ const LANGKAH = [
                 </span>
               </h1>
 
-              <p class="text-muted-foreground mx-auto mt-6 max-w-xl text-lg leading-relaxed">
+              <!-- Pesan kampanye: kemerdekaan ↔ pelayanan -->
+              <p v-if="KAMPANYE_HUT" class="mx-auto mt-6 max-w-xl text-base font-medium text-red-700">
+                {{ TEX_KAMPANYE.garis }}
+              </p>
+
+              <p class="text-muted-foreground mx-auto mt-4 max-w-xl text-lg leading-relaxed">
                 Posyandu Wapalo membantu kader mencatat pengukuran, memantau status gizi, dan menjaga
                 riwayat tumbuh kembang — dari balita, ibu hamil, hingga dewasa dan lansia.
               </p>
 
               <div class="mt-9 flex flex-wrap items-center justify-center gap-3">
                 <RouterLink to="/dashboard">
-                  <Button size="lg" class="gap-2 shadow-lg shadow-primary/25">
+                  <Button
+                    size="lg"
+                    :variant="KAMPANYE_HUT ? 'destructive' : 'default'"
+                    class="gap-2 shadow-lg"
+                    :class="KAMPANYE_HUT ? 'shadow-red-600/25' : 'shadow-primary/25'"
+                  >
                     <LayoutDashboard class="size-4" />
-                    Jelajahi Layanan
+                    Mulai Sekarang
                   </Button>
                 </RouterLink>
                 <RouterLink to="/kalkulator">
@@ -352,7 +408,15 @@ const LANGKAH = [
 
       <!-- ===== LAYANAN POSYANDU ===== -->
       <section id="layanan" class="border-border/60 bg-card/60 scroll-mt-20 border-y">
-        <div class="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
+        <div class="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
+          <!-- Pola garis diagonal halus (motif Indonesia, lapisan kampanye) -->
+          <div
+            v-if="KAMPANYE_HUT"
+            class="pointer-events-none absolute inset-0 opacity-[0.03]"
+            aria-hidden="true"
+            style="background-image: repeating-linear-gradient(45deg, #dc2626 0, #dc2626 1px, transparent 1px, transparent 16px)"
+          />
+
           <Reveal>
             <p class="text-primary text-xs font-bold tracking-widest uppercase">Layanan terpadu</p>
             <h2 class="font-display mt-4 max-w-xl text-3xl leading-tight font-semibold text-balance sm:text-4xl">
@@ -368,11 +432,17 @@ const LANGKAH = [
             <Reveal v-for="(m, i) in LAYANAN" :key="m.kunci" :delay="i * 80">
               <component :is="m.aktif ? RouterLink : 'div'" :to="m.aktif ? m.href : null" class="block h-full">
                 <Card
-                  class="h-full rounded-2xl py-0 transition-all duration-300"
+                  class="relative h-full overflow-hidden rounded-2xl py-0 transition-all duration-300"
                   :class="m.aktif
                     ? 'border-emerald-100 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10'
                     : 'opacity-80'"
                 >
+                  <!-- Pita merah tipis di puncak kartu layanan aktif (lapisan kampanye) -->
+                  <span
+                    v-if="m.aktif && KAMPANYE_HUT"
+                    aria-hidden="true"
+                    class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-600 via-red-400 to-red-600"
+                  />
                   <CardContent class="flex flex-col gap-4 p-6 sm:p-7">
                     <div class="flex items-start justify-between gap-3">
                       <span
@@ -398,7 +468,11 @@ const LANGKAH = [
                       <h3 class="font-display text-xl font-semibold">{{ m.nama }}</h3>
                       <p class="text-muted-foreground mt-1.5 text-sm leading-relaxed">{{ m.deskripsi }}</p>
                     </div>
-                    <p v-if="m.aktif" class="text-primary inline-flex items-center gap-1.5 text-sm font-bold">
+                    <p
+                      v-if="m.aktif"
+                      class="inline-flex items-center gap-1.5 text-sm font-bold"
+                      :class="KAMPANYE_HUT ? 'text-red-600' : 'text-primary'"
+                    >
                       Buka layanan
                       <ArrowRight class="size-4" />
                     </p>
@@ -627,6 +701,12 @@ const LANGKAH = [
         <div class="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
           <Reveal>
             <div class="from-primary to-accent relative overflow-hidden rounded-[2rem] bg-gradient-to-br p-10 text-center shadow-2xl shadow-primary/25 sm:p-16">
+              <!-- Pita merah tipis di puncak CTA (lapisan kampanye) -->
+              <span
+                v-if="KAMPANYE_HUT"
+                aria-hidden="true"
+                class="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-red-600 via-red-400 to-red-600"
+              />
               <div class="absolute inset-0 opacity-10" aria-hidden="true" style="background-image: radial-gradient(24rem 12rem at 50% 0%, rgba(255,255,255,.9), transparent 70%)" />
               <svg
                 class="pointer-events-none absolute inset-x-0 -bottom-6 h-36 w-full opacity-[0.09]"
@@ -653,7 +733,10 @@ const LANGKAH = [
                 />
               </svg>
               <div class="relative">
-                <p class="text-xs font-bold tracking-widest text-white/70 uppercase">Sehat &amp; mandiri untuk semua</p>
+                <p v-if="KAMPANYE_HUT" class="text-xs font-bold tracking-widest text-white/80 uppercase">
+                  {{ TEX_KAMPANYE.cta }}
+                </p>
+                <p class="mt-3 text-xs font-bold tracking-widest text-white/70 uppercase">Sehat &amp; mandiri untuk semua</p>
                 <h2 class="font-display mx-auto mt-4 max-w-2xl text-3xl leading-tight font-semibold text-white text-balance sm:text-4xl">
                   Mulai kelola data posyandu secara digital.
                 </h2>
@@ -684,3 +767,26 @@ const LANGKAH = [
     <AppFooter />
   </div>
 </template>
+
+<style scoped>
+/* Animasi halus lapisan kampanye — tetap hormati prefers-reduced-motion */
+@keyframes melayang-hut {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.anim-melayang {
+  animation: melayang-hut 7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-melayang {
+    animation: none;
+  }
+}
+</style>
