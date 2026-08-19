@@ -10,4 +10,9 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  server: {
+    host: '0.0.0.0', // expose agar dapat diakses via preview URL (Daytona)
+    port: 5173,
+    strictPort: true,
+  },
 })
