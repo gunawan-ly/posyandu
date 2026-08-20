@@ -133,6 +133,18 @@ PB/TB > 0; data tidak valid → tidak diklasifikasi (error).
 - Setiap perubahan perilaku aplikasi: perbarui PRD.md dan AGENTS.md agar tetap sinkron dengan
   kode, lalu commit dengan konvensi `(Update vX.Y.Z) Deskripsi`.
 
+### Alur Pengembangan Fitur
+
+1. **Awan** memberikan ide/misi dalam bahasa bebas (mentah, belum tentu terstruktur).
+2. **Zero** mematangkan ide tersebut menjadi spesifikasi kerja: tujuan, cakupan perubahan,
+   file/komponen yang terpengaruh, kriteria penerimaan, dan catatan risiko — lalu menyampaikan
+   spesifikasi ini ke OpenCode CLI.
+3. **OpenCode CLI** mengimplementasikan sesuai spesifikasi (one-shot `opencode run '...'` untuk
+   tugas terbatas, atau sesi interaktif untuk tugas panjang), patuh pada AGENTS.md & PRD.md.
+4. **Zero** memverifikasi hasil: `npm run build` (vue-tsc + vite), `npm test` (vitest), review
+   diff, dan memastikan PRD.md/AGENTS.md disinkronkan dengan perubahan perilaku.
+5. **Awan** menerima laporan hasil + risiko tersisa (jika ada) dan memutuskan langkah berikutnya.
+
 ## graphify
 
 This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
