@@ -74,7 +74,7 @@ const labelModul = computed(() => {
   const path = route?.path ?? ''
   if (path.startsWith('/balita')) return 'Balita'
   if (path.startsWith('/bumil')) return 'Bumil'
-  return 'Data Balita'
+  return 'Modul Data'
 })
 
 function modulAktif() {
