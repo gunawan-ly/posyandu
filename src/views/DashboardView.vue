@@ -337,8 +337,8 @@ function formatTanggal(tgl: string | null): string {
       </section>
 
       <!-- ===== STATISTIK BULAN INI ===== -->
-      <section v-if="!statistikError" class="pb-16 sm:pb-20">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6">
+      <section v-if="!statistikError" class="flex flex-col items-center justify-center py-16 sm:py-20">
+        <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
           <Card v-if="statistikLoading" variant="glass-strong" role="status" aria-label="Memuat…">
             <CardContent class="flex flex-col gap-6 p-6 sm:p-7">
               <div class="flex flex-wrap items-center justify-between gap-2">

@@ -391,8 +391,8 @@ const LANGKAH = [
       </section>
 
       <!-- ===== STATISTIK BULAN INI ===== -->
-      <section v-if="!statistikError" class="relative -mt-6 pb-16 sm:pb-20">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6">
+      <section v-if="!statistikError" class="flex flex-col items-center justify-center py-16 sm:py-20">
+        <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
           <Reveal>
             <Card variant="glass-strong">
               <CardContent class="flex flex-col gap-6 p-6 sm:p-7">
