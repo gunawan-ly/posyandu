@@ -64,10 +64,10 @@ async function hapus(bumil: Bumil) {
 </script>
 
 <template>
-  <div class="min-h-screen">
+  <div class="flex min-h-screen flex-col">
     <AppNavbar />
 
-    <section class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+    <section class="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
       <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p class="text-primary text-xs font-bold tracking-widest uppercase">Data posyandu</p>

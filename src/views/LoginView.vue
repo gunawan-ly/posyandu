@@ -65,10 +65,10 @@ const klsInput =
 </script>
 
 <template>
-  <div class="min-h-screen">
+  <div class="flex min-h-screen flex-col">
     <AppNavbar />
 
-    <section class="mx-auto flex max-w-md flex-col px-4 py-14 sm:px-6">
+    <section class="mx-auto flex w-full max-w-md flex-col px-4 py-14 sm:px-6">
       <Card>
         <CardHeader class="text-center">
           <CardTitle class="font-display text-2xl font-normal">

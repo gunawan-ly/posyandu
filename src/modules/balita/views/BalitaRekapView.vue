@@ -174,10 +174,10 @@ function kodeStatus(st: string | null | undefined): string | null {
 </script>
 
 <template>
-  <div class="min-h-screen">
+  <div class="flex min-h-screen flex-col">
     <AppNavbar />
 
-    <section class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+    <section class="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
       <div class="no-print">
         <p class="text-primary text-xs font-bold tracking-widest uppercase">Data posyandu</p>
         <h1 class="font-display mt-3 text-3xl leading-tight sm:text-4xl">Rekap Bulanan Balita</h1>

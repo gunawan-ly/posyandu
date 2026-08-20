@@ -246,7 +246,7 @@ function formatTanggal(tgl: string | null): string {
 </script>
 
 <template>
-  <div class="min-h-screen">
+  <div class="flex min-h-screen flex-col">
     <AppNavbar />
 
     <!-- Latar gradasi lembut (blob) agar efek kartu kaca terlihat -->
@@ -256,7 +256,7 @@ function formatTanggal(tgl: string | null): string {
       <div class="glass-blob-3" />
     </div>
 
-    <main id="konten-utama">
+    <main id="konten-utama" class="w-full">
       <!-- ===== HERO / SAMBUTAN ===== -->
       <section class="relative overflow-hidden">
         <div class="absolute inset-0 -z-10" aria-hidden="true">

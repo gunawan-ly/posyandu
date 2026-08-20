@@ -177,10 +177,10 @@ const klsInputError = `${klsInput} border-red-300 focus-visible:border-red-400 f
 </script>
 
 <template>
-  <div class="min-h-screen">
+  <div class="flex min-h-screen flex-col">
     <AppNavbar />
 
-    <section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
+    <section class="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
       <header class="max-w-2xl">
         <p class="text-primary text-xs font-bold tracking-widest uppercase">Kalkulator status gizi</p>
         <h1 class="font-display mt-3 text-3xl leading-tight sm:text-4xl">Hitung status gizi anak Anda.</h1>

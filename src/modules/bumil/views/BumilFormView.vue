@@ -136,10 +136,10 @@ const klsInput =
 </script>
 
 <template>
-  <div class="min-h-screen">
+  <div class="flex min-h-screen flex-col">
     <AppNavbar />
 
-    <section class="mx-auto max-w-2xl px-4 py-12 sm:px-6">
+    <section class="mx-auto w-full max-w-2xl px-4 py-12 sm:px-6">
       <RouterLink to="/bumil" class="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm font-medium">
         <ArrowLeft class="size-4" />
         Kembali ke daftar

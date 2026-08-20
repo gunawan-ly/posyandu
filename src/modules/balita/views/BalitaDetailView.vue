@@ -250,10 +250,10 @@ const klsInput =
 </script>
 
 <template>
-  <div class="min-h-screen">
+  <div class="flex min-h-screen flex-col">
     <AppNavbar />
 
-    <section class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+    <section class="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
       <div v-if="sibuk" role="status" aria-label="Memuat…">
         <div class="flex items-center gap-3">
           <Skeleton class="size-12 rounded-xl" />
