@@ -95,3 +95,58 @@
     @apply bg-primary/20 text-primary;
   }
 }
+
+/* ---- Cetak / PDF ---- */
+.print-only {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 1.5cm;
+  }
+
+  body {
+    background: #ffffff !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block;
+  }
+
+  .print-area,
+  .print-area * {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border-color: #000000 !important;
+  }
+
+  .print-area .overflow-x-auto {
+    overflow: visible !important;
+  }
+
+  .print-area table {
+    width: 100% !important;
+    min-width: 0 !important;
+    border-collapse: collapse !important;
+  }
+
+  .print-area th,
+  .print-area td {
+    font-size: 10px;
+    white-space: normal !important;
+  }
+
+  .print-area thead {
+    display: table-header-group;
+  }
+
+  .print-area tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

@@ -177,7 +177,7 @@ function kodeStatus(st: string | null | undefined): string | null {
     <AppNavbar />
 
     <section class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-      <div>
+      <div class="no-print">
         <p class="text-primary text-xs font-bold tracking-widest uppercase">Data posyandu</p>
         <h1 class="font-display mt-3 text-3xl leading-tight sm:text-4xl">Rekap Bulanan Balita</h1>
         <p class="text-muted-foreground mt-3 max-w-xl text-sm">
@@ -186,7 +186,7 @@ function kodeStatus(st: string | null | undefined): string | null {
         </p>
       </div>
 
-      <Card class="mt-8">
+      <Card class="no-print mt-8">
         <CardContent class="flex flex-col gap-4">
           <div class="flex flex-wrap gap-2">
             <Button
@@ -345,7 +345,7 @@ function kodeStatus(st: string | null | undefined): string | null {
             <CardDescription>{{ baris.length }} balita hadir pada periode {{ label }}</CardDescription>
           </CardHeader>
           <CardContent class="flex flex-col gap-4">
-            <div class="flex flex-wrap items-center gap-2">
+            <div class="no-print flex flex-wrap items-center gap-2">
               <Button size="sm" @click="eksporExcel">
                 <FileSpreadsheet class="size-4" />
                 Ekspor Excel

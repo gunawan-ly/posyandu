@@ -4,7 +4,7 @@ import { RouterLink } from 'vue-router'
 </script>
 
 <template>
-  <footer class="border-border/60 bg-card border-t">
+  <footer class="no-print border-border/60 bg-card border-t">
     <div class="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-3">
       <div class="space-y-3">
         <div class="flex items-center gap-2.5">
