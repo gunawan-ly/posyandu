@@ -33,7 +33,7 @@ const TAUTAN = [
 </script>
 
 <template>
-  <header class="no-print bg-background/80 border-border/60 sticky top-0 z-40 border-b backdrop-blur-md">
+  <header class="no-print glass-nav sticky top-0 z-40">
     <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
       <RouterLink to="/" class="group flex items-center gap-2.5">
         <span class="bg-primary grid size-9 place-items-center rounded-xl text-white shadow-sm transition-transform group-hover:scale-105">

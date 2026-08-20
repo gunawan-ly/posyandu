@@ -96,6 +96,112 @@
   }
 }
 
+/* ============================================================
+   Tema glassmorphism ala iOS (v2.10.0)
+   Lapisan kaca: latar semi-transparan + backdrop blur + border
+   tipis terang + bayangan lembut berlapis + sudut membulat besar.
+   ------------------------------------------------------------
+   Cascade: kelas ini di `@layer components`, sehingga utilitas
+   Tailwind (layer utilities) tetap bisa menimpa saat diperlukan
+   (mis. hover:shadow-xl untuk efek angkat kartu, atau border).
+   ============================================================ */
+@layer components {
+  /* Kartu kaca dasar — dipakai untuk kartu layanan/modul */
+  .glass {
+    background: rgba(255, 255, 255, 0.1);
+    -webkit-backdrop-filter: blur(14px) saturate(1.5);
+    backdrop-filter: blur(14px) saturate(1.5);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: var(--glass-radius, 1.25rem);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 8px 32px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Varian lebih pekat untuk kartu berisi data */
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.16);
+    -webkit-backdrop-filter: blur(18px) saturate(1.6);
+    backdrop-filter: blur(18px) saturate(1.6);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: var(--glass-radius, 1.25rem);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.3),
+      0 12px 40px -8px rgba(0, 0, 0, 0.18);
+  }
+
+  /* Navbar frosted: transparan + blur, batas bawah tipis.
+     Kepekatan disetel lewat --glass-nav-opacity (default 0.6). */
+  .glass-nav {
+    background: rgba(255, 255, 255, var(--glass-nav-opacity, 0.6));
+    -webkit-backdrop-filter: blur(20px) saturate(1.8);
+    backdrop-filter: blur(20px) saturate(1.8);
+    border-bottom: 1px solid rgba(5, 150, 105, 0.12);
+  }
+}
+
+/* Latar gradasi lembut (blob hijau/teal) di belakang konten —
+   memberi warna di belakang kartu kaca agar efek blur terlihat. */
+.glass-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.glass-blob-1,
+.glass-blob-2,
+.glass-blob-3 {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+}
+
+.glass-blob-1 {
+  width: 36rem;
+  height: 36rem;
+  top: -12rem;
+  left: -10rem;
+  background: radial-gradient(circle, rgba(5, 150, 105, 0.35), transparent 70%);
+  opacity: 0.6;
+}
+
+.glass-blob-2 {
+  width: 40rem;
+  height: 40rem;
+  top: 30%;
+  right: -12rem;
+  background: radial-gradient(circle, rgba(13, 148, 136, 0.3), transparent 70%);
+  opacity: 0.5;
+}
+
+.glass-blob-3 {
+  width: 38rem;
+  height: 38rem;
+  bottom: -14rem;
+  left: 20%;
+  background: radial-gradient(circle, rgba(209, 250, 229, 0.7), transparent 70%);
+  opacity: 0.55;
+}
+
+/* Perpindahan sangat pelan (opsional) — dinonaktifkan saat prefers-reduced-motion */
+@keyframes glass-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(2rem, -2.5rem, 0) scale(1.06);
+  }
+  100% {
+    transform: translate3d(-1.5rem, 2rem, 0) scale(0.98);
+  }
+}
+
+.anim-glass-drift {
+  animation: glass-drift 70s ease-in-out infinite alternate;
+}
+
 /* ---- Cetak / PDF ---- */
 .print-only {
   display: none;
@@ -108,6 +214,23 @@
 
   body {
     background: #ffffff !important;
+  }
+
+  /* Kaca dipaksa solid agar teks tetap terbaca saat dicetak */
+  .glass,
+  .glass-strong,
+  .glass-nav {
+    background: #ffffff !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+  }
+
+  .glass-backdrop,
+  .glass-blob-1,
+  .glass-blob-2,
+  .glass-blob-3 {
+    display: none !important;
   }
 
   .no-print {
@@ -148,5 +271,12 @@
   .print-area tr {
     break-inside: avoid;
     page-break-inside: avoid;
+  }
+}
+
+/* Hormati preferensi gerak — jangan tambahkan animasi baru */
+@media (prefers-reduced-motion: reduce) {
+  .anim-glass-drift {
+    animation: none;
   }
 }

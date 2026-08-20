@@ -242,6 +242,13 @@ const LANGKAH = [
   <div class="min-h-screen">
     <AppNavbar />
 
+    <!-- Latar gradasi lembut (blob) agar efek kartu kaca terlihat -->
+    <div class="glass-backdrop" aria-hidden="true">
+      <div class="glass-blob-1 anim-glass-drift" />
+      <div class="glass-blob-2 anim-glass-drift" />
+      <div class="glass-blob-3" />
+    </div>
+
     <main id="konten-utama">
       <!-- ===== HERO ===== -->
       <section class="relative overflow-hidden">
@@ -387,7 +394,7 @@ const LANGKAH = [
       <section v-if="!statistikError" class="relative -mt-6 pb-16 sm:pb-20">
         <div class="mx-auto max-w-6xl px-4 sm:px-6">
           <Reveal>
-            <Card class="rounded-2xl border-emerald-100 shadow-lg shadow-primary/5">
+            <Card variant="glass-strong">
               <CardContent class="flex flex-col gap-6 p-6 sm:p-7">
                 <div class="flex flex-wrap items-center justify-between gap-2">
                   <p class="text-muted-foreground text-xs font-bold tracking-widest uppercase">
@@ -453,9 +460,10 @@ const LANGKAH = [
             <Reveal v-for="(m, i) in LAYANAN" :key="m.kunci" :delay="i * 80">
               <component :is="m.aktif ? RouterLink : 'div'" :to="m.aktif ? m.href : null" class="block h-full">
                 <Card
-                  class="relative h-full overflow-hidden rounded-2xl py-0 transition-all duration-300"
+                  variant="glass"
+                  class="relative h-full overflow-hidden py-0 transition-all duration-300"
                   :class="m.aktif
-                    ? 'border-emerald-100 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10'
+                    ? 'hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10'
                     : 'opacity-80'"
                 >
                   <!-- Pita merah tipis di puncak kartu layanan aktif (lapisan kampanye) -->
@@ -541,7 +549,10 @@ const LANGKAH = [
                   class="absolute -inset-3 -z-10 rounded-[2rem] bg-gradient-to-br from-primary/25 to-accent/20 blur-xl"
                   aria-hidden="true"
                 />
-                <Card class="rounded-3xl border-emerald-100 py-0 shadow-2xl shadow-primary/10">
+                <Card
+                  variant="glass-strong"
+                  class="rounded-3xl py-0"
+                >
                   <CardContent class="gap-0 p-6 sm:p-7">
                     <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
                       <p class="font-display flex items-center gap-2 text-lg font-semibold">
@@ -687,7 +698,7 @@ const LANGKAH = [
               </div>
             </Reveal>
             <Reveal :delay="120">
-              <Card class="rounded-2xl border-emerald-100 py-0">
+              <Card variant="glass" class="py-0">
                 <CardContent class="gap-0 p-6 sm:p-7">
                   <p class="font-display mb-6 text-lg font-semibold">Mengapa skor-z?</p>
                   <ul class="space-y-5">

@@ -239,6 +239,13 @@ function formatTanggal(tgl: string | null): string {
   <div class="min-h-screen">
     <AppNavbar />
 
+    <!-- Latar gradasi lembut (blob) agar efek kartu kaca terlihat -->
+    <div class="glass-backdrop" aria-hidden="true">
+      <div class="glass-blob-1 anim-glass-drift" />
+      <div class="glass-blob-2 anim-glass-drift" />
+      <div class="glass-blob-3" />
+    </div>
+
     <main id="konten-utama">
       <!-- ===== HERO / SAMBUTAN ===== -->
       <section class="relative overflow-hidden">
@@ -322,7 +329,7 @@ function formatTanggal(tgl: string | null): string {
       <!-- ===== STATISTIK BULAN INI ===== -->
       <section v-if="!statistikError" class="pb-16 sm:pb-20">
         <div class="mx-auto max-w-6xl px-4 sm:px-6">
-          <Card class="rounded-2xl border-emerald-100 shadow-lg shadow-primary/5">
+          <Card variant="glass-strong">
             <CardContent class="flex flex-col gap-6 p-6 sm:p-7">
               <div class="flex flex-wrap items-center justify-between gap-2">
                 <p class="text-muted-foreground text-xs font-bold tracking-widest uppercase">
@@ -379,9 +386,10 @@ function formatTanggal(tgl: string | null): string {
           <div class="mt-10 grid gap-5 md:grid-cols-2">
             <div v-for="m in MODUL" :key="m.kunci" class="block h-full">
               <Card
-                class="h-full rounded-2xl py-0 transition-all duration-300"
+                variant="glass"
+                class="h-full py-0 transition-all duration-300"
                 :class="m.aktif
-                  ? 'border-emerald-100 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10'
+                  ? 'hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10'
                   : 'opacity-80'"
               >
                 <CardContent class="flex flex-col gap-4 p-6 sm:p-7">
@@ -462,7 +470,7 @@ function formatTanggal(tgl: string | null): string {
           </div>
 
           <div v-else class="mt-8 grid gap-4 md:grid-cols-2">
-            <Card v-for="k in perluPerhatian" :key="k.balita_id" class="h-full">
+            <Card v-for="k in perluPerhatian" :key="k.balita_id" variant="glass-strong" class="h-full">
               <CardContent class="flex flex-col gap-4 p-6">
                 <div class="flex items-start justify-between gap-3">
                   <div class="flex min-w-0 items-center gap-3">
@@ -498,7 +506,7 @@ function formatTanggal(tgl: string | null): string {
       <!-- ===== INFO / PRIVASI ===== -->
       <section class="border-border/60 bg-card/60 border-t">
         <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-          <div class="flex items-start gap-4 rounded-2xl border border-emerald-100 bg-white p-6">
+          <div class="glass-strong flex items-start gap-4 p-6">
             <span class="bg-primary/10 text-primary grid size-11 shrink-0 place-items-center rounded-xl">
               <ShieldCheck class="size-5" />
             </span>
