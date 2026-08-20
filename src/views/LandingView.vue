@@ -53,10 +53,13 @@ const hasil = computed(() =>
 
 // ---- Statistik publik (bulan berjalan) ----
 interface StatistikPublik {
-  total_balita: number
-  total_bumil: number
+  balita_bayi: number
+  balita_balita: number
+  bumil_hamil: number
+  bumil_menyusui: number
+  kunjungan_balita_bulan_ini: number
+  kunjungan_bumil_bulan_ini: number
   kunjungan_bulan_ini: number
-  total_kunjungan: number
   bulan_ini: string
 }
 
@@ -88,10 +91,56 @@ const labelBulanIni = computed(() =>
   statistik.value ? labelBulan(statistik.value.bulan_ini) : labelBulan(new Date().toISOString().slice(0, 7)),
 )
 
-const persentaseCakupan = computed(() => {
+const KARTU_STATISTIK = computed(() => {
   const s = statistik.value
-  if (!s || s.total_balita <= 0) return 0
-  return Math.round((s.kunjungan_bulan_ini / s.total_balita) * 100)
+  const totalBalita = s ? s.balita_bayi + s.balita_balita : 0
+  const totalBumil = s ? s.bumil_hamil + s.bumil_menyusui : 0
+  const persen = (kunjungan: number, sasaran: number): number =>
+    sasaran > 0 ? Math.round((kunjungan / sasaran) * 1000) / 10 : 0
+  return [
+    {
+      ikon: Baby,
+      label: 'Bayi',
+      nilai: s?.balita_bayi ?? null,
+      akhiran: 'anak',
+      keterangan: 'sasaran 0–11 bulan',
+    },
+    {
+      ikon: Users,
+      label: 'Balita',
+      nilai: s?.balita_balita ?? null,
+      akhiran: 'anak',
+      keterangan: 'sasaran 12–60 bulan',
+    },
+    {
+      ikon: HeartPulse,
+      label: 'Ibu Hamil',
+      nilai: s?.bumil_hamil ?? null,
+      akhiran: 'ibu',
+      keterangan: 'sasaran ibu hamil',
+    },
+    {
+      ikon: Sparkles,
+      label: 'Ibu Menyusui',
+      nilai: s?.bumil_menyusui ?? null,
+      akhiran: 'ibu',
+      keterangan: 'sasaran ibu menyusui',
+    },
+    {
+      ikon: CalendarDays,
+      label: 'Kunjungan Balita',
+      nilai: s ? persen(s.kunjungan_balita_bulan_ini, totalBalita) : null,
+      akhiran: '%',
+      keterangan: s ? `bulan ini dari ${totalBalita} sasaran` : '–',
+    },
+    {
+      ikon: TrendingUp,
+      label: 'Kunjungan Bumil/Menyusui',
+      nilai: s ? persen(s.kunjungan_bumil_bulan_ini, totalBumil) : null,
+      akhiran: '%',
+      keterangan: s ? `bulan ini dari ${totalBumil} sasaran` : '–',
+    },
+  ]
 })
 
 onMounted(async () => {
@@ -106,40 +155,6 @@ onMounted(async () => {
   } catch {
     statistikError.value = true
   }
-})
-
-const KARTU_STATISTIK = computed(() => {
-  const s = statistik.value
-  return [
-    {
-      ikon: Baby,
-      label: 'Balita terdata',
-      nilai: s?.total_balita ?? null,
-      akhiran: 'anak',
-      keterangan: 'sasaran balita 0–60 bulan',
-    },
-    {
-      ikon: HeartPulse,
-      label: 'Ibu hamil terdata',
-      nilai: s?.total_bumil ?? null,
-      akhiran: 'ibu',
-      keterangan: 'sasaran bumil',
-    },
-    {
-      ikon: CalendarDays,
-      label: 'Kunjungan bulan ini',
-      nilai: s?.kunjungan_bulan_ini ?? null,
-      akhiran: 'kunjungan',
-      keterangan: 'cakupan ±' + persentaseCakupan.value + '% dari sasaran',
-    },
-    {
-      ikon: BarChart3,
-      label: 'Total kunjungan',
-      nilai: s?.total_kunjungan ?? null,
-      akhiran: 'kunjungan',
-      keterangan: 'akumulasi sejak awal',
-    },
-  ]
 })
 
 // ---- Layanan posyandu ----
@@ -378,10 +393,16 @@ const LANGKAH = [
                   <p class="text-muted-foreground text-xs font-bold tracking-widest uppercase">
                     Statistik posyandu · {{ labelBulanIni }}
                   </p>
-                  <span class="text-primary inline-flex items-center gap-1.5 text-xs font-bold">
-                    <BarChart3 class="size-3.5" />
-                    angka agregat publik
-                  </span>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+                      <CalendarDays class="size-3.5" />
+                      Kunjungan bulan ini: {{ statistik?.kunjungan_bulan_ini ?? '–' }}
+                    </span>
+                    <span class="text-primary inline-flex items-center gap-1.5 text-xs font-bold">
+                      <BarChart3 class="size-3.5" />
+                      angka agregat publik
+                    </span>
+                  </div>
                 </div>
                 <dl class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                   <div v-for="k in KARTU_STATISTIK" :key="k.label" class="flex items-start gap-3">
