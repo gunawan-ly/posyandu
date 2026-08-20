@@ -174,6 +174,33 @@ export async function listKunjungan(balitaId: number): Promise<Kunjungan[]> {
   return (data ?? []) as Kunjungan[]
 }
 
+// Rekap: kunjungan dalam rentang tanggal (inklusi batas awal & akhir, format YYYY-MM-DD).
+export async function listKunjunganPeriode(awal: string, akhir: string): Promise<Kunjungan[]> {
+  const kl = wajibSupabase()
+  const { data, error } = await kl
+    .from('balita_kunjungan')
+    .select('*')
+    .gte('tanggal_kunjungan', awal)
+    .lte('tanggal_kunjungan', akhir)
+    .order('tanggal_kunjungan', { ascending: true })
+    .order('id', { ascending: true })
+  if (error) throw error
+  return (data ?? []) as Kunjungan[]
+}
+
+// Rekap: ambil balita berdasarkan daftar id (urut nama); kosong bila ids kosong.
+export async function listBalitaById(ids: number[]): Promise<Balita[]> {
+  if (ids.length === 0) return []
+  const kl = wajibSupabase()
+  const { data, error } = await kl
+    .from('balita_identitas')
+    .select('*')
+    .in('id', ids)
+    .order('nama')
+  if (error) throw error
+  return (data ?? []) as Balita[]
+}
+
 export async function tambahKunjungan(balita: Balita, input: InputKunjungan): Promise<Kunjungan> {
   const kl = wajibSupabase()
 
