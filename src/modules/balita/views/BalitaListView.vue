@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Plus, Search, Trash2, UserRound, Users } from '@lucide/vue'
+import { FileText, Plus, Search, Trash2, UserRound, Users } from '@lucide/vue'
 import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import AppFooter from '@/components/AppFooter.vue'
@@ -71,12 +71,20 @@ async function hapus(balita: Balita) {
             Kelola identitas balita dan catat pengukuran setiap kunjungan.
           </p>
         </div>
-        <RouterLink v-if="isAdmin" to="/balita/baru">
-          <Button size="lg">
-            <Plus class="size-4" />
-            Tambah Balita
-          </Button>
-        </RouterLink>
+        <div class="flex flex-wrap items-center gap-2">
+          <RouterLink to="/balita/rekap">
+            <Button variant="outline" size="lg">
+              <FileText class="size-4" />
+              Rekap
+            </Button>
+          </RouterLink>
+          <RouterLink v-if="isAdmin" to="/balita/baru">
+            <Button size="lg">
+              <Plus class="size-4" />
+              Tambah Balita
+            </Button>
+          </RouterLink>
+        </div>
       </div>
 
       <div class="mt-8 max-w-sm">

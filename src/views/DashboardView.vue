@@ -355,7 +355,7 @@ function formatTanggal(tgl: string | null): string {
           </div>
 
           <div class="mt-10 grid gap-5 md:grid-cols-2">
-            <component :is="m.aktif ? RouterLink : 'div'" v-for="m in MODUL" :key="m.kunci" :to="m.aktif ? m.href : null" class="block h-full">
+            <div v-for="m in MODUL" :key="m.kunci" class="block h-full">
               <Card
                 class="h-full rounded-2xl py-0 transition-all duration-300"
                 :class="m.aktif
@@ -383,13 +383,22 @@ function formatTanggal(tgl: string | null): string {
                     <h3 class="font-display text-xl font-semibold">{{ m.nama }}</h3>
                     <p class="text-muted-foreground mt-1.5 text-sm leading-relaxed">{{ m.deskripsi }}</p>
                   </div>
-                  <p v-if="m.aktif" class="text-primary inline-flex items-center gap-1.5 text-sm font-bold">
-                    Buka layanan
-                    <ArrowRight class="size-4" />
-                  </p>
+                  <div v-if="m.aktif" class="flex flex-wrap items-center gap-x-4 gap-y-1">
+                    <RouterLink :to="m.href ?? '/'" class="text-primary inline-flex items-center gap-1.5 text-sm font-bold">
+                      Buka layanan
+                      <ArrowRight class="size-4" />
+                    </RouterLink>
+                    <RouterLink
+                      v-if="m.kunci === 'balita' && isAutentikasi"
+                      to="/balita/rekap"
+                      class="text-muted-foreground hover:text-primary inline-flex items-center text-sm font-medium underline-offset-4 hover:underline"
+                    >
+                      Rekap
+                    </RouterLink>
+                  </div>
                 </CardContent>
               </Card>
-            </component>
+            </div>
           </div>
         </div>
       </section>
