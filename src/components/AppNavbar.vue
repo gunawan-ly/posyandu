@@ -64,9 +64,18 @@ function isAktif(label: string) {
 
 // --- Dropdown modul (Data Balita) ---
 const bukaModul = ref(false)
+const bukaModulMobile = ref(false)
 const wadahModul = ref<HTMLElement | null>(null)
 const tombolModul = ref<HTMLButtonElement | null>(null)
 const menuModul = ref<HTMLElement | null>(null)
+
+// Label trigger menyesuaikan modul yang sedang dibuka: Balita / Bumil / default.
+const labelModul = computed(() => {
+  const path = route?.path ?? ''
+  if (path.startsWith('/balita')) return 'Balita'
+  if (path.startsWith('/bumil')) return 'Bumil'
+  return 'Data Balita'
+})
 
 function modulAktif() {
   const path = route?.path ?? ''
@@ -109,6 +118,7 @@ watch(
   () => route?.path,
   () => {
     bukaModul.value = false
+    bukaModulMobile.value = false
     amatiTentang()
   },
 )
@@ -131,7 +141,7 @@ onBeforeUnmount(() => {
         <span class="font-display text-lg font-bold tracking-tight">Posyandu Wapalo</span>
       </RouterLink>
 
-      <nav class="hidden items-center gap-1 md:flex" aria-label="Navigasi utama">
+      <nav class="hidden items-center gap-1.5 md:flex" aria-label="Navigasi utama">
         <RouterLink
           v-for="t in TAUTAN"
           :key="t.label"
@@ -158,7 +168,7 @@ onBeforeUnmount(() => {
             "
             @click="bukaModul = !bukaModul"
           >
-            Data Balita
+            {{ labelModul }}
             <ChevronDown class="size-4 transition-transform" :class="bukaModul && 'rotate-180'" />
           </button>
 
@@ -175,7 +185,7 @@ onBeforeUnmount(() => {
               ref="menuModul"
               role="menu"
               aria-label="Modul data"
-              class="glass min-w-44 p-1.5"
+              class="glass absolute top-full left-0 z-50 mt-2 min-w-44 p-1.5"
             >
               <RouterLink
                 v-for="m in MODUL"
@@ -239,17 +249,47 @@ onBeforeUnmount(() => {
                 {{ t.label }}
               </RouterLink>
               <template v-if="isAutentikasi">
-                <p class="text-muted-foreground mt-2 px-4 text-xs font-bold uppercase tracking-wide">Data Balita</p>
-                <RouterLink
-                  v-for="m in MODUL"
-                  :key="m.to"
-                  :to="m.to"
-                  class="text-foreground hover:bg-muted rounded-lg px-4 py-3 text-base font-medium"
-                  :class="itemModulAktif(m.to) && 'bg-muted text-primary'"
-                  @click="buka = false"
-                >
-                  {{ m.label }}
-                </RouterLink>
+                <div class="mt-2">
+                  <button
+                    type="button"
+                    aria-haspopup="menu"
+                    :aria-expanded="bukaModulMobile"
+                    class="flex w-full items-center justify-between gap-2 rounded-lg px-4 py-3 text-base font-medium transition-colors"
+                    :class="
+                      modulAktif()
+                        ? 'bg-muted text-primary'
+                        : 'text-foreground hover:bg-muted'
+                    "
+                    @click="bukaModulMobile = !bukaModulMobile"
+                  >
+                    {{ labelModul }}
+                    <ChevronDown
+                      class="size-4 shrink-0 transition-transform"
+                      :class="bukaModulMobile && 'rotate-180'"
+                    />
+                  </button>
+                  <Transition
+                    enter-active-class="transition duration-150 ease-out"
+                    enter-from-class="-translate-y-1 opacity-0"
+                    enter-to-class="translate-y-0 opacity-100"
+                    leave-active-class="transition duration-100 ease-in"
+                    leave-from-class="translate-y-0 opacity-100"
+                    leave-to-class="-translate-y-1 opacity-0"
+                  >
+                    <div v-if="bukaModulMobile" class="mt-1 flex flex-col gap-1 pl-3">
+                      <RouterLink
+                        v-for="m in MODUL"
+                        :key="m.to"
+                        :to="m.to"
+                        class="text-foreground hover:bg-muted rounded-lg px-4 py-3 text-base font-medium"
+                        :class="itemModulAktif(m.to) && 'bg-muted text-primary'"
+                        @click="buka = false; bukaModulMobile = false"
+                      >
+                        {{ m.label }}
+                      </RouterLink>
+                    </div>
+                  </Transition>
+                </div>
               </template>
               <div v-if="isAutentikasi" class="border-border/60 mt-2 flex items-center justify-between border-t px-4 pt-3">
                 <span class="text-muted-foreground truncate text-sm">{{ user?.email }}</span>
