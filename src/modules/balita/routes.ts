@@ -10,6 +10,12 @@ export const balitaRoutes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/balita/rekap',
+    name: 'balita-rekap',
+    component: () => import('@/modules/balita/views/BalitaRekapView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/balita/baru',
     name: 'balita-baru',
     component: () => import('@/modules/balita/views/BalitaFormView.vue'),

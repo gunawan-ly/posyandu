@@ -38,45 +38,59 @@ export function labelPeriode(periode: PeriodeRekap): string {
   return `${formatTanggal(awal)} - ${formatTanggal(akhir)}`
 }
 
+// Pasangan Keterangan|Jumlah berurutan mengikuti FORMAT REKAP BULANAN POSYANDU.
+// Sumber tunggal bagi lembar Ringkasan (ekspor) & tabel format resmi (halaman rekap).
+export interface BarisRingkasan {
+  label: string
+  ambil: (r: RekapBulanan) => number
+}
+
+export const BARIS_RINGKASAN: BarisRingkasan[] = [
+  { label: 'Jumlah Sasaran - Bayi', ambil: (r) => r.sasaran_bayi },
+  { label: 'Jumlah Sasaran - Balita', ambil: (r) => r.sasaran_balita },
+  { label: 'Bayi Datang (Hadir)', ambil: (r) => r.bayi_hadir },
+  { label: 'Bayi Tidak Datang (Tidak Hadir)', ambil: (r) => r.bayi_tidak_hadir },
+  { label: 'Ceklis Perkembangan - Lengkap', ambil: (r) => r.ceklis_lengkap },
+  { label: 'Ceklis Perkembangan - Tidak Lengkap', ambil: (r) => r.ceklis_tidak_lengkap },
+  { label: 'Berat Badan - Naik', ambil: (r) => r.bb_naik },
+  { label: 'Berat Badan - Tidak Naik', ambil: (r) => r.bb_tidak_naik },
+  { label: 'BB/U - Normal', ambil: (r) => r.bbu_normal },
+  { label: 'BB/U - Tidak Normal', ambil: (r) => r.bbu_tidak_normal },
+  { label: 'TB/U - Normal', ambil: (r) => r.tbu_normal },
+  { label: 'TB/U - Tidak Normal', ambil: (r) => r.tbu_tidak_normal },
+  { label: 'BB/TB - Normal', ambil: (r) => r.bbtb_normal },
+  { label: 'BB/TB - Tidak Normal', ambil: (r) => r.bbtb_tidak_normal },
+  { label: 'Lingkar Kepala - Normal', ambil: (r) => r.lika_normal },
+  { label: 'Lingkar Kepala - Tidak Normal', ambil: (r) => r.lika_tidak_normal },
+  { label: 'Lingkar Lengan - Normal', ambil: (r) => r.lila_normal },
+  { label: 'Lingkar Lengan - Tidak Normal', ambil: (r) => r.lila_tidak_normal },
+  { label: 'Imunisasi - Ya', ambil: (r) => r.imunisasi_ya },
+  { label: 'Imunisasi - Tidak', ambil: (r) => r.imunisasi_tidak },
+  { label: 'Vitamin A - Ya', ambil: (r) => r.vitamin_ya },
+  { label: 'Vitamin A - Tidak', ambil: (r) => r.vitamin_tidak },
+  { label: 'ASI - Ya', ambil: (r) => r.asi_ya },
+  { label: 'ASI - Tidak', ambil: (r) => r.asi_tidak },
+  { label: 'MP ASI - Ya', ambil: (r) => r.mpasi_ya },
+  { label: 'MP ASI - Tidak', ambil: (r) => r.mpasi_tidak },
+  { label: 'Obat Cacing - Ya', ambil: (r) => r.cacing_ya },
+  { label: 'Obat Cacing - Tidak', ambil: (r) => r.cacing_tidak },
+  { label: 'Edukasi - Ya', ambil: (r) => r.edukasi_ya },
+  { label: 'Edukasi - Tidak', ambil: (r) => r.edukasi_tidak },
+]
+
 // Lembar "Ringkasan": judul, periode, lalu pasangan Keterangan|Jumlah berurutan
 // mengikuti FORMAT REKAP BULANAN POSYANDU.
 export function susunLembarRingkasan(rekap: RekapBulanan, labelPeriode: string): (string | number)[][] {
-  return [
+  const baris: (string | number)[][] = [
     ['REKAP BULANAN POSYANDU - BALITA', ''],
     ['Periode', labelPeriode],
     [],
     ['Keterangan', 'Jumlah'],
-    ['Jumlah Sasaran - Bayi', rekap.sasaran_bayi],
-    ['Jumlah Sasaran - Balita', rekap.sasaran_balita],
-    ['Bayi Datang (Hadir)', rekap.bayi_hadir],
-    ['Bayi Tidak Datang (Tidak Hadir)', rekap.bayi_tidak_hadir],
-    ['Ceklis Perkembangan - Lengkap', rekap.ceklis_lengkap],
-    ['Ceklis Perkembangan - Tidak Lengkap', rekap.ceklis_tidak_lengkap],
-    ['Berat Badan - Naik', rekap.bb_naik],
-    ['Berat Badan - Tidak Naik', rekap.bb_tidak_naik],
-    ['BB/U - Normal', rekap.bbu_normal],
-    ['BB/U - Tidak Normal', rekap.bbu_tidak_normal],
-    ['TB/U - Normal', rekap.tbu_normal],
-    ['TB/U - Tidak Normal', rekap.tbu_tidak_normal],
-    ['BB/TB - Normal', rekap.bbtb_normal],
-    ['BB/TB - Tidak Normal', rekap.bbtb_tidak_normal],
-    ['Lingkar Kepala - Normal', rekap.lika_normal],
-    ['Lingkar Kepala - Tidak Normal', rekap.lika_tidak_normal],
-    ['Lingkar Lengan - Normal', rekap.lila_normal],
-    ['Lingkar Lengan - Tidak Normal', rekap.lila_tidak_normal],
-    ['Imunisasi - Ya', rekap.imunisasi_ya],
-    ['Imunisasi - Tidak', rekap.imunisasi_tidak],
-    ['Vitamin A - Ya', rekap.vitamin_ya],
-    ['Vitamin A - Tidak', rekap.vitamin_tidak],
-    ['ASI - Ya', rekap.asi_ya],
-    ['ASI - Tidak', rekap.asi_tidak],
-    ['MP ASI - Ya', rekap.mpasi_ya],
-    ['MP ASI - Tidak', rekap.mpasi_tidak],
-    ['Obat Cacing - Ya', rekap.cacing_ya],
-    ['Obat Cacing - Tidak', rekap.cacing_tidak],
-    ['Edukasi - Ya', rekap.edukasi_ya],
-    ['Edukasi - Tidak', rekap.edukasi_tidak],
   ]
+  for (const { label, ambil } of BARIS_RINGKASAN) {
+    baris.push([label, ambil(rekap)])
+  }
+  return baris
 }
 
 export const KEPALA_RINCIAN = [

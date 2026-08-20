@@ -1,9 +1,15 @@
 // @vitest-environment happy-dom
-import { mount } from '@vue/test-utils'
-import { describe, expect, it } from 'vitest'
+import { flushPromises, mount } from '@vue/test-utils'
+import { describe, expect, it, vi } from 'vitest'
 import { hitungSemuaStatus } from '@/lib/kalkulator'
+import BalitaRekapView from '@/modules/balita/views/BalitaRekapView.vue'
 import KalkulatorView from '@/views/KalkulatorView.vue'
 import LandingView from '@/views/LandingView.vue'
+
+vi.mock('@/modules/balita/db', () => ({
+  listBalita: vi.fn().mockResolvedValue([]),
+  listKunjunganPeriode: vi.fn().mockResolvedValue([]),
+}))
 
 describe('render komponen utama', () => {
   it('LandingView ter-render tanpa error', () => {
@@ -38,5 +44,14 @@ describe('render komponen utama', () => {
     expect(vm.hasil).not.toBeNull()
     expect(vm.hasil?.status_bb_u).toBe('N')
     expect(wrapper.text()).toContain('Umur 12 bulan')
+  })
+
+  it('BalitaRekapView ter-render tanpa error dan menampilkan state kosong', async () => {
+    const wrapper = mount(BalitaRekapView, {
+      global: { stubs: { RouterLink: true, RouterView: true } },
+    })
+    expect(wrapper.text()).toContain('Rekap Bulanan Balita')
+    await flushPromises()
+    expect(wrapper.text()).toContain('Belum ada kunjungan di periode ini')
   })
 })
