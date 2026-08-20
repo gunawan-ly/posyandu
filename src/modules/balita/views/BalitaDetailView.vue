@@ -464,32 +464,48 @@ const klsInput =
               <CardContent class="flex flex-col gap-3">
                 <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
                   <div>
-                    <p class="text-muted-foreground text-xs font-bold uppercase">Posyandu</p>
-                    <p class="mt-0.5">{{ balita.posyandu || '—' }}</p>
+                    <p class="text-muted-foreground text-xs font-bold uppercase">Nama</p>
+                    <p class="mt-0.5">{{ balita.nama || '—' }}</p>
                   </div>
                   <div>
-                    <p class="text-muted-foreground text-xs font-bold uppercase">Dusun</p>
-                    <p class="mt-0.5">{{ balita.dusun || '—' }}</p>
-                  </div>
-                  <div>
-                    <p class="text-muted-foreground text-xs font-bold uppercase">Orang tua</p>
-                    <p class="mt-0.5">{{ balita.nama_orang_tua || '—' }}</p>
-                  </div>
-                  <div>
-                    <p class="text-muted-foreground text-xs font-bold uppercase">Anak ke</p>
-                    <p class="mt-0.5">{{ balita.anak_ke || '—' }}</p>
+                    <p class="text-muted-foreground text-xs font-bold uppercase">Jenis kelamin</p>
+                    <p class="mt-0.5">{{ balita.jenis_kelamin === 'Perempuan' ? 'Perempuan' : 'Laki-laki' }}</p>
                   </div>
                   <div>
                     <p class="text-muted-foreground text-xs font-bold uppercase">NIK</p>
                     <p class="mt-0.5 break-all">{{ balita.nik || '—' }}</p>
                   </div>
                   <div>
+                    <p class="text-muted-foreground text-xs font-bold uppercase">Tempat lahir</p>
+                    <p class="mt-0.5">{{ balita.tempat_lahir || '—' }}</p>
+                  </div>
+                  <div>
+                    <p class="text-muted-foreground text-xs font-bold uppercase">Tanggal lahir</p>
+                    <p class="mt-0.5">{{ formatTanggal(balita.tanggal_lahir) }}</p>
+                  </div>
+                  <div>
+                    <p class="text-muted-foreground text-xs font-bold uppercase">Anak ke</p>
+                    <p class="mt-0.5">{{ balita.anak_ke || '—' }}</p>
+                  </div>
+                  <div>
+                    <p class="text-muted-foreground text-xs font-bold uppercase">Nama orang tua</p>
+                    <p class="mt-0.5">{{ balita.nama_orang_tua || '—' }}</p>
+                  </div>
+                  <div>
+                    <p class="text-muted-foreground text-xs font-bold uppercase">NIK orang tua</p>
+                    <p class="mt-0.5 break-all">{{ balita.nik_orang_tua || '—' }}</p>
+                  </div>
+                  <div>
                     <p class="text-muted-foreground text-xs font-bold uppercase">No. KK</p>
                     <p class="mt-0.5 break-all">{{ balita.nomor_kk || '—' }}</p>
                   </div>
-                  <div class="col-span-2">
-                    <p class="text-muted-foreground text-xs font-bold uppercase">Alamat</p>
-                    <p class="mt-0.5">{{ balita.alamat || '—' }}</p>
+                  <div>
+                    <p class="text-muted-foreground text-xs font-bold uppercase">Dusun</p>
+                    <p class="mt-0.5">{{ balita.dusun || '—' }}</p>
+                  </div>
+                  <div>
+                    <p class="text-muted-foreground text-xs font-bold uppercase">Posyandu</p>
+                    <p class="mt-0.5">{{ balita.posyandu || '—' }}</p>
                   </div>
                   <div>
                     <p class="text-muted-foreground text-xs font-bold uppercase">BB lahir</p>
@@ -498,6 +514,10 @@ const klsInput =
                   <div>
                     <p class="text-muted-foreground text-xs font-bold uppercase">PB lahir</p>
                     <p class="mt-0.5">{{ balita.pb_lahir ?? '—' }} cm</p>
+                  </div>
+                  <div class="col-span-2">
+                    <p class="text-muted-foreground text-xs font-bold uppercase">Alamat</p>
+                    <p class="mt-0.5">{{ balita.alamat || '—' }}</p>
                   </div>
                 </div>
               </CardContent>
