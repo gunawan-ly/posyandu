@@ -132,6 +132,8 @@ PB/TB > 0; data tidak valid → tidak diklasifikasi (error).
 - Bahasa tim: **Indonesia** di semua komunikasi, kode, komentar, dan commit.
 - Setiap perubahan perilaku aplikasi: perbarui PRD.md dan AGENTS.md agar tetap sinkron dengan
   kode, lalu commit dengan konvensi `(Update vX.Y.Z) Deskripsi`.
+- Kontrol versi: **commit** dilakukan mandiri oleh Zero (konvensi `(Update vX.Y.Z)`); **push**
+  ke remote hanya dilakukan atas instruksi eksplisit dari Awan.
 
 ### Alur Pengembangan Fitur
 
