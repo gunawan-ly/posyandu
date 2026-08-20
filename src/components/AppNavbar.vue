@@ -62,7 +62,7 @@ function isAktif(label: string) {
   return false
 }
 
-// --- Dropdown modul (Data Balita) ---
+// --- Dropdown modul (default "Modul Data": Balita, Bumil, dst.) ---
 const bukaModul = ref(false)
 const bukaModulMobile = ref(false)
 const wadahModul = ref<HTMLElement | null>(null)
