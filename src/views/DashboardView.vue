@@ -19,6 +19,7 @@ import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import AppFooter from '@/components/AppFooter.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
+import Skeleton from '@/components/Skeleton.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -50,6 +51,7 @@ interface StatistikPublik {
 }
 
 const statistik = ref<StatistikPublik | null>(null)
+const statistikLoading = ref(true)
 const statistikError = ref(false)
 
 const NAMA_BULAN = [
@@ -130,8 +132,10 @@ const KARTU_STATISTIK = computed(() => {
 })
 
 async function muatStatistik() {
+  statistikLoading.value = true
   if (!supabase) {
     statistikError.value = true
+    statistikLoading.value = false
     return
   }
   try {
@@ -140,6 +144,8 @@ async function muatStatistik() {
     statistik.value = data as StatistikPublik
   } catch {
     statistikError.value = true
+  } finally {
+    statistikLoading.value = false
   }
 }
 
@@ -189,14 +195,18 @@ const MODUL: ModulLayanan[] = [
 
 // ---- Perlu Perhatian (kader login) ----
 const perluPerhatian = ref<KunjunganTerakhir[]>([])
+const muatPerhatianLoading = ref(false)
 const muatPerhatianError = ref('')
 
 async function muatPerluPerhatian() {
   muatPerhatianError.value = ''
+  muatPerhatianLoading.value = true
   try {
     perluPerhatian.value = await balitaPerluPerhatian()
   } catch (e) {
     muatPerhatianError.value = e instanceof Error ? e.message : 'Gagal memuat data.'
+  } finally {
+    muatPerhatianLoading.value = false
   }
 }
 
@@ -329,7 +339,25 @@ function formatTanggal(tgl: string | null): string {
       <!-- ===== STATISTIK BULAN INI ===== -->
       <section v-if="!statistikError" class="pb-16 sm:pb-20">
         <div class="mx-auto max-w-6xl px-4 sm:px-6">
-          <Card variant="glass-strong">
+          <Card v-if="statistikLoading" variant="glass-strong" role="status" aria-label="Memuat…">
+            <CardContent class="flex flex-col gap-6 p-6 sm:p-7">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <Skeleton class="h-4 w-44" />
+                <Skeleton class="h-6 w-48 rounded-full" />
+              </div>
+              <dl class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                <div v-for="i in 4" :key="i" class="flex items-start gap-3">
+                  <Skeleton class="size-11 rounded-xl" />
+                  <div class="flex-1 space-y-2">
+                    <Skeleton class="h-3 w-20" />
+                    <Skeleton class="h-7 w-16" />
+                    <Skeleton class="h-3 w-28" />
+                  </div>
+                </div>
+              </dl>
+            </CardContent>
+          </Card>
+          <Card v-else variant="glass-strong">
             <CardContent class="flex flex-col gap-6 p-6 sm:p-7">
               <div class="flex flex-wrap items-center justify-between gap-2">
                 <p class="text-muted-foreground text-xs font-bold tracking-widest uppercase">
@@ -455,7 +483,28 @@ function formatTanggal(tgl: string | null): string {
             </RouterLink>
           </div>
 
-          <p v-if="muatPerhatianError" class="mt-6 text-sm font-medium text-red-600" role="alert">
+          <div v-if="muatPerhatianLoading" class="mt-8 grid gap-4 md:grid-cols-2" role="status" aria-label="Memuat…">
+            <Card v-for="i in 4" :key="i" variant="glass-strong" class="h-full">
+              <CardContent class="flex flex-col gap-4 p-6">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="flex min-w-0 items-center gap-3">
+                    <Skeleton class="size-10 rounded-lg" />
+                    <div class="flex-1 space-y-2">
+                      <Skeleton class="h-4 w-40" />
+                      <Skeleton class="h-3 w-32" />
+                    </div>
+                  </div>
+                  <Skeleton class="mt-1 size-5 rounded" />
+                </div>
+                <div class="flex flex-wrap gap-2 border-t border-border/60 pt-4">
+                  <Skeleton class="h-6 w-20 rounded-full" />
+                  <Skeleton class="h-6 w-24 rounded-full" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <p v-else-if="muatPerhatianError" class="mt-6 text-sm font-medium text-red-600" role="alert">
             {{ muatPerhatianError }}
           </p>
 

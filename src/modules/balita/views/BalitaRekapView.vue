@@ -3,6 +3,7 @@ import { CalendarDays, Check, Copy, FileSpreadsheet, Printer } from '@lucide/vue
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import AppFooter from '@/components/AppFooter.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
+import Skeleton from '@/components/Skeleton.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -250,7 +251,35 @@ function kodeStatus(st: string | null | undefined): string | null {
         </CardContent>
       </Card>
 
-      <div v-if="loading" class="text-muted-foreground mt-10 text-sm">Memuat data…</div>
+      <div v-if="loading" class="mt-8" role="status" aria-label="Memuat…">
+        <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <Card v-for="i in 4" :key="i">
+            <CardContent class="flex flex-col gap-2 py-5">
+              <Skeleton class="h-8 w-16" />
+              <Skeleton class="h-3 w-32" />
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card class="mt-6">
+          <CardHeader>
+            <Skeleton class="h-5 w-48" />
+            <Skeleton class="h-3 w-32" />
+          </CardHeader>
+          <CardContent class="flex flex-col gap-2">
+            <Skeleton v-for="i in 8" :key="i" class="h-6 w-full" />
+          </CardContent>
+        </Card>
+
+        <Card class="mt-6">
+          <CardHeader>
+            <Skeleton class="h-5 w-40" />
+          </CardHeader>
+          <CardContent class="flex flex-col gap-2">
+            <Skeleton v-for="i in 5" :key="i" class="h-6 w-full" />
+          </CardContent>
+        </Card>
+      </div>
 
       <div v-else-if="error" class="mt-6">
         <p

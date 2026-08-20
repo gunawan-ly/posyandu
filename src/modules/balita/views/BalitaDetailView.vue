@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 import AppFooter from '@/components/AppFooter.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
 import KurvaWHO from '@/components/KurvaWHO.vue'
+import Skeleton from '@/components/Skeleton.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -253,7 +254,50 @@ const klsInput =
     <AppNavbar />
 
     <section class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-      <p v-if="sibuk" class="text-muted-foreground text-sm">Memuat data…</p>
+      <div v-if="sibuk" role="status" aria-label="Memuat…">
+        <div class="flex items-center gap-3">
+          <Skeleton class="size-12 rounded-xl" />
+          <div class="space-y-2">
+            <Skeleton class="h-6 w-56" />
+            <Skeleton class="h-4 w-80 max-w-full" />
+          </div>
+        </div>
+
+        <div class="mt-8 grid gap-6 lg:grid-cols-3">
+          <div class="min-w-0 space-y-6 lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <Skeleton class="h-5 w-40" />
+              </CardHeader>
+              <CardContent class="flex flex-col gap-3">
+                <Skeleton class="h-56 w-full" />
+                <Skeleton class="h-3 w-72 max-w-full" />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Skeleton class="h-5 w-44" />
+              </CardHeader>
+              <CardContent class="flex flex-col gap-2">
+                <Skeleton v-for="i in 5" :key="i" class="h-8 w-full" />
+              </CardContent>
+            </Card>
+          </div>
+
+          <div class="space-y-6">
+            <Card>
+              <CardHeader>
+                <Skeleton class="h-5 w-24" />
+              </CardHeader>
+              <CardContent class="flex flex-col gap-3">
+                <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+                  <Skeleton v-for="i in 4" :key="i" class="h-8 w-full" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
 
       <template v-else-if="balita">
         <div class="flex flex-wrap items-start justify-between gap-4">
@@ -602,6 +646,15 @@ const klsInput =
           Kembali ke daftar
         </RouterLink>
       </template>
+
+      <p
+        v-else-if="pesanError"
+        class="mt-4 flex items-center gap-2 text-sm font-medium text-red-600"
+        role="alert"
+      >
+        <TriangleAlert class="size-4 shrink-0" />
+        {{ pesanError }}
+      </p>
     </section>
 
     <AppFooter />
