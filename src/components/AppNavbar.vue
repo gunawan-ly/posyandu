@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { LogOut, Menu, Sprout } from '@lucide/vue'
-import { onMounted, ref } from 'vue'
+import { ChevronDown, ChevronRight, LogOut, Menu, Sprout } from '@lucide/vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import {
@@ -15,21 +15,110 @@ const buka = ref(false)
 const route = useRoute()
 const { isAutentikasi, user, inisialisasi, keluar } = useAuth()
 
-onMounted(() => {
-  inisialisasi()
+const TAUTAN = [
+  { label: 'Beranda', to: { path: '/' } },
+  { label: 'Tentang', to: { path: '/', hash: '#tentang' } },
+  { label: 'Dashboard', to: { path: '/dashboard' } },
+]
+
+const MODUL = [
+  { label: 'Balita', to: '/balita' },
+  { label: 'Bumil', to: '/bumil' },
+]
+
+// --- Tab Tentang aktif: hash #tentang ATAU section #tentang sedang terlihat ---
+const tentangTerlihat = ref(false)
+const tentangAktif = computed(() => {
+  const path = route?.path ?? ''
+  return path === '/' && (route?.hash === '#tentang' || tentangTerlihat.value)
 })
 
-function isAktif(href: string) {
-  const path = route?.path ?? ''
-  if (href === '/') return path === '/'
-  return path.startsWith(href)
+let pengamat: IntersectionObserver | null = null
+let timerCoba: ReturnType<typeof setTimeout> | null = null
+
+function amatiTentang() {
+  pengamat?.disconnect()
+  if (timerCoba) clearTimeout(timerCoba)
+  const el = document.getElementById('tentang')
+  if (!el) {
+    tentangTerlihat.value = false
+    if (route?.path === '/') timerCoba = setTimeout(amatiTentang, 150)
+    return
+  }
+  pengamat = new IntersectionObserver(
+    (entri) => {
+      tentangTerlihat.value = entri.some((e) => e.isIntersecting)
+    },
+    { rootMargin: '-64px 0px 0px 0px' },
+  )
+  pengamat.observe(el)
 }
 
-const TAUTAN = [
-  { label: 'Beranda', href: '/' },
-  { label: 'Tentang', href: '/#tentang' },
-  { label: 'Dashboard', href: '/dashboard' },
-]
+function isAktif(label: string) {
+  const path = route?.path ?? ''
+  if (label === 'Beranda') return path === '/' && !tentangAktif.value
+  if (label === 'Tentang') return tentangAktif.value
+  if (label === 'Dashboard') return path.startsWith('/dashboard')
+  return false
+}
+
+// --- Dropdown modul (Data Balita) ---
+const bukaModul = ref(false)
+const wadahModul = ref<HTMLElement | null>(null)
+const tombolModul = ref<HTMLButtonElement | null>(null)
+const menuModul = ref<HTMLElement | null>(null)
+
+function modulAktif() {
+  const path = route?.path ?? ''
+  return path.startsWith('/balita') || path.startsWith('/bumil')
+}
+
+function itemModulAktif(to: string) {
+  return (route?.path ?? '').startsWith(to)
+}
+
+function klikLuar(event: MouseEvent) {
+  if (wadahModul.value && !wadahModul.value.contains(event.target as Node)) {
+    bukaModul.value = false
+  }
+}
+
+function tekanEscape(event: KeyboardEvent) {
+  if (event.key === 'Escape' && bukaModul.value) {
+    bukaModul.value = false
+    tombolModul.value?.focus()
+  }
+}
+
+watch(bukaModul, (b) => {
+  if (b) {
+    nextTick(() => {
+      menuModul.value?.querySelector<HTMLElement>('[role="menuitem"]')?.focus()
+    })
+  }
+})
+
+onMounted(() => {
+  inisialisasi()
+  amatiTentang()
+  document.addEventListener('click', klikLuar)
+  document.addEventListener('keydown', tekanEscape)
+})
+
+watch(
+  () => route?.path,
+  () => {
+    bukaModul.value = false
+    amatiTentang()
+  },
+)
+
+onBeforeUnmount(() => {
+  pengamat?.disconnect()
+  if (timerCoba) clearTimeout(timerCoba)
+  document.removeEventListener('click', klikLuar)
+  document.removeEventListener('keydown', tekanEscape)
+})
 </script>
 
 <template>
@@ -39,29 +128,75 @@ const TAUTAN = [
         <span class="bg-primary grid size-9 place-items-center rounded-xl text-white shadow-sm transition-transform group-hover:scale-105">
           <Sprout class="size-5" />
         </span>
-        <span class="font-display text-lg font-normal tracking-tight">Posyandu Wapalo</span>
+        <span class="font-display text-lg font-bold tracking-tight">Posyandu Wapalo</span>
       </RouterLink>
 
       <nav class="hidden items-center gap-1 md:flex" aria-label="Navigasi utama">
         <RouterLink
           v-for="t in TAUTAN"
-          :key="t.href"
-          :to="t.href"
-          :aria-current="isAktif(t.href) ? 'page' : undefined"
+          :key="t.label"
+          :to="t.to"
+          :aria-current="isAktif(t.label) ? 'page' : undefined"
           class="text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg px-3.5 py-2 text-sm font-medium transition-colors"
-          :class="isAktif(t.href) && 'bg-muted text-foreground'"
+          :class="isAktif(t.label) && 'bg-muted text-foreground'"
         >
           {{ t.label }}
         </RouterLink>
-        <RouterLink
-          v-if="isAutentikasi"
-          to="/balita"
-          :aria-current="isAktif('/balita') ? 'page' : undefined"
-          class="text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg px-3.5 py-2 text-sm font-medium transition-colors"
-          :class="isAktif('/balita') && 'bg-muted text-foreground'"
-        >
-          Data Balita
-        </RouterLink>
+
+        <div v-if="isAutentikasi" ref="wadahModul" class="relative">
+          <button
+            ref="tombolModul"
+            type="button"
+            aria-haspopup="menu"
+            :aria-expanded="bukaModul"
+            :aria-current="modulAktif() ? 'page' : undefined"
+            class="flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium transition-colors"
+            :class="
+              bukaModul || modulAktif()
+                ? 'bg-muted text-foreground'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+            "
+            @click="bukaModul = !bukaModul"
+          >
+            Data Balita
+            <ChevronDown class="size-4 transition-transform" :class="bukaModul && 'rotate-180'" />
+          </button>
+
+          <Transition
+            enter-active-class="transition duration-100 ease-out"
+            enter-from-class="translate-y-1 scale-95 opacity-0"
+            enter-to-class="translate-y-0 scale-100 opacity-100"
+            leave-active-class="transition duration-75 ease-in"
+            leave-from-class="translate-y-0 scale-100 opacity-100"
+            leave-to-class="translate-y-1 scale-95 opacity-0"
+          >
+            <div
+              v-if="bukaModul"
+              ref="menuModul"
+              role="menu"
+              aria-label="Modul data"
+              class="glass min-w-44 p-1.5"
+            >
+              <RouterLink
+                v-for="m in MODUL"
+                :key="m.to"
+                :to="m.to"
+                role="menuitem"
+                tabindex="-1"
+                class="flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+                :class="
+                  itemModulAktif(m.to)
+                    ? 'bg-muted text-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                "
+                @click="bukaModul = false"
+              >
+                {{ m.label }}
+                <ChevronRight v-if="itemModulAktif(m.to)" class="size-4" />
+              </RouterLink>
+            </div>
+          </Transition>
+        </div>
       </nav>
 
       <div class="flex items-center gap-2">
@@ -95,23 +230,27 @@ const TAUTAN = [
             <nav class="flex flex-col gap-1 px-4" aria-label="Menu mobile">
               <RouterLink
                 v-for="t in TAUTAN"
-                :key="t.href"
-                :to="t.href"
+                :key="t.label"
+                :to="t.to"
                 class="text-foreground hover:bg-muted rounded-lg px-4 py-3 text-base font-medium"
-                :class="isAktif(t.href) && 'bg-muted text-primary'"
+                :class="isAktif(t.label) && 'bg-muted text-primary'"
                 @click="buka = false"
               >
                 {{ t.label }}
               </RouterLink>
-              <RouterLink
-                v-if="isAutentikasi"
-                to="/balita"
-                class="text-foreground hover:bg-muted rounded-lg px-4 py-3 text-base font-medium"
-                :class="isAktif('/balita') && 'bg-muted text-primary'"
-                @click="buka = false"
-              >
-                Data Balita
-              </RouterLink>
+              <template v-if="isAutentikasi">
+                <p class="text-muted-foreground mt-2 px-4 text-xs font-bold uppercase tracking-wide">Data Balita</p>
+                <RouterLink
+                  v-for="m in MODUL"
+                  :key="m.to"
+                  :to="m.to"
+                  class="text-foreground hover:bg-muted rounded-lg px-4 py-3 text-base font-medium"
+                  :class="itemModulAktif(m.to) && 'bg-muted text-primary'"
+                  @click="buka = false"
+                >
+                  {{ m.label }}
+                </RouterLink>
+              </template>
               <div v-if="isAutentikasi" class="border-border/60 mt-2 flex items-center justify-between border-t px-4 pt-3">
                 <span class="text-muted-foreground truncate text-sm">{{ user?.email }}</span>
                 <Button variant="outline" size="sm" @click="buka = false; keluar()">Keluar</Button>
