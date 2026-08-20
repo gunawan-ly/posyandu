@@ -118,6 +118,21 @@ PB/TB > 0; data tidak valid → tidak diklasifikasi (error).
 10. **Statistik publik (landing):** anonim tidak punya SELECT ke tabel data anak (RLS ketat), jadi statistik landing memakai fungsi `public.statistik_publik()` (SECURITY DEFINER, `search_path=public`, revoke public + grant anon/authenticated) yang hanya mengembalikan COUNT agregat (total_balita, total_bumil, kunjungan_bulan_ini, total_kunjungan, bulan_ini) — tanpa data perorangan. Landing fetch via `supabase.rpc('statistik_publik')` di `onMounted`; bila env Supabase kosong/error → seksi statistik disembunyikan.
 11. **Kunjungan terakhir (dashboard kader):** seksi "Balita yang perlu perhatian" memakai fungsi `public.kunjungan_terakhir()` (**SECURITY INVOKER** — RLS tetap berlaku) yang mengembalikan kunjungan terakhir per balita (nama, tanggal lahir/kunjungan, status BB/U·TB/U·BB/TB). Hanya `authenticated` yang boleh execute (`revoke public` + `revoke anon` eksplisit + `grant authenticated`); Supabase auto-grant EXECUTE ke anon/authenticated sehingga perlu `revoke ... from anon` tambahan. Anon yang memanggil mendapat 401 permission denied. Filter "perlu perhatian" (Kurang/Sangat Kurang/Pendek/Sangat Pendek/Gizi Buruk/Gizi Kurang) dilakukan di client (`balitaPerluPerhatian()`).
 
+## Kolaborasi Tim
+
+- **Awan** — Founder & pemilik produk: penentu arah, keputusan akhir, dan pemilik visi.
+- **Zero** — CEO (asisten Hermes / agent orchestrator): memimpin eksekusi, menyusun rencana,
+  menjalankan OpenCode CLI sebagai pekerja coding, memverifikasi hasil (build/test), dan
+  melaporkan ke Awan.
+- **OpenCode CLI** — pekerja coding otonom (model bawaan `deepseek-v4-flash-free`):
+  dikendalikan Zero lewat `opencode run` (one-shot) atau sesi interaktif; bekerja di dalam
+  repo ini dan patuh pada AGENTS.md.
+- Alur kerja: Awan memberi misi → Zero menyusun rencana & mengeksekusi (mendelegasikan tugas
+  coding ke OpenCode bila perlu) → hasil diverifikasi → dilaporkan ke Awan.
+- Bahasa tim: **Indonesia** di semua komunikasi, kode, komentar, dan commit.
+- Setiap perubahan perilaku aplikasi: perbarui PRD.md dan AGENTS.md agar tetap sinkron dengan
+  kode, lalu commit dengan konvensi `(Update vX.Y.Z) Deskripsi`.
+
 ## graphify
 
 This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
