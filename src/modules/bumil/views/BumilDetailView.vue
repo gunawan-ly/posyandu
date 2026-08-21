@@ -311,7 +311,7 @@ const klsInput =
                     <tbody>
                       <tr v-for="k in kunjungan" :key="k.id" class="border-border/60 border-b last:border-0">
                         <td class="py-3 pr-3 font-medium whitespace-nowrap">{{ formatTanggal(k.tanggal_kunjungan) }}</td>
-                        <td class="py-3 pr-3 text-muted-foreground whitespace-nowrap">{{ formatAngka(k.usia_kehamilan_minggu) }} mg</td>
+                        <td class="py-3 pr-3 text-muted-foreground whitespace-nowrap">{{ formatAngka(k.usia_kehamilan_minggu) }} minggu</td>
                         <td class="py-3 pr-3 whitespace-nowrap">{{ formatAngka(k.berat_badan) }}</td>
                         <td class="py-3 pr-3 whitespace-nowrap">{{ k.bb_sesuai_kurva_kia ?? '—' }}</td>
                         <td class="py-3 pr-3 whitespace-nowrap">{{ formatAngka(k.lingkaran_lengan_atas) }}</td>

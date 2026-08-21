@@ -90,8 +90,8 @@ async function hapus(bumil: Bumil) {
           <input
             v-model="cari"
             type="text"
-            placeholder="Cari nama ibu…"
-            aria-label="Cari nama ibu"
+            placeholder="Cari nama, suami, NIK, atau dusun…"
+            aria-label="Cari nama, suami, NIK, atau dusun"
             class="border-input bg-background focus-visible:border-ring focus-visible:ring-ring/50 h-10 w-full rounded-md border py-2 pr-9 pl-9 text-sm shadow-sm outline-none focus-visible:ring-3"
           />
           <button
@@ -147,7 +147,7 @@ async function hapus(bumil: Bumil) {
           </p>
           <p class="text-muted-foreground mt-1 max-w-sm text-sm">
             <template v-if="cari">
-              Tidak ditemukan ibu dengan nama “{{ cari }}”. Coba kata kunci lain atau hapus
+              Tidak ditemukan ibu dengan kata kunci “{{ cari }}”. Coba kata kunci lain atau hapus
               pencarian.
             </template>
             <template v-else>

@@ -21,7 +21,7 @@ import {
 } from '@/modules/balita/db'
 import { hitungZLik, hitungZLil, klasifikasiLika, klasifikasiLila } from '@/lib/kalkulator'
 import { kodeDariLabel, labelStatus } from '@/lib/status'
-import { parseTanggal, umurSaatIni } from '@/lib/umur'
+import { hitungUmurBulan, parseTanggal, umurSaatIni } from '@/lib/umur'
 import { useAuth } from '@/supabase/useAuth'
 
 const { isAdmin } = useAuth()
@@ -87,8 +87,10 @@ const zLilaLive = computed<number | null>(() => {
   const nilai = Number(lingkarLengan.value)
   if (!lingkarLengan.value || !(nilai > 0) || !balita.value) return null
   const lahir = parseTanggal(balita.value.tanggal_lahir)
-  if (!lahir) return null
-  const umur = Math.max(0, Math.round((new Date(tglKunjungan.value).getTime() - lahir.getTime()) / (1000 * 60 * 60 * 24 * 30.4375)))
+  const kunjungan = parseTanggal(tglKunjungan.value)
+  if (!lahir || !kunjungan) return null
+  // Umur kalender, sama dengan logika penyimpanan kunjungan (db.ts).
+  const umur = hitungUmurBulan(lahir, kunjungan)
   return hitungZLil(jkKurva.value, umur, nilai)
 })
 const statusLilaLive = computed<string>(() =>
@@ -98,8 +100,10 @@ const zLikaLive = computed<number | null>(() => {
   const nilai = Number(lingkarKepala.value)
   if (!lingkarKepala.value || !(nilai > 0) || !balita.value) return null
   const lahir = parseTanggal(balita.value.tanggal_lahir)
-  if (!lahir) return null
-  const umur = Math.max(0, Math.round((new Date(tglKunjungan.value).getTime() - lahir.getTime()) / (1000 * 60 * 60 * 24 * 30.4375)))
+  const kunjungan = parseTanggal(tglKunjungan.value)
+  if (!lahir || !kunjungan) return null
+  // Umur kalender, sama dengan logika penyimpanan kunjungan (db.ts).
+  const umur = hitungUmurBulan(lahir, kunjungan)
   return hitungZLik(jkKurva.value, umur, nilai)
 })
 const statusLikaLive = computed<string>(() =>

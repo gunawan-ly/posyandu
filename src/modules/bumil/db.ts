@@ -110,7 +110,13 @@ export interface InputKunjunganBumil {
 export async function listBumil(cari = ''): Promise<Bumil[]> {
   const kl = wajibSupabase()
   let q = kl.from('bumil_identitas').select('*').order('nama')
-  if (cari.trim()) q = q.ilike('nama', `%${cari.trim()}%`)
+  if (cari.trim()) {
+    // Buang karakter khusus filter .or() PostgREST (koma, kurung) agar tidak memecah query.
+    const kata = cari.trim().replace(/[,()]/g, '')
+    if (kata) {
+      q = q.or(`nama.ilike.%${kata}%,nama_suami.ilike.%${kata}%,nik.ilike.%${kata}%,dusun.ilike.%${kata}%`)
+    }
+  }
   const { data, error } = await q
   if (error) throw error
   return (data ?? []) as Bumil[]
