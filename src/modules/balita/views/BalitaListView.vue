@@ -111,7 +111,7 @@ async function hapus(balita: Balita) {
             type="text"
             placeholder="Cari nama, orang tua, atau NIK…"
             aria-label="Cari nama, orang tua, atau NIK"
-            class="border-input bg-background focus-visible:border-ring focus-visible:ring-ring/50 h-10 w-full rounded-md border py-2 pr-9 pl-9 text-sm shadow-sm outline-none focus-visible:ring-3"
+            class="border-input bg-background focus-visible:border-ring focus-visible:ring-ring/50 h-12 md:h-10 w-full rounded-md border py-2 pr-9 pl-9 text-sm shadow-sm outline-none focus-visible:ring-3"
           />
           <button
             v-if="cari"
