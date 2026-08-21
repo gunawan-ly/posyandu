@@ -98,7 +98,9 @@ PB/TB > 0; data tidak valid → tidak diklasifikasi (error).
 - Git commit: `(Update vX.Y.Z) Deskripsi singkat`
 - Seluruh perhitungan di sisi klien (browser) — jangan pindahkan ke server tanpa alasan
 - Komponen UI baru: pakai primitif shadcn-vue di `src/components/ui/` bila ada, selain itu pola cva (class-variance-authority)
-- Tema: palet hijau klinis di `src/style.css` (`:root` + `@theme inline`); jangan hardcode warna
+- Tema: palet hijau klinis di `src/style.css` (`:root` + `@theme inline`); jangan hardcode warna.
+  `--primary` = `#047857` (emerald-700, kontras putih ≥ 4.5:1 / AA) — jangan digelapkan/diterangkan lagi;
+  input form memakai `h-12 md:h-10` (48px mobile utk target sentuh, 40px desktop) via konstanta `klsInput`.
 
 ## Konvensi Git & Perawatan Repo
 - JANGAN commit `node_modules/`, `dist/`, `.env`, `venv/`, `__pycache__/`, `instance/*.db`
