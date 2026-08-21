@@ -123,13 +123,13 @@ PB/TB > 0; data tidak valid → tidak diklasifikasi (error).
 ## Kolaborasi Tim
 
 - **Awan** — Founder & pemilik produk: penentu arah, keputusan akhir, dan pemilik visi.
-- **Zero** — CEO (asisten Hermes / agent orchestrator): memimpin eksekusi, menyusun rencana,
+- **Alpha** — CEO (asisten Hermes / agent orchestrator): memimpin eksekusi, menyusun rencana,
   menjalankan OpenCode CLI sebagai pekerja coding, memverifikasi hasil (build/test), dan
   melaporkan ke Awan.
-- **OpenCode CLI** — pekerja coding otonom (model bawaan `deepseek-v4-flash-free`):
-  dikendalikan Zero lewat `opencode run` (one-shot) atau sesi interaktif; bekerja di dalam
+- **OpenCode CLI** — pekerja coding otonom (model bawaan, saat ini `big-pickle`):
+  dikendalikan Alpha lewat `opencode run` (one-shot) atau sesi interaktif; bekerja di dalam
   repo ini dan patuh pada AGENTS.md.
-- Alur kerja: Awan memberi misi → Zero menyusun rencana & mengeksekusi (mendelegasikan tugas
+- Alur kerja: Awan memberi misi → Alpha menyusun rencana & mengeksekusi (mendelegasikan tugas
   coding ke OpenCode bila perlu) → hasil diverifikasi → dilaporkan ke Awan.
 - Bahasa tim: **Indonesia** di semua komunikasi, kode, komentar, dan commit.
 - Setiap perubahan perilaku aplikasi: perbarui PRD.md dan AGENTS.md agar tetap sinkron dengan
@@ -140,12 +140,12 @@ PB/TB > 0; data tidak valid → tidak diklasifikasi (error).
 ### Alur Pengembangan Fitur
 
 1. **Awan** memberikan ide/misi dalam bahasa bebas (mentah, belum tentu terstruktur).
-2. **Zero** mematangkan ide tersebut menjadi spesifikasi kerja: tujuan, cakupan perubahan,
+2. **Alpha** mematangkan ide tersebut menjadi spesifikasi kerja: tujuan, cakupan perubahan,
    file/komponen yang terpengaruh, kriteria penerimaan, dan catatan risiko — lalu menyampaikan
    spesifikasi ini ke OpenCode CLI.
 3. **OpenCode CLI** mengimplementasikan sesuai spesifikasi (one-shot `opencode run '...'` untuk
    tugas terbatas, atau sesi interaktif untuk tugas panjang), patuh pada AGENTS.md & PRD.md.
-4. **Zero** memverifikasi hasil: `npm run build` (vue-tsc + vite), `npm test` (vitest), review
+4. **Alpha** memverifikasi hasil: `npm run build` (vue-tsc + vite), `npm test` (vitest), review
    diff, dan memastikan PRD.md/AGENTS.md disinkronkan dengan perubahan perilaku.
 5. **Awan** menerima laporan hasil + risiko tersisa (jika ada) dan memutuskan langkah berikutnya.
 
