@@ -253,32 +253,35 @@ describe('hitungRekapBulanan', () => {
     expect(r.bb_tidak_naik).toBe(1)
   })
 
-  it('menghitung status indikator (normal vs tidak normal)', () => {
+  it('menghitung status indikator (kosong tidak masuk hitungan)', () => {
     expect(hasil.bbu_normal).toBe(1)
     expect(hasil.bbu_tidak_normal).toBe(2)
     expect(hasil.tbu_normal).toBe(2)
     expect(hasil.tbu_tidak_normal).toBe(1)
     expect(hasil.bbtb_normal).toBe(2) // "Gizi Baik" dianggap Normal
     expect(hasil.bbtb_tidak_normal).toBe(1)
+    // LiKA kunjungan id 3 bernilai null → tidak dihitung di kedua kolom.
     expect(hasil.lika_normal).toBe(1)
-    expect(hasil.lika_tidak_normal).toBe(2)
+    expect(hasil.lika_tidak_normal).toBe(1)
     expect(hasil.lila_normal).toBe(2)
     expect(hasil.lila_tidak_normal).toBe(1)
   })
 
-  it('menghitung layanan (imunisasi, vitamin, ASI, MP-ASI, obat cacing, edukasi)', () => {
+  it('menghitung layanan (kosong/tak diisi tidak masuk hitungan)', () => {
+    // Kunjungan id 2: imunisasi/vitamin/obat_cacing null → dilewati.
+    // Kunjungan id 3: ASI/MP-ASI/edukasi null → dilewati.
     expect(hasil.imunisasi_ya).toBe(1)
-    expect(hasil.imunisasi_tidak).toBe(2)
+    expect(hasil.imunisasi_tidak).toBe(1)
     expect(hasil.vitamin_ya).toBe(2)
-    expect(hasil.vitamin_tidak).toBe(1)
+    expect(hasil.vitamin_tidak).toBe(0)
     expect(hasil.asi_ya).toBe(1)
-    expect(hasil.asi_tidak).toBe(2)
+    expect(hasil.asi_tidak).toBe(1)
     expect(hasil.mpasi_ya).toBe(1)
-    expect(hasil.mpasi_tidak).toBe(2)
+    expect(hasil.mpasi_tidak).toBe(1)
     expect(hasil.cacing_ya).toBe(2)
-    expect(hasil.cacing_tidak).toBe(1)
+    expect(hasil.cacing_tidak).toBe(0)
     expect(hasil.edukasi_ya).toBe(1)
-    expect(hasil.edukasi_tidak).toBe(2)
+    expect(hasil.edukasi_tidak).toBe(1)
   })
 
   it('periode rentang menghasilkan sasaran & kehadiran yang sama', () => {

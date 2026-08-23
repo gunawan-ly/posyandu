@@ -105,7 +105,7 @@ export function klasifikasiSasaran(tanggalLahir: string, refTanggal: Date): 'bay
 
 // Nilai "Ya": cocok dengan pola Y/Ya/lengkap/L/1/benar (trim, case-insensitive).
 // Mencakup nilai form baru ('Ya', 'L') maupun data lama ('Y', 'lengkap').
-// null / string kosong / nilai lain dianggap "Tidak".
+// Pemanggil wajib melewatkan nilai kosong lebih dulu (aturan: kosong tidak dihitung).
 function fungsiAktif(nilai: string | null | undefined): boolean {
   if (nilai == null) return false
   return /^(y|ya|lengkap|l|1|benar)$/i.test(nilai.trim())
@@ -161,22 +161,31 @@ export function hitungRekapBulanan(
     else balitaHadir += 1
   }
 
-  // Dua kolom Ya/Tidak sekaligus atas kunjungan terakhir per balita (null dihitung "Tidak").
+  // Dua kolom Ya/Tidak sekaligus atas kunjungan terakhir per balita.
+  // Aturan (Awan): nilai terisi & bukan pola Ya → "Tidak"; kosong/tak diisi →
+  // tidak dihitung di kedua kolom (tidak diasumsikan apa pun).
   const hitungDua = (ambil: (k: Kunjungan) => string | null | undefined): [number, number] => {
     let ya = 0
     let tidak = 0
     for (const k of daftarKunjungan) {
-      if (fungsiAktif(ambil(k))) ya += 1
+      const v = (ambil(k) ?? '').trim()
+      if (!v) continue
+      if (fungsiAktif(v)) ya += 1
       else tidak += 1
     }
     return [ya, tidak]
   }
 
+  // Pasangan Normal/Tidak Normal memakai aturan yang sama: terisi & bukan label
+  // normal → "Tidak Normal"; kosong (belum diukur/status tak bisa dihitung) →
+  // tidak masuk hitungan.
   const hitungNormal = (ambil: (k: Kunjungan) => string | null | undefined, labelNormal: string): [number, number] => {
     let normal = 0
     let tidakNormal = 0
     for (const k of daftarKunjungan) {
-      if (normalTidakNormal(ambil(k), labelNormal)) normal += 1
+      const v = (ambil(k) ?? '').trim()
+      if (!v) continue
+      if (normalTidakNormal(v, labelNormal)) normal += 1
       else tidakNormal += 1
     }
     return [normal, tidakNormal]
