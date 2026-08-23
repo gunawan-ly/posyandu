@@ -1,0 +1,266 @@
+<script setup lang="ts">
+import { Plus, TriangleAlert } from '@lucide/vue'
+import { computed, ref } from 'vue'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { tambahKunjungan, type Balita } from '@/modules/balita/db'
+import { hitungZLik, hitungZLil, klasifikasiLika, klasifikasiLila } from '@/lib/kalkulator'
+import { labelStatus } from '@/lib/status'
+import { hitungUmurBulan, parseTanggal } from '@/lib/umur'
+
+const props = defineProps<{
+  balita: Balita
+  isAdmin: boolean
+}>()
+
+const emit = defineEmits<{ tersimpan: [] }>()
+
+const tglKunjungan = ref(new Date().toISOString().slice(0, 10))
+const beratBadan = ref<string>('')
+const tinggiBadan = ref<string>('')
+const lingkarLengan = ref<string>('')
+const lingkarKepala = ref<string>('')
+const bbNaik = ref('')
+const imunisasi = ref('')
+const vitaminA = ref('')
+const asiEksklusif = ref('')
+const mpAsi = ref('')
+const obatCacing = ref('')
+const ceklisPerkembangan = ref('')
+const gejalaTbc = ref('')
+const edukasi = ref('')
+const menyimpan = ref(false)
+const pesanSukses = ref('')
+const pesanForm = ref('')
+
+const jkKurva = computed<'L' | 'P'>(() => (props.balita.jenis_kelamin === 'Perempuan' ? 'P' : 'L'))
+
+// Status LiLA/LiKA dihitung otomatis dari pengukuran (z-score WHO) saat form diisi.
+const zLilaLive = computed<number | null>(() => {
+  const nilai = Number(lingkarLengan.value)
+  if (!lingkarLengan.value || !(nilai > 0) || !props.balita) return null
+  const lahir = parseTanggal(props.balita.tanggal_lahir)
+  const kunjungan = parseTanggal(tglKunjungan.value)
+  if (!lahir || !kunjungan) return null
+  // Umur kalender, sama dengan logika penyimpanan kunjungan (db.ts).
+  const umur = hitungUmurBulan(lahir, kunjungan)
+  return hitungZLil(jkKurva.value, umur, nilai)
+})
+const statusLilaLive = computed<string>(() =>
+  zLilaLive.value != null ? labelStatus(klasifikasiLila(zLilaLive.value)) : '',
+)
+const zLikaLive = computed<number | null>(() => {
+  const nilai = Number(lingkarKepala.value)
+  if (!lingkarKepala.value || !(nilai > 0) || !props.balita) return null
+  const lahir = parseTanggal(props.balita.tanggal_lahir)
+  const kunjungan = parseTanggal(tglKunjungan.value)
+  if (!lahir || !kunjungan) return null
+  // Umur kalender, sama dengan logika penyimpanan kunjungan (db.ts).
+  const umur = hitungUmurBulan(lahir, kunjungan)
+  return hitungZLik(jkKurva.value, umur, nilai)
+})
+const statusLikaLive = computed<string>(() =>
+  zLikaLive.value != null ? labelStatus(klasifikasiLika(zLikaLive.value)) : '',
+)
+
+async function simpanKunjungan() {
+  pesanForm.value = ''
+  pesanSukses.value = ''
+  if (!props.balita) return
+
+  const bb = Number(beratBadan.value)
+  const tb = Number(tinggiBadan.value)
+  if (!beratBadan.value || !(bb > 0)) {
+    pesanForm.value = 'Berat badan wajib diisi (kg).'
+    return
+  }
+  if (!tinggiBadan.value || !(tb > 0)) {
+    pesanForm.value = 'Panjang/tinggi badan wajib diisi (cm).'
+    return
+  }
+
+  menyimpan.value = true
+  try {
+    await tambahKunjungan(props.balita, {
+      tanggal_kunjungan: tglKunjungan.value,
+      berat_badan: bb,
+      tinggi_badan: tb,
+      lingkar_lengan: lingkarLengan.value ? Number(lingkarLengan.value) : null,
+      lingkar_kepala: lingkarKepala.value ? Number(lingkarKepala.value) : null,
+      bb_naik_tidak: bbNaik.value || null,
+      imunisasi: imunisasi.value || null,
+      vitamin_a: vitaminA.value || null,
+      asi_eksklusif: asiEksklusif.value || null,
+      mp_asi: mpAsi.value || null,
+      obat_cacing: obatCacing.value || null,
+      ceklis_perkembangan: ceklisPerkembangan.value || null,
+      gejala_tbc: gejalaTbc.value || null,
+      edukasi: edukasi.value || null,
+    })
+    emit('tersimpan')
+    beratBadan.value = ''
+    tinggiBadan.value = ''
+    lingkarLengan.value = ''
+    lingkarKepala.value = ''
+    bbNaik.value = ''
+    imunisasi.value = ''
+    vitaminA.value = ''
+    asiEksklusif.value = ''
+    mpAsi.value = ''
+    obatCacing.value = ''
+    ceklisPerkembangan.value = ''
+    gejalaTbc.value = ''
+    edukasi.value = ''
+    pesanSukses.value = 'Kunjungan berhasil dicatat.'
+  } catch (e) {
+    pesanForm.value = e instanceof Error ? e.message : 'Gagal menyimpan kunjungan.'
+  } finally {
+    menyimpan.value = false
+  }
+}
+
+const OPSI_YA_TIDAK = ['Ya', 'Tidak']
+const OPSI_NAIK = ['Naik', 'Tidak Naik']
+const OPSI_CEKLIS = ['L', 'TL']
+
+const klsInput =
+  'border-input bg-background h-12 md:h-10 w-full min-w-0 rounded-md border px-3 py-2 text-base shadow-sm outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-3 disabled:pointer-events-none disabled:opacity-50 md:text-sm'
+</script>
+
+<template>
+  <Card v-if="isAdmin">
+    <CardHeader>
+      <CardTitle class="font-display text-lg font-normal">Catat kunjungan</CardTitle>
+    </CardHeader>
+    <CardContent class="flex flex-col gap-4">
+      <form class="space-y-4" @submit.prevent="simpanKunjungan">
+        <div>
+          <label for="tgl-kunjungan" class="text-muted-foreground mb-1.5 block text-xs font-bold">Tanggal kunjungan</label>
+          <input id="tgl-kunjungan" v-model="tglKunjungan" type="date" class="w-full [color-scheme:light]" :class="klsInput" />
+        </div>
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <label for="bb" class="text-muted-foreground mb-1.5 block text-xs font-bold">Berat badan (kg)</label>
+            <input id="bb" v-model="beratBadan" type="number" inputmode="decimal" step="0.1" min="0" placeholder="cth: 9,6" class="w-full" :class="klsInput" />
+          </div>
+          <div>
+            <label for="pb" class="text-muted-foreground mb-1.5 block text-xs font-bold">Panjang/tinggi (cm)</label>
+            <input id="pb" v-model="tinggiBadan" type="number" inputmode="decimal" step="0.1" min="0" placeholder="cth: 75" class="w-full" :class="klsInput" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <label for="lila" class="text-muted-foreground mb-1.5 block text-xs font-bold">LiLA (cm)</label>
+            <input id="lila" v-model="lingkarLengan" type="number" inputmode="decimal" step="0.1" min="0" class="w-full" :class="klsInput" />
+          </div>
+          <div>
+            <label for="lika" class="text-muted-foreground mb-1.5 block text-xs font-bold">LiKA (cm)</label>
+            <input id="lika" v-model="lingkarKepala" type="number" inputmode="decimal" step="0.1" min="0" class="w-full" :class="klsInput" />
+          </div>
+        </div>
+
+        <div v-if="statusLilaLive || statusLikaLive" class="rounded-lg border border-emerald-100 bg-emerald-50/60 px-3 py-2 text-sm">
+          <span v-if="statusLilaLive">
+            Status LiLA: <span class="font-bold">{{ statusLilaLive }}</span>
+            <span v-if="zLilaLive != null" class="text-muted-foreground"> (z {{ zLilaLive.toFixed(2) }})</span>
+          </span>
+          <span v-if="statusLilaLive && statusLikaLive" class="mx-2 text-emerald-300">·</span>
+          <span v-if="statusLikaLive">
+            Status LiKA: <span class="font-bold">{{ statusLikaLive }}</span>
+            <span v-if="zLikaLive != null" class="text-muted-foreground"> (z {{ zLikaLive.toFixed(2) }})</span>
+          </span>
+        </div>
+
+        <div class="border-border/60 border-t pt-4">
+          <p class="text-muted-foreground mb-3 text-xs font-bold tracking-widest uppercase">Gizi & kesehatan</p>
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <label for="bb-naik" class="text-muted-foreground mb-1.5 block text-xs font-bold">BB naik</label>
+              <select id="bb-naik" v-model="bbNaik" class="w-full" :class="klsInput">
+                <option value="">— pilih —</option>
+                <option v-for="s in OPSI_NAIK" :key="s" :value="s">{{ s }}</option>
+              </select>
+            </div>
+            <div>
+              <label for="ceklis-perkembangan" class="text-muted-foreground mb-1.5 block text-xs font-bold">Ceklis perkembangan</label>
+              <select id="ceklis-perkembangan" v-model="ceklisPerkembangan" class="w-full" :class="klsInput">
+                <option value="">— pilih —</option>
+                <option v-for="s in OPSI_CEKLIS" :key="s" :value="s">{{ s === 'L' ? 'L (Lengkap)' : 'TL (Tidak Lengkap)' }}</option>
+              </select>
+            </div>
+            <div>
+              <label for="imunisasi" class="text-muted-foreground mb-1.5 block text-xs font-bold">Imunisasi</label>
+              <select id="imunisasi" v-model="imunisasi" class="w-full" :class="klsInput">
+                <option value="">— pilih —</option>
+                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
+              </select>
+            </div>
+            <div>
+              <label for="vitamin-a" class="text-muted-foreground mb-1.5 block text-xs font-bold">Vitamin A</label>
+              <select id="vitamin-a" v-model="vitaminA" class="w-full" :class="klsInput">
+                <option value="">— pilih —</option>
+                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
+              </select>
+            </div>
+            <div>
+              <label for="asi-eksklusif" class="text-muted-foreground mb-1.5 block text-xs font-bold">ASI eksklusif</label>
+              <select id="asi-eksklusif" v-model="asiEksklusif" class="w-full" :class="klsInput">
+                <option value="">— pilih —</option>
+                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
+              </select>
+            </div>
+            <div>
+              <label for="mp-asi" class="text-muted-foreground mb-1.5 block text-xs font-bold">MP-ASI</label>
+              <select id="mp-asi" v-model="mpAsi" class="w-full" :class="klsInput">
+                <option value="">— pilih —</option>
+                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
+              </select>
+            </div>
+            <div>
+              <label for="obat-cacing" class="text-muted-foreground mb-1.5 block text-xs font-bold">Obat cacing</label>
+              <select id="obat-cacing" v-model="obatCacing" class="w-full" :class="klsInput">
+                <option value="">— pilih —</option>
+                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
+              </select>
+            </div>
+            <div>
+              <label for="gejala-tbc" class="text-muted-foreground mb-1.5 block text-xs font-bold">Gejala TBC</label>
+              <select id="gejala-tbc" v-model="gejalaTbc" class="w-full" :class="klsInput">
+                <option value="">— pilih —</option>
+                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="mt-3">
+            <label for="edukasi" class="text-muted-foreground mb-1.5 block text-xs font-bold">Edukasi (opsional)</label>
+            <textarea
+              id="edukasi"
+              v-model="edukasi"
+              rows="2"
+              class="w-full resize-none"
+              :class="klsInput"
+              placeholder="Catatan edukasi gizi/kesehatan…"
+            ></textarea>
+          </div>
+        </div>
+
+        <p v-if="pesanForm" class="flex items-start gap-2 text-sm font-medium text-red-600" role="alert">
+          <TriangleAlert class="mt-0.5 size-4 shrink-0" />
+          {{ pesanForm }}
+        </p>
+        <p v-if="pesanSukses" class="text-sm font-medium text-emerald-700" role="status">
+          {{ pesanSukses }}
+        </p>
+
+        <Button size="lg" class="w-full" type="submit" :disabled="menyimpan">
+          <Plus class="size-4" />
+          {{ menyimpan ? 'Menyimpan…' : 'Simpan Kunjungan' }}
+        </Button>
+      </form>
+
+      <p class="text-muted-foreground border-border/60 border-t pt-3 text-xs leading-relaxed">
+        Status BB/U, TB/U, dan BB/TB dihitung otomatis dari pengukuran memakai standar WHO.
+      </p>
+    </CardContent>
+  </Card>
+</template>
