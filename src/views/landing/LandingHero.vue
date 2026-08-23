@@ -1,9 +1,42 @@
 <script setup lang="ts">
-import { ArrowRight, LayoutDashboard, Sparkles } from '@lucide/vue'
+import { Lock, Sparkles } from '@lucide/vue'
+import { onBeforeUnmount, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import Reveal from '@/components/Reveal.vue'
 import { Button } from '@/components/ui/button'
 import { KAMPANYE_HUT, TEX_KAMPANYE } from './kampanye'
+
+// ---- Navigasi 4 modul posyandu (hero) ----
+// Dua modul aktif diarahkan ke rutenya; dua lainnya masih dikembangkan
+// dan menampilkan pengingat saat diklik (tanpa navigasi).
+interface ModulNav {
+  nama: string
+  href?: string
+  aktif: boolean
+}
+
+const MODUL_NAV: ModulNav[] = [
+  { nama: 'Bumil & Busui', href: '/bumil', aktif: true },
+  { nama: 'Bayi & Balita', href: '/balita', aktif: true },
+  { nama: 'Remaja', aktif: false },
+  { nama: 'Dewasa & Lansia', aktif: false },
+]
+
+// Pengingat untuk modul yang masih dalam tahap pengembangan.
+const pesanKunci = ref('')
+let timerPesan: ReturnType<typeof setTimeout> | undefined
+
+function klikModulTerkunci(nama: string): void {
+  pesanKunci.value = `Modul ${nama} masih dalam tahap pengembangan — segera hadir.`
+  if (timerPesan) clearTimeout(timerPesan)
+  timerPesan = setTimeout(() => {
+    pesanKunci.value = ''
+  }, 3000)
+}
+
+onBeforeUnmount(() => {
+  if (timerPesan) clearTimeout(timerPesan)
+})
 </script>
 
 <template>
@@ -122,24 +155,54 @@ import { KAMPANYE_HUT, TEX_KAMPANYE } from './kampanye'
             riwayat tumbuh kembang — dari balita, ibu hamil, hingga dewasa dan lansia.
           </p>
 
-          <div class="mt-9 flex flex-wrap items-center justify-center gap-3">
-            <RouterLink to="/dashboard">
+          <!-- CTA utama: Masuk (paling atas tengah) -->
+          <div class="mt-9 flex justify-center">
+            <RouterLink to="/login">
               <Button
                 size="lg"
                 :variant="KAMPANYE_HUT ? 'destructive' : 'default'"
-                class="gap-2 shadow-lg"
+                class="gap-2 px-8 shadow-lg"
                 :class="KAMPANYE_HUT ? 'shadow-red-600/25' : 'shadow-primary/25'"
               >
-                <LayoutDashboard class="size-4" />
-                Mulai Sekarang
+                <Lock class="size-4" />
+                Masuk
               </Button>
             </RouterLink>
-            <RouterLink to="/kalkulator">
-              <Button variant="outline" size="lg">
-                Coba Kalkulator Status Gizi
-                <ArrowRight class="size-4" />
-              </Button>
-            </RouterLink>
+          </div>
+
+          <!-- Navigasi 4 modul posyandu -->
+          <div class="mt-5 flex flex-col items-center gap-2.5">
+            <div class="flex flex-wrap items-center justify-center gap-2.5">
+              <template v-for="(m, i) in MODUL_NAV" :key="m.nama">
+                <RouterLink v-if="m.aktif && m.href" :to="m.href">
+                  <Button variant="outline" size="sm" class="font-medium">
+                    {{ i + 1 }}. {{ m.nama }}
+                  </Button>
+                </RouterLink>
+                <Button
+                  v-else
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  class="text-muted-foreground gap-1.5 opacity-70"
+                  :aria-label="`${m.nama} (masih dalam tahap pengembangan)`"
+                  @click="klikModulTerkunci(m.nama)"
+                >
+                  <Lock class="size-3.5" />
+                  {{ i + 1 }}. {{ m.nama }}
+                </Button>
+              </template>
+            </div>
+            <!-- Pengingat modul terkunci -->
+            <p
+              v-if="pesanKunci"
+              role="status"
+              aria-live="polite"
+              class="text-muted-foreground inline-flex items-center gap-1.5 rounded-full border border-dashed px-3.5 py-1 text-xs font-medium"
+            >
+              <Lock class="size-3" />
+              {{ pesanKunci }}
+            </p>
           </div>
         </div>
       </Reveal>
