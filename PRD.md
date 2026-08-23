@@ -132,8 +132,11 @@ sebagai label Indonesia + z-score mentah; hasil tersimpan terpisah dari pengukur
 di kolom `berat_badan`/`tinggi_badan`/`lingkar_*`, hasil di kolom `bb_menurut_umur`/`z_*`/`umur_bulan`).
 
 **Pengujian:** unit test Vitest `src/lib/kalkulator/index.test.ts` (validasi vs fixture Python, 20 kasus,
-toleransi z ±0.005) + smoke test render komponen; boundary klasifikasi BB/TB (6 kategori) & indikator lain
-diuji eksplisit (z = ±3.01/±3.00/±2.99/…, data tidak lengkap, umur 0).
+toleransi z ±0.005) + test `src/lib/status.test.ts` & `src/modules/bumil/bumil.test.ts` (pemetaan kode↔label
+status & opsi kunjungan bumil) + smoke test render komponen; boundary klasifikasi BB/TB (6 kategori) &
+indikator lain diuji eksplisit (z = ±3.01/±3.00/±2.99/…, data tidak lengkap, umur 0). Baseline saat ini
+**85 test hijau**. Lint wajib bersih via `npm run lint` (ESLint flat config: typescript-eslint +
+eslint-plugin-vue; komponen vendor shadcn-vue diberi pengecualian baku).
 
 ## 6. Model Data
 
