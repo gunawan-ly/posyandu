@@ -9,6 +9,8 @@ const rekap: RekapBulanan = {
   sasaran_balita: 12,
   bayi_hadir: 4,
   bayi_tidak_hadir: 1,
+  balita_hadir: 10,
+  balita_tidak_hadir: 2,
   ceklis_lengkap: 3,
   ceklis_tidak_lengkap: 1,
   bb_naik: 2,
@@ -102,6 +104,14 @@ describe('susunLembarRingkasan', () => {
     expect(lembar[0]).toEqual(['REKAP BULANAN POSYANDU - BALITA', ''])
     expect(lembar[1]).toEqual(['Periode', 'AGUSTUS 2026'])
     expect(lembar[3]).toEqual(['Keterangan', 'Jumlah'])
+  })
+
+  it('menyisipkan Balita Datang/Tidak Datang tepat setelah Bayi Tidak Datang', () => {
+    const lembar = susunLembarRingkasan(rekap, 'AGUSTUS 2026')
+    const iBayiTidak = lembar.findIndex((r) => r[0] === 'Bayi Tidak Datang (Tidak Hadir)')
+    expect(iBayiTidak).toBeGreaterThan(-1)
+    expect(lembar[iBayiTidak + 1]).toEqual(['Balita Datang (Hadir)', 10])
+    expect(lembar[iBayiTidak + 2]).toEqual(['Balita Tidak Datang (Tidak Hadir)', 2])
   })
 
   it('memuat tiap baris keterangan beserta jumlahnya (mis. Jumlah Sasaran - Bayi)', () => {

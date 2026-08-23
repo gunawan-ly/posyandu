@@ -146,6 +146,7 @@ describe('hitungRekapBulanan', () => {
     buatBalita({ id: 2, nama: 'Budi', tanggal_lahir: '2024-02-10' }), // 24 bulan → balita
     buatBalita({ id: 3, nama: 'Citra', tanggal_lahir: '2024-08-20' }), // 18 bulan → balita
     buatBalita({ id: 4, nama: 'Dewi', tanggal_lahir: '2025-05-20' }), // 9 bulan → bayi, tanpa kunjungan
+    buatBalita({ id: 5, nama: 'Eko', tanggal_lahir: '2024-06-01' }), // ~20 bulan → balita, tanpa kunjungan
   ]
 
   const kunjungan = [
@@ -207,11 +208,13 @@ describe('hitungRekapBulanan', () => {
 
   const hasil = hitungRekapBulanan(kunjungan, balita, { bulan: 1, tahun: 2026 })
 
-  it('menghitung sasaran & kehadiran', () => {
+  it('menghitung sasaran & kehadiran (bayi dan balita)', () => {
     expect(hasil.sasaran_bayi).toBe(2)
-    expect(hasil.sasaran_balita).toBe(2)
+    expect(hasil.sasaran_balita).toBe(3)
     expect(hasil.bayi_hadir).toBe(1)
     expect(hasil.bayi_tidak_hadir).toBe(1)
+    expect(hasil.balita_hadir).toBe(2)
+    expect(hasil.balita_tidak_hadir).toBe(1)
   })
 
   it('menghitung ceklis perkembangan & kenaikan BB (nilai null dihitung Tidak)', () => {
@@ -252,9 +255,11 @@ describe('hitungRekapBulanan', () => {
   it('periode rentang menghasilkan sasaran & kehadiran yang sama', () => {
     const hasilRentang = hitungRekapBulanan(kunjungan, balita, { awal: '2026-02-01', akhir: '2026-02-28' })
     expect(hasilRentang.sasaran_bayi).toBe(2)
-    expect(hasilRentang.sasaran_balita).toBe(2)
+    expect(hasilRentang.sasaran_balita).toBe(3)
     expect(hasilRentang.bayi_hadir).toBe(1)
     expect(hasilRentang.bayi_tidak_hadir).toBe(1)
+    expect(hasilRentang.balita_hadir).toBe(2)
+    expect(hasilRentang.balita_tidak_hadir).toBe(1)
   })
 })
 

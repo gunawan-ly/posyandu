@@ -343,8 +343,7 @@ function kodeStatus(st: string | null | undefined): string | null {
             <CardDescription>Periode {{ label }}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div class="overflow-x-auto">
-              <table class="w-full min-w-[480px] text-sm">
+            <table class="w-full text-sm">
                 <thead>
                   <tr
                     class="text-muted-foreground border-border/60 border-b text-left text-xs font-bold tracking-wide uppercase"
@@ -353,18 +352,17 @@ function kodeStatus(st: string | null | undefined): string | null {
                     <th class="py-2 pr-3 text-right">Jumlah</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr
-                    v-for="b in BARIS_RINGKASAN"
-                    :key="b.label"
-                    class="border-border/60 border-b last:border-0"
-                  >
-                    <td class="py-2.5 pr-3">{{ b.label }}</td>
-                    <td class="py-2.5 pr-3 text-right font-medium tabular-nums">{{ b.ambil(rekap) }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <tbody>
+              <tr
+                v-for="b in BARIS_RINGKASAN"
+                :key="b.label"
+                class="border-border/60 border-b last:border-0"
+              >
+                <td class="py-2.5 pr-3">{{ b.label }}</td>
+                <td class="py-2.5 pr-3 text-right font-medium tabular-nums">{{ b.ambil(rekap) }}</td>
+              </tr>
+            </tbody>
+          </table>
           </CardContent>
         </Card>
 

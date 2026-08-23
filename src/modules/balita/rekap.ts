@@ -8,6 +8,8 @@ export interface RekapBulanan {
   sasaran_balita: number
   bayi_hadir: number
   bayi_tidak_hadir: number
+  balita_hadir: number
+  balita_tidak_hadir: number
   ceklis_lengkap: number
   ceklis_tidak_lengkap: number
   bb_naik: number
@@ -130,10 +132,15 @@ export function hitungRekapBulanan(
 
   // Sasaran dihitung dari SEMUA balita terdata; kehadiran memakai satu suara per balita.
   const sasaranBayi = balita.filter((b) => klasifikasiSasaran(b.tanggal_lahir, refTanggal) === 'bayi').length
+  const sasaranBalita = balita.length - sasaranBayi
   const hadir = new Set(perBalita.keys())
-  const bayiHadir = balita.filter(
-    (b) => klasifikasiSasaran(b.tanggal_lahir, refTanggal) === 'bayi' && hadir.has(b.id),
-  ).length
+  let bayiHadir = 0
+  let balitaHadir = 0
+  for (const b of balita) {
+    if (!hadir.has(b.id)) continue
+    if (klasifikasiSasaran(b.tanggal_lahir, refTanggal) === 'bayi') bayiHadir += 1
+    else balitaHadir += 1
+  }
 
   // Dua kolom Ya/Tidak sekaligus atas kunjungan terakhir per balita (null dihitung "Tidak").
   const hitungDua = (ambil: (k: Kunjungan) => string | null | undefined): [number, number] => {
@@ -172,9 +179,11 @@ export function hitungRekapBulanan(
 
   return {
     sasaran_bayi: sasaranBayi,
-    sasaran_balita: balita.length - sasaranBayi,
+    sasaran_balita: sasaranBalita,
     bayi_hadir: bayiHadir,
     bayi_tidak_hadir: sasaranBayi - bayiHadir,
+    balita_hadir: balitaHadir,
+    balita_tidak_hadir: sasaranBalita - balitaHadir,
     ceklis_lengkap: ceklisLengkap,
     ceklis_tidak_lengkap: ceklisTidakLengkap,
     bb_naik: bbNaik,
