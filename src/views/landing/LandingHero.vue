@@ -84,7 +84,7 @@ import { KAMPANYE_HUT, TEX_KAMPANYE } from './kampanye'
 
           <p class="text-primary inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50/80 px-3.5 py-1.5 text-xs font-bold tracking-wide shadow-sm">
             <Sparkles class="size-3.5" />
-            PosyanduGizi — Platform digital untuk posyandu
+            Posyandu Wapalo — Platform digital untuk posyandu
           </p>
 
           <h1 class="font-display mt-6 text-[2.6rem] leading-[1.1] font-semibold text-balance sm:text-5xl lg:text-[3.6rem]">
