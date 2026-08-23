@@ -1,10 +1,27 @@
 <script setup lang="ts">
 import { Lock, Sparkles } from '@lucide/vue'
-import { onBeforeUnmount, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import Reveal from '@/components/Reveal.vue'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@/supabase/useAuth'
 import { KAMPANYE_HUT, TEX_KAMPANYE } from './kampanye'
+
+const { isAutentikasi, inisialisasi } = useAuth()
+
+// Status pengecekan sesi untuk tombol Masuk (tombol aktif setelah sesi diketahui).
+const cekSesi = ref(true)
+
+onMounted(async () => {
+  try {
+    await inisialisasi()
+  } finally {
+    cekSesi.value = false
+  }
+})
+
+// Masuk cerdas: sudah login → dashboard; belum → halaman login.
+const tujuanMasuk = computed(() => (isAutentikasi.value ? '/dashboard' : '/login'))
 
 // ---- Navigasi 4 modul posyandu (hero) ----
 // Dua modul aktif diarahkan ke rutenya; dua lainnya masih dikembangkan
@@ -155,9 +172,9 @@ onBeforeUnmount(() => {
             riwayat tumbuh kembang — dari balita, ibu hamil, hingga dewasa dan lansia.
           </p>
 
-          <!-- CTA utama: Masuk (paling atas tengah) -->
+          <!-- CTA utama: Masuk (paling atas tengah) — tujuan cerdas sesi -->
           <div class="mt-9 flex justify-center">
-            <RouterLink to="/login">
+            <RouterLink :to="tujuanMasuk">
               <Button
                 size="lg"
                 :variant="KAMPANYE_HUT ? 'destructive' : 'default'"
