@@ -103,11 +103,30 @@ export function klasifikasiSasaran(tanggalLahir: string, refTanggal: Date): 'bay
   return hitungUmurBulan(lahir, refTanggal) < 12 ? 'bayi' : 'balita'
 }
 
-// Nilai "Ya": cocok dengan pola Y/Ya/lengkap/1 (trim, case-insensitive).
+// Nilai "Ya": cocok dengan pola Y/Ya/lengkap/L/1/benar (trim, case-insensitive).
+// Mencakup nilai form baru ('Ya', 'L') maupun data lama ('Y', 'lengkap').
 // null / string kosong / nilai lain dianggap "Tidak".
 function fungsiAktif(nilai: string | null | undefined): boolean {
   if (nilai == null) return false
-  return /^(y|ya|lengkap|1| benar)$/i.test(nilai.trim())
+  return /^(y|ya|lengkap|l|1|benar)$/i.test(nilai.trim())
+}
+
+// BB naik punya TIGA keadaan: Naik, Tidak Naik, dan kosong.
+// Kunjungan tanpa isi (null/kosong) TIDAK dihitung pada kedua kolom —
+// sesuai aturan Awan: tidak boleh diasumsikan "Tidak Naik" bila tidak diisi.
+const POLA_NAIK = /^(y|ya|naik|1|benar)$/i
+const POLA_TIDAK_NAIK = /^(t|tidak|tidak naik|0)$/i
+
+function hitungBbNaik(kunjungan: { bb_naik_tidak: string | null }[]): [number, number] {
+  let naik = 0
+  let tidakNaik = 0
+  for (const k of kunjungan) {
+    const v = (k.bb_naik_tidak ?? '').trim()
+    if (!v) continue
+    if (POLA_NAIK.test(v)) naik += 1
+    else if (POLA_TIDAK_NAIK.test(v)) tidakNaik += 1
+  }
+  return [naik, tidakNaik]
 }
 
 // Label status "Normal": untuk BB/TB label normalnya "Gizi Baik".
@@ -164,7 +183,7 @@ export function hitungRekapBulanan(
   }
 
   const [ceklisLengkap, ceklisTidakLengkap] = hitungDua((k) => k.ceklis_perkembangan)
-  const [bbNaik, bbTidakNaik] = hitungDua((k) => k.bb_naik_tidak)
+  const [bbNaik, bbTidakNaik] = hitungBbNaik(daftarKunjungan)
   const [bbuNormal, bbuTidakNormal] = hitungNormal((k) => k.bb_menurut_umur, 'Normal')
   const [tbuNormal, tbuTidakNormal] = hitungNormal((k) => k.pbtb_menurut_umur, 'Normal')
   const [bbtbNormal, bbtbTidakNormal] = hitungNormal((k) => k.bb_menurut_pbtb, 'Gizi Baik')

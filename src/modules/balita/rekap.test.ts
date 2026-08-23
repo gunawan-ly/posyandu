@@ -217,11 +217,40 @@ describe('hitungRekapBulanan', () => {
     expect(hasil.balita_tidak_hadir).toBe(1)
   })
 
-  it('menghitung ceklis perkembangan & kenaikan BB (nilai null dihitung Tidak)', () => {
+  it('menghitung ceklis perkembangan (null dihitung Tidak) & kenaikan BB (kosong dilewati)', () => {
     expect(hasil.ceklis_lengkap).toBe(2)
     expect(hasil.ceklis_tidak_lengkap).toBe(1)
+    // BB naik: kunjungan id 3 bernilai null TIDAK dihitung di kedua kolom.
     expect(hasil.bb_naik).toBe(1)
-    expect(hasil.bb_tidak_naik).toBe(2)
+    expect(hasil.bb_tidak_naik).toBe(1)
+  })
+
+  it('BB naik mengenali nilai form Naik/Tidak Naik dan melewatkan yang kosong', () => {
+    const bList = [
+      buatBalita({ id: 11, nama: 'Fajar', tanggal_lahir: '2024-01-10' }),
+      buatBalita({ id: 12, nama: 'Gita', tanggal_lahir: '2024-02-10' }),
+      buatBalita({ id: 13, nama: 'Hana', tanggal_lahir: '2024-03-10' }),
+    ]
+    const kList = [
+      buatKunjungan({ id: 21, balita_id: 11, tanggal_kunjungan: '2026-02-05', bb_naik_tidak: 'Naik' }),
+      buatKunjungan({ id: 22, balita_id: 12, tanggal_kunjungan: '2026-02-06', bb_naik_tidak: 'Tidak Naik' }),
+      buatKunjungan({ id: 23, balita_id: 13, tanggal_kunjungan: '2026-02-07', bb_naik_tidak: '' }),
+    ]
+    const r = hitungRekapBulanan(kList, bList, { bulan: 1, tahun: 2026 })
+    expect(r.bb_naik).toBe(1)
+    expect(r.bb_tidak_naik).toBe(1)
+  })
+
+  it('BB naik tetap mengenali nilai legacy Y/T', () => {
+    const bList = [buatBalita({ id: 21, nama: 'Imel', tanggal_lahir: '2024-01-10' })]
+    const kList = [
+      buatKunjungan({ id: 31, balita_id: 21, tanggal_kunjungan: '2026-02-05', bb_naik_tidak: 'Y' }),
+      buatKunjungan({ id: 32, balita_id: 21, tanggal_kunjungan: '2026-02-20', bb_naik_tidak: 'T' }),
+    ]
+    const r = hitungRekapBulanan(kList, bList, { bulan: 1, tahun: 2026 })
+    // Satu suara per balita: kunjungan terakhir (id 32, 'T') yang dipakai.
+    expect(r.bb_naik).toBe(0)
+    expect(r.bb_tidak_naik).toBe(1)
   })
 
   it('menghitung status indikator (normal vs tidak normal)', () => {
