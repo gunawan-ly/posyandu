@@ -237,13 +237,13 @@ onMounted(async () => {
 
     <g>
       <path
-        v-for="z in Z_LINES"
-        :key="z"
-        :d="pathZ(z)"
+        v-for="gz in Z_LINES"
+        :key="gz"
+        :d="pathZ(gz)"
         fill="none"
-        :stroke="z === 0 ? '#059669' : '#0d9488'"
-        :stroke-width="z === 0 ? 2.5 : 1"
-        :opacity="z === 0 ? 1 : 0.35"
+        :stroke="gz === 0 ? '#059669' : '#0d9488'"
+        :stroke-width="gz === 0 ? 2.5 : 1"
+        :opacity="gz === 0 ? 1 : 0.35"
         :style="{
           strokeDasharray: pathLength,
           strokeDashoffset: offset,
