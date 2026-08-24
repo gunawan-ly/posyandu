@@ -87,20 +87,21 @@ describe('render komponen utama', () => {
     expect(wrapper.text()).not.toContain('masih dalam tahap pengembangan')
   })
 
-  it('Rute /apras terdaftar dan memuat placeholder Modul Apras', async () => {
-    // Meta guard rute: daftar butuh login, tambah data butuh admin.
+  it('Rute /apras terdaftar dan memuat halaman daftar Apras penuh', async () => {
+    // Meta guard rute: daftar & detail butuh login, tambah/edit butuh admin.
     const ruteDaftar = aprasRoutes.find((r) => r.path === '/apras')
     const ruteBaru = aprasRoutes.find((r) => r.path === '/apras/baru')
+    const ruteDetail = aprasRoutes.find((r) => r.path === '/apras/:id')
     expect(ruteDaftar?.name).toBe('apras')
     expect(ruteDaftar?.meta).toMatchObject({ requiresAuth: true })
     expect(ruteBaru?.meta).toMatchObject({ requiresAuth: true, requiresAdmin: true })
+    expect(ruteDetail?.meta).toMatchObject({ requiresAuth: true })
 
-    // Halaman placeholder menampilkan keterangan sasaran.
+    // Halaman daftar penuh (bukan placeholder lagi): judul + aksi admin.
     const wrapper = mount(AprasListView, OPSI_MOUNT)
     await flushPromises()
-    expect(wrapper.text()).toContain('Modul Apras')
-    expect(wrapper.text()).toContain('Anak Pra Sekolah')
-    expect(wrapper.text()).toContain('sedang disiapkan')
+    expect(wrapper.text()).toContain('Daftar Apras')
+    expect(wrapper.text()).toContain('Anak pra sekolah usia 5–6 tahun')
   })
 
   it('Rute /remaja terdaftar dan memuat placeholder Modul Remaja', async () => {
