@@ -28,7 +28,6 @@ insert into auth.users (
   updated_at,
   confirmation_sent_at,
   recovery_sent_at,
-  email_change_sent_status,
   email_change_confirm_status
 )
 select
