@@ -7,6 +7,8 @@ Aplikasi web Kalkulator Status Gizi Anak (Posyandu) berbasis standar pertumbuhan
 Arsitektur saat ini: **SPA Vite + Vue 3** dengan perhitungan **client-side (TypeScript)**,
 backend masa depan memakai **Supabase** (BaaS). Rencana pengembangan jangka panjang
 terdokumentasi di **PRD.md** (living document); jaga agar AGENTS.md dan PRD.md tetap sinkron.
+Panduan ringkas untuk Claude Code tersedia di **CLAUDE.md** (perintah, arsitektur big-picture,
+konvensi keras) — jagalah tetap sinkron dengan file ini.
 
 ## Tech Stack
 - Frontend: Vue 3 SPA + TypeScript + Vite 8 (bundler), Vue Router (SPA, lazy routes)
