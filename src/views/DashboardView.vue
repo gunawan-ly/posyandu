@@ -170,19 +170,20 @@ const MODUL: ModulLayanan[] = [
     href: '/balita',
   },
   {
+    kunci: 'apras',
+    nama: 'Apras',
+    deskripsi: 'Pencatatan anak pra sekolah (5–6 tahun).',
+    ikon: UserRound,
+    aktif: true,
+    href: '/apras',
+  },
+  {
     kunci: 'bumil',
     nama: 'Bumil',
     deskripsi: 'Pemantauan ibu hamil: identitas, kunjungan, dan status kesehatan.',
     ikon: HeartPulse,
     aktif: true,
     href: '/bumil',
-  },
-  {
-    kunci: 'remaja',
-    nama: 'Remaja',
-    deskripsi: 'Pencatatan tumbuh kembang dan kesehatan remaja.',
-    ikon: UserRound,
-    aktif: false,
   },
   {
     kunci: 'lansia',

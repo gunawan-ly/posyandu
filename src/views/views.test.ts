@@ -2,6 +2,8 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
 import { hitungSemuaStatus } from '@/lib/kalkulator'
+import { aprasRoutes } from '@/modules/apras/routes'
+import AprasListView from '@/modules/apras/views/AprasListView.vue'
 import BalitaRekapView from '@/modules/balita/views/BalitaRekapView.vue'
 import KalkulatorView from '@/views/KalkulatorView.vue'
 import LandingView from '@/views/LandingView.vue'
@@ -68,7 +70,7 @@ describe('render komponen utama', () => {
       // Tombol utama Masuk.
       expect(wrapper.text()).toContain('Masuk')
       // Empat modul navigasi.
-      for (const nama of ['Bumil & Busui', 'Bayi & Balita', 'Remaja', 'Dewasa & Lansia']) {
+      for (const nama of ['Bumil & Busui', 'Bayi & Balita', 'Apras', 'Dewasa & Lansia']) {
         expect(wrapper.text()).toContain(nama)
       }
       // Teks lama sudah tidak ada di landing.
@@ -76,7 +78,7 @@ describe('render komponen utama', () => {
       expect(wrapper.text()).not.toContain('Mulai Sekarang')
 
       // Klik modul terkunci → pesan pengingat muncul, lalu hilang setelah 3 detik.
-      const kunci = wrapper.findAll('button').find((b) => b.text().includes('Remaja'))
+      const kunci = wrapper.findAll('button').find((b) => b.text().includes('Dewasa & Lansia'))
       expect(kunci).toBeDefined()
       await kunci!.trigger('click')
       expect(wrapper.text()).toContain('masih dalam tahap pengembangan')
@@ -86,6 +88,43 @@ describe('render komponen utama', () => {
     } finally {
       vi.useRealTimers()
     }
+  })
+
+  it('Rute /apras terdaftar dan memuat placeholder Modul Apras', async () => {
+    // Meta guard rute: daftar butuh login, tambah data butuh admin.
+    const ruteDaftar = aprasRoutes.find((r) => r.path === '/apras')
+    const ruteBaru = aprasRoutes.find((r) => r.path === '/apras/baru')
+    expect(ruteDaftar?.name).toBe('apras')
+    expect(ruteDaftar?.meta).toMatchObject({ requiresAuth: true })
+    expect(ruteBaru?.meta).toMatchObject({ requiresAuth: true, requiresAdmin: true })
+
+    // Halaman placeholder menampilkan keterangan sasaran.
+    const wrapper = mount(AprasListView, OPSI_MOUNT)
+    await flushPromises()
+    expect(wrapper.text()).toContain('Modul Apras')
+    expect(wrapper.text()).toContain('Anak Pra Sekolah')
+    expect(wrapper.text()).toContain('sedang disiapkan')
+  })
+
+  it('Navigasi modul: Apras aktif menuju /apras, Dewasa & Lansia tetap terkunci', () => {
+    const wrapper = mount(LandingView, OPSI_MOUNT)
+
+    // Tautan aktif menuju /apras tersedia di landing.
+    const tautanApras = wrapper.findAll('a').find((a) => a.attributes('href') === '/apras')
+    expect(tautanApras).toBeDefined()
+    expect(tautanApras!.text()).toContain('Apras')
+
+    // Modul Apras berupa tombol yang dibungkus tautan aktif ke /apras.
+    const tombolApras = wrapper.findAll('button').find((b) => b.text().includes('Apras'))
+    expect(tombolApras).toBeDefined()
+    expect(tombolApras!.element.closest('a')?.getAttribute('href')).toBe('/apras')
+
+    // Dewasa & Lansia masih terkunci: tombol tanpa tautan.
+    const tombolLansia = wrapper
+      .findAll('button')
+      .find((b) => b.text().includes('Dewasa & Lansia'))
+    expect(tombolLansia).toBeDefined()
+    expect(tombolLansia!.element.closest('a')).toBeNull()
   })
 
   it('Tombol Masuk: sudah login → dashboard, belum → halaman login', async () => {

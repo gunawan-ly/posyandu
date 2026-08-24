@@ -24,7 +24,7 @@ onMounted(async () => {
 const tujuanMasuk = computed(() => (isAutentikasi.value ? '/dashboard' : '/login'))
 
 // ---- Navigasi 4 modul posyandu (hero) ----
-// Dua modul aktif diarahkan ke rutenya; dua lainnya masih dikembangkan
+// Modul aktif diarahkan ke rutenya; sisanya masih dikembangkan
 // dan menampilkan pengingat saat diklik (tanpa navigasi).
 interface ModulNav {
   nama: string
@@ -35,7 +35,7 @@ interface ModulNav {
 const MODUL_NAV: ModulNav[] = [
   { nama: 'Bumil & Busui', href: '/bumil', aktif: true },
   { nama: 'Bayi & Balita', href: '/balita', aktif: true },
-  { nama: 'Remaja', aktif: false },
+  { nama: 'Apras', href: '/apras', aktif: true },
   { nama: 'Dewasa & Lansia', aktif: false },
 ]
 

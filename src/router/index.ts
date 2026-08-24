@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { supabase } from '@/supabase/client'
+import { aprasRoutes } from '@/modules/apras/routes'
 import { balitaRoutes } from '@/modules/balita/routes'
 import { bumilRoutes } from '@/modules/bumil/routes'
 
@@ -37,6 +38,7 @@ const router = createRouter({
       component: () => import('@/views/DashboardView.vue'),
     },
     ...balitaRoutes,
+    ...aprasRoutes,
     ...bumilRoutes,
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
