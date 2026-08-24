@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Lock, Sparkles } from '@lucide/vue'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import Reveal from '@/components/Reveal.vue'
 import { Button } from '@/components/ui/button'
@@ -23,9 +23,9 @@ onMounted(async () => {
 // Masuk cerdas: sudah login → dashboard; belum → halaman login.
 const tujuanMasuk = computed(() => (isAutentikasi.value ? '/dashboard' : '/login'))
 
-// ---- Navigasi 4 modul posyandu (hero) ----
-// Modul aktif diarahkan ke rutenya; sisanya masih dikembangkan
-// dan menampilkan pengingat saat diklik (tanpa navigasi).
+// ---- Navigasi modul posyandu (hero) ----
+// Modul aktif diarahkan ke rutenya; Dewasa & Lansia masih dikembangkan
+// dan tampil dengan ikon gembok (tanpa notifikasi klik).
 interface ModulNav {
   nama: string
   href?: string
@@ -36,24 +36,9 @@ const MODUL_NAV: ModulNav[] = [
   { nama: 'Bumil & Busui', href: '/bumil', aktif: true },
   { nama: 'Bayi & Balita', href: '/balita', aktif: true },
   { nama: 'Apras', href: '/apras', aktif: true },
+  { nama: 'Remaja', href: '/remaja', aktif: true },
   { nama: 'Dewasa & Lansia', aktif: false },
 ]
-
-// Pengingat untuk modul yang masih dalam tahap pengembangan.
-const pesanKunci = ref('')
-let timerPesan: ReturnType<typeof setTimeout> | undefined
-
-function klikModulTerkunci(nama: string): void {
-  pesanKunci.value = `Modul ${nama} masih dalam tahap pengembangan — segera hadir.`
-  if (timerPesan) clearTimeout(timerPesan)
-  timerPesan = setTimeout(() => {
-    pesanKunci.value = ''
-  }, 3000)
-}
-
-onBeforeUnmount(() => {
-  if (timerPesan) clearTimeout(timerPesan)
-})
 </script>
 
 <template>
@@ -187,8 +172,8 @@ onBeforeUnmount(() => {
             </RouterLink>
           </div>
 
-          <!-- Navigasi 4 modul posyandu -->
-          <div class="mt-5 flex flex-col items-center gap-2.5">
+          <!-- Navigasi modul posyandu -->
+          <div class="mt-5 flex justify-center">
             <div class="flex flex-wrap items-center justify-center gap-2.5">
               <template v-for="(m, i) in MODUL_NAV" :key="m.nama">
                 <RouterLink v-if="m.aktif && m.href" :to="m.href">
@@ -202,24 +187,12 @@ onBeforeUnmount(() => {
                   size="sm"
                   type="button"
                   class="text-muted-foreground gap-1.5 opacity-70"
-                  :aria-label="`${m.nama} (masih dalam tahap pengembangan)`"
-                  @click="klikModulTerkunci(m.nama)"
                 >
                   <Lock class="size-3.5" />
                   {{ i + 1 }}. {{ m.nama }}
                 </Button>
               </template>
             </div>
-            <!-- Pengingat modul terkunci -->
-            <p
-              v-if="pesanKunci"
-              role="status"
-              aria-live="polite"
-              class="text-muted-foreground inline-flex items-center gap-1.5 rounded-full border border-dashed px-3.5 py-1 text-xs font-medium"
-            >
-              <Lock class="size-3" />
-              {{ pesanKunci }}
-            </p>
           </div>
         </div>
       </Reveal>

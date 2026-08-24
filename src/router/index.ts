@@ -3,6 +3,7 @@ import { supabase } from '@/supabase/client'
 import { aprasRoutes } from '@/modules/apras/routes'
 import { balitaRoutes } from '@/modules/balita/routes'
 import { bumilRoutes } from '@/modules/bumil/routes'
+import { remajaRoutes } from '@/modules/remaja/routes'
 
 const reduksiGerak =
   typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
@@ -40,6 +41,7 @@ const router = createRouter({
     ...balitaRoutes,
     ...aprasRoutes,
     ...bumilRoutes,
+    ...remajaRoutes,
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
 })

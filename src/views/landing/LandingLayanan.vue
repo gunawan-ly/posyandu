@@ -41,6 +41,14 @@ const LAYANAN: ModulLayanan[] = [
     href: '/bumil',
   },
   {
+    kunci: 'remaja',
+    nama: 'Remaja',
+    deskripsi: 'Pencatatan tumbuh kembang dan kesehatan remaja.',
+    ikon: UserRound,
+    aktif: true,
+    href: '/remaja',
+  },
+  {
     kunci: 'lansia',
     nama: 'Dewasa & Lansia',
     deskripsi: 'Pemantauan kesehatan dewasa dan lansia di posyandu.',
@@ -64,7 +72,7 @@ const LAYANAN: ModulLayanan[] = [
       <Reveal>
         <p class="text-primary text-xs font-bold tracking-widest uppercase">Layanan terpadu</p>
         <h2 class="font-display mt-4 max-w-xl text-3xl leading-tight font-semibold text-balance sm:text-4xl">
-          Satu posyandu, empat sasaran kesehatan.
+          Satu posyandu, lima sasaran kesehatan.
         </h2>
         <p class="text-muted-foreground mt-4 max-w-2xl text-sm leading-relaxed">
           Setiap kelompok warga memiliki pencatatan dan pemantauan sendiri dalam satu sistem.

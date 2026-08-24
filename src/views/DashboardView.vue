@@ -186,6 +186,14 @@ const MODUL: ModulLayanan[] = [
     href: '/bumil',
   },
   {
+    kunci: 'remaja',
+    nama: 'Remaja',
+    deskripsi: 'Pencatatan tumbuh kembang dan kesehatan remaja.',
+    ikon: UserRound,
+    aktif: true,
+    href: '/remaja',
+  },
+  {
     kunci: 'lansia',
     nama: 'Dewasa & Lansia',
     deskripsi: 'Pemantauan kesehatan dewasa dan lansia di posyandu.',
@@ -280,7 +288,7 @@ function formatTanggal(tgl: string | null): string {
             </p>
             <h1 class="font-display mt-6 text-3xl leading-tight font-semibold text-balance sm:text-5xl">
               Satu posyandu,
-              <span class="text-primary">empat sasaran kesehatan.</span>
+              <span class="text-primary">lima sasaran kesehatan.</span>
             </h1>
             <p class="text-muted-foreground mx-auto mt-5 max-w-xl text-base leading-relaxed">
               Pantau layanan posyandu dalam satu sistem digital — dari pencatatan balita hingga
