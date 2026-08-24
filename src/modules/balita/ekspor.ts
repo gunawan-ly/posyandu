@@ -1,8 +1,15 @@
 // Helper ekspor Rekap Bulanan Posyandu: label periode, lembar ringkasan/rincian,
 // workbook XLSX, dan CSV. Semua fungsi murni (dapat dites di Node).
-import * as XLSX from 'xlsx'
+//
+// SheetJS (xlsx, ~350 KB) dimuat lewat impor dinamis agar tidak masuk chunk
+// halaman rekap — hanya diunduh saat pengguna benar-benar mengekspor.
+import type * as XLSX from 'xlsx'
 import type { BarisRekap, PeriodeRekap, RekapBulanan } from './rekap'
 import { parseTanggal } from '@/lib/umur'
+
+function muatXlsx(): Promise<typeof XLSX> {
+  return import('xlsx')
+}
 
 export const NAMA_BULAN = [
   'Januari',
@@ -146,27 +153,30 @@ export function susunLembarRincian(baris: BarisRekap[]): (string | number | null
 }
 
 // Workbook XLSX: sheet "Ringkasan" (pertama) + "Rincian".
-export function buatWorkbookRekap(
+// Async karena SheetJS dimuat dinamis (impor dinamis menghasilkan Promise).
+export async function buatWorkbookRekap(
   rekap: RekapBulanan,
   baris: BarisRekap[],
   periodeLabel: string,
-): XLSX.WorkBook {
-  const wb = XLSX.utils.book_new()
-  const ringkasan = XLSX.utils.aoa_to_sheet(susunLembarRingkasan(rekap, periodeLabel))
+): Promise<XLSX.WorkBook> {
+  const X = await muatXlsx()
+  const wb = X.utils.book_new()
+  const ringkasan = X.utils.aoa_to_sheet(susunLembarRingkasan(rekap, periodeLabel))
   ringkasan['!cols'] = [{ wch: 40 }]
-  const rincian = XLSX.utils.aoa_to_sheet(susunLembarRincian(baris))
-  XLSX.utils.book_append_sheet(wb, ringkasan, 'Ringkasan')
-  XLSX.utils.book_append_sheet(wb, rincian, 'Rincian')
+  const rincian = X.utils.aoa_to_sheet(susunLembarRincian(baris))
+  X.utils.book_append_sheet(wb, ringkasan, 'Ringkasan')
+  X.utils.book_append_sheet(wb, rincian, 'Rincian')
   return wb
 }
 
 // Simpan workbook ke file (dipakai di browser). Tidak dipanggil dalam test.
 export function unduhXlsx(workbook: XLSX.WorkBook, namaFile: string): void {
-  XLSX.writeFile(workbook, namaFile)
+  void import('xlsx').then((X) => X.writeFile(workbook, namaFile))
 }
 
 // CSV dari lembar rincian (nilai null → string kosong).
-export function teksCsvRekap(baris: BarisRekap[]): string {
-  const lembar = XLSX.utils.aoa_to_sheet(susunLembarRincian(baris))
-  return XLSX.utils.sheet_to_csv(lembar)
+export async function teksCsvRekap(baris: BarisRekap[]): Promise<string> {
+  const X = await muatXlsx()
+  const lembar = X.utils.aoa_to_sheet(susunLembarRincian(baris))
+  return X.utils.sheet_to_csv(lembar)
 }

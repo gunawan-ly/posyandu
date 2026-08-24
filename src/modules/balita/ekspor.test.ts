@@ -156,8 +156,8 @@ describe('susunLembarRincian', () => {
 })
 
 describe('buatWorkbookRekap', () => {
-  it('menghasilkan workbook dengan sheet Ringkasan (pertama) & Rincian', () => {
-    const wb = buatWorkbookRekap(rekap, baris, 'AGUSTUS 2026')
+  it('menghasilkan workbook dengan sheet Ringkasan (pertama) & Rincian', async () => {
+    const wb = await buatWorkbookRekap(rekap, baris, 'AGUSTUS 2026')
     expect(wb.SheetNames).toEqual(['Ringkasan', 'Rincian'])
     const buffer = XLSX.write(wb, { type: 'buffer' })
     const dibaca = XLSX.read(buffer)
@@ -176,8 +176,8 @@ describe('buatWorkbookRekap', () => {
 })
 
 describe('teksCsvRekap', () => {
-  it('berisi header "Nama" dan nama balita; nilai null menjadi string kosong', () => {
-    const csv = teksCsvRekap(baris)
+  it('berisi header "Nama" dan nama balita; nilai null menjadi string kosong', async () => {
+    const csv = await teksCsvRekap(baris)
     expect(csv).toContain('Nama')
     expect(csv).toContain('Ani')
     expect(csv).toContain('Budi')

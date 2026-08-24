@@ -123,9 +123,9 @@ watch(
   { immediate: true },
 )
 
-function eksporExcel() {
+async function eksporExcel() {
   if (!rekap.value || baris.value.length === 0) return
-  const wb = buatWorkbookRekap(rekap.value, baris.value, label.value)
+  const wb = await buatWorkbookRekap(rekap.value, baris.value, label.value)
   const slug = label.value.toLowerCase().replace(/[^a-z0-9]+/g, '-')
   unduhXlsx(wb, `rekap-balita-${slug}.xlsx`)
 }
@@ -137,7 +137,7 @@ function cetak() {
 async function salinCsv() {
   if (baris.value.length === 0) return
   try {
-    await navigator.clipboard.writeText(teksCsvRekap(baris.value))
+    await navigator.clipboard.writeText(await teksCsvRekap(baris.value))
     tersalin.value = true
     if (timerTersalin) clearTimeout(timerTersalin)
     timerTersalin = setTimeout(() => {
