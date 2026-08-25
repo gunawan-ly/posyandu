@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { Plus, Search, Trash2, UserRound, Users, X } from '@lucide/vue'
+import { Pencil, Plus, Search, Trash2, UserRound, Users, X } from '@lucide/vue'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import AppFooter from '@/components/AppFooter.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
 import Skeleton from '@/components/Skeleton.vue'
 import ViewToggle from '@/components/ViewToggle.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import FormModalApras from '@/modules/apras/views/FormModalApras.vue'
 import { listApras, hapusApras, type Apras } from '@/modules/apras/db'
 import { umurSaatIni, parseTanggal } from '@/lib/umur'
 import { bacaViewModul, simpanViewModul } from '@/lib/viewModul'
@@ -21,6 +23,20 @@ const daftar = ref<Apras[]>([])
 const cari = ref('')
 const sibuk = ref(true)
 const pesanError = ref('')
+const dlgHapus = ref<InstanceType<typeof ConfirmDialog>>()
+const modalTambah = ref(false)
+const modalUbahOpen = ref(false)
+const modalUbahData = ref<Apras | null>(null)
+
+function bukaUbah(a: Apras) {
+  modalUbahData.value = a
+  modalUbahOpen.value = true
+}
+
+function tutupUbah() {
+  modalUbahOpen.value = false
+  modalUbahData.value = null
+}
 // Mode tampilan daftar: kartu (default) ⇄ tabel — diingat per modul via localStorage.
 const modeView = ref<'grid' | 'tabel'>(bacaViewModul(KUNCI_VIEW))
 let timerCari: ReturnType<typeof setTimeout> | undefined
@@ -80,7 +96,12 @@ function formatTanggal(tgl: string | null): string {
 }
 
 async function hapus(anak: Apras) {
-  if (!window.confirm(`Hapus data ${anak.nama} beserta seluruh kunjungannya?`)) return
+  const ok = await dlgHapus.value?.buka(
+    `Hapus data ${anak.nama} beserta seluruh kunjungannya?`,
+    'Hapus Apras',
+    { merah: true },
+  )
+  if (!ok) return
   try {
     await hapusApras(anak.id)
     await muat()
@@ -104,12 +125,10 @@ async function hapus(anak: Apras) {
             kunjungan.
           </p>
         </div>
-        <RouterLink v-if="isAdmin" to="/apras/baru">
-          <Button size="lg">
-            <Plus class="size-4" />
-            Tambah Apras
-          </Button>
-        </RouterLink>
+        <Button v-if="isAdmin" size="lg" @click="modalTambah = true">
+          <Plus class="size-4" />
+          Tambah Apras
+        </Button>
       </div>
 
       <div class="mt-8 flex flex-wrap items-center justify-between gap-3">
@@ -218,16 +237,26 @@ async function hapus(anak: Apras) {
                   </p>
                 </div>
               </div>
-              <button
-                v-if="isAdmin"
-                type="button"
-                class="text-muted-foreground hover:bg-red-50 hover:text-red-600 -mr-1.5 mt-1 shrink-0 rounded-lg p-2 transition-colors"
-                aria-label="Hapus apras"
-                title="Hapus apras"
-                @click="hapus(a)"
-              >
-                <Trash2 class="size-4" />
-              </button>
+              <div v-if="isAdmin" class="flex items-center gap-1">
+                <button
+                  type="button"
+                  class="text-muted-foreground hover:bg-emerald-50 hover:text-emerald-700 -mr-1.5 mt-1 shrink-0 rounded-lg p-2 transition-colors"
+                  aria-label="Ubah apras"
+                  title="Ubah apras"
+                  @click="bukaUbah(a)"
+                >
+                  <Pencil class="size-4" />
+                </button>
+                <button
+                  type="button"
+                  class="text-muted-foreground hover:bg-red-50 hover:text-red-600 -mr-1.5 mt-1 shrink-0 rounded-lg p-2 transition-colors"
+                  aria-label="Hapus apras"
+                  title="Hapus apras"
+                  @click="hapus(a)"
+                >
+                  <Trash2 class="size-4" />
+                </button>
+              </div>
             </div>
 
             <div class="border-border/60 grid grid-cols-2 gap-2 border-t pt-3 text-xs">
@@ -295,6 +324,15 @@ async function hapus(anak: Apras) {
                       <RouterLink :to="`/apras/${a.id}`">
                         <Button variant="ghost" size="sm">Detail</Button>
                       </RouterLink>
+                      <Button
+                        v-if="isAdmin"
+                        variant="ghost"
+                        size="sm"
+                        @click="bukaUbah(a)"
+                      >
+                        <Pencil class="size-4" />
+                        Ubah
+                      </Button>
                       <button
                         v-if="isAdmin"
                         type="button"
@@ -316,5 +354,9 @@ async function hapus(anak: Apras) {
     </section>
 
     <AppFooter />
+
+    <ConfirmDialog ref="dlgHapus" />
+    <FormModalApras v-model:open="modalTambah" @tersimpan="muat" />
+    <FormModalApras v-model:open="modalUbahOpen" :apras="modalUbahData" @tersimpan="muat" @update:open="(v) => { if (!v) tutupUbah() }" />
   </div>
 </template>

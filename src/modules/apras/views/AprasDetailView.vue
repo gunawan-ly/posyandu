@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ArrowLeft, Pencil, Trash2, TriangleAlert, Users } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import DetailKunjunganModal from '@/components/DetailKunjunganModal.vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppFooter from '@/components/AppFooter.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
@@ -34,6 +36,12 @@ const apras = ref<Apras | null>(null)
 const kunjungan = ref<KunjunganApras[]>([])
 const sibuk = ref(true)
 const pesanError = ref('')
+const dlgHapus = ref<InstanceType<typeof ConfirmDialog>>()
+
+// Modal detail kunjungan
+const detailOpen = ref(false)
+const detailJudul = ref('')
+const detailBaris = ref<Array<[string, string | number | null]>>([])
 
 onMounted(muat)
 
@@ -83,7 +91,8 @@ function formatTanggal(tgl: string | null): string {
 }
 
 async function hapusKunj(a: Apras, k: KunjunganApras) {
-  if (!window.confirm(`Hapus kunjungan ${formatTanggal(k.tanggal_kunjungan)}?`)) return
+  const ok = await dlgHapus.value?.buka(`Hapus kunjungan ${formatTanggal(k.tanggal_kunjungan)}?`)
+  if (!ok) return
   try {
     await hapusKunjunganApras(k.id)
     kunjungan.value = await listKunjunganApras(a.id)
@@ -97,9 +106,32 @@ async function hapusDariTabel(k: KunjunganApras) {
   await hapusKunj(apras.value, k)
 }
 
+function lihatKunjungan(k: KunjunganApras) {
+  detailJudul.value = `Kunjungan ${formatTanggal(k.tanggal_kunjungan)}`
+  detailBaris.value = [
+    ['Tanggal', formatTanggal(k.tanggal_kunjungan)],
+    ['Umur', k.umur_bulan != null ? `${k.umur_bulan} bulan` : null],
+    ['Berat badan', k.berat_badan != null ? `${k.berat_badan} kg` : null],
+    ['Tinggi badan', k.tinggi_badan != null ? `${k.tinggi_badan} cm` : null],
+    ['Lingkar kepala', k.lingkar_kepala != null ? `${k.lingkar_kepala} cm` : null],
+    ['Lingkar lengan', k.lingkar_lengan != null ? `${k.lingkar_lengan} cm` : null],
+    ['Obat cacing', k.obat_cacing],
+    ['Gejala TBC', k.gejala_tbc],
+    ['Dirujuk', k.dirujuk],
+    ['Edukasi', k.edukasi],
+    ['Catatan', k.catatan],
+  ]
+  detailOpen.value = true
+}
+
 async function hapusAnak() {
   if (!apras.value) return
-  if (!window.confirm(`Hapus ${apras.value.nama} beserta seluruh kunjungannya?`)) return
+  const ok = await dlgHapus.value?.buka(
+    `Hapus ${apras.value.nama} beserta seluruh kunjungannya?`,
+    'Hapus Apras',
+    { merah: true },
+  )
+  if (!ok) return
   try {
     await hapusApras(apras.value.id)
     await router.replace('/apras')
@@ -187,7 +219,7 @@ async function hapusAnak() {
         <div class="mt-8 grid gap-6 lg:grid-cols-3">
           <!-- Kiri: riwayat -->
           <div class="min-w-0 space-y-6 lg:col-span-2">
-            <TabelRiwayatApras :kunjungan="kunjungan" :is-admin="isAdmin" @hapus="hapusDariTabel" />
+            <TabelRiwayatApras :kunjungan="kunjungan" :is-admin="isAdmin" @hapus="hapusDariTabel" @lihat="lihatKunjungan" />
           </div>
 
           <!-- Kanan: identitas + form kunjungan -->
@@ -271,5 +303,8 @@ async function hapusAnak() {
     </section>
 
     <AppFooter />
+
+    <ConfirmDialog ref="dlgHapus" />
+    <DetailKunjunganModal v-model:open="detailOpen" :judul="detailJudul" :baris="detailBaris" />
   </div>
 </template>

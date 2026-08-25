@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ArrowLeft, HeartPulse, Pencil, Trash2, TriangleAlert } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import DetailKunjunganModal from '@/components/DetailKunjunganModal.vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppFooter from '@/components/AppFooter.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
@@ -34,6 +36,12 @@ const bumil = ref<Bumil | null>(null)
 const kunjungan = ref<KunjunganBumil[]>([])
 const sibuk = ref(true)
 const pesanError = ref('')
+const dlgHapus = ref<InstanceType<typeof ConfirmDialog>>()
+
+// Modal detail kunjungan
+const detailOpen = ref(false)
+const detailJudul = ref('')
+const detailBaris = ref<Array<[string, string | number | null]>>([])
 
 onMounted(muat)
 
@@ -80,7 +88,8 @@ async function muatUlangRiwayat() {
 }
 
 async function hapusKunj(bumilId: number, k: KunjunganBumil) {
-  if (!window.confirm(`Hapus kunjungan ${formatTanggal(k.tanggal_kunjungan)}?`)) return
+  const ok = await dlgHapus.value?.buka(`Hapus kunjungan ${formatTanggal(k.tanggal_kunjungan)}?`)
+  if (!ok) return
   try {
     await hapusKunjunganBumil(k.id)
     kunjungan.value = await listKunjunganBumil(bumilId)
@@ -94,9 +103,40 @@ async function hapusDariTabel(k: KunjunganBumil) {
   await hapusKunj(bumil.value.id, k)
 }
 
+function lihatKunjungan(k: KunjunganBumil) {
+  detailJudul.value = `Kunjungan ${formatTanggal(k.tanggal_kunjungan)}`
+  detailBaris.value = [
+    ['Tanggal', formatTanggal(k.tanggal_kunjungan)],
+    ['Usia kehamilan', k.usia_kehamilan_minggu != null ? `${k.usia_kehamilan_minggu} minggu` : null],
+    ['Berat badan', k.berat_badan != null ? `${k.berat_badan} kg` : null],
+    ['BB sesuai kurva KIA', k.bb_sesuai_kurva_kia],
+    ['LiLA', k.lingkaran_lengan_atas != null ? `${k.lingkaran_lengan_atas} cm` : null],
+    ['Status LiLA', k.lila_hijau_merah],
+    ['Tekanan darah', k.tekanan_darah != null ? `${k.tekanan_darah} mmHg` : null],
+    ['TD sesuai kurva KIA', k.td_sesuai_kurva_kia],
+    ['Batuk terus-menerus', k.batuk_terus_menerus],
+    ['Demam > 2 minggu', k.demam_lebih_dua_minggu],
+    ['BB tidak naik 2 bulan', k.bb_tidak_naik_dua_bulan],
+    ['Kontak TBC', k.kontak_tbc],
+    ['Dapat tablet TTD', k.dapat_tablet_ttd],
+    ['Konsumsi TTD', k.konsumsi_ttd],
+    ['MT KEK diberikan', k.mt_kek_diberikan],
+    ['Konsumsi MT KEK', k.konsumsi_mt_kek],
+    ['Kelas bumil', k.kelas_bumil],
+    ['Edukasi', k.dapat_edukasi],
+    ['Dirujuk', k.dirujuk],
+  ]
+  detailOpen.value = true
+}
+
 async function hapusBumilData() {
   if (!bumil.value) return
-  if (!window.confirm(`Hapus ${bumil.value.nama} beserta seluruh kunjungannya?`)) return
+  const ok = await dlgHapus.value?.buka(
+    `Hapus ${bumil.value.nama} beserta seluruh kunjungannya?`,
+    'Hapus Ibu Hamil',
+    { merah: true },
+  )
+  if (!ok) return
   try {
     await hapusBumil(bumil.value.id)
     await router.replace('/bumil')
@@ -194,7 +234,7 @@ async function hapusBumilData() {
         <div class="mt-8 grid gap-6 lg:grid-cols-3">
           <!-- Kiri: riwayat kunjungan -->
           <div class="min-w-0 space-y-6 lg:col-span-2">
-            <TabelRiwayatBumil :kunjungan="kunjungan" :is-admin="isAdmin" @hapus="hapusDariTabel" />
+            <TabelRiwayatBumil :kunjungan="kunjungan" :is-admin="isAdmin" @hapus="hapusDariTabel" @lihat="lihatKunjungan" />
 
             <Card v-if="kunjunganTerbaru">
               <CardHeader>
@@ -329,5 +369,8 @@ async function hapusBumilData() {
     </section>
 
     <AppFooter />
+
+    <ConfirmDialog ref="dlgHapus" />
+    <DetailKunjunganModal v-model:open="detailOpen" :judul="detailJudul" :baris="detailBaris" />
   </div>
 </template>

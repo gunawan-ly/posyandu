@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { HeartPulse, Plus, Search, Trash2, UserRound, X } from '@lucide/vue'
+import { HeartPulse, Pencil, Plus, Search, Trash2, UserRound, X } from '@lucide/vue'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import AppFooter from '@/components/AppFooter.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
 import Skeleton from '@/components/Skeleton.vue'
 import ViewToggle from '@/components/ViewToggle.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import FormModalBumil from '@/modules/bumil/views/FormModalBumil.vue'
 import { hapusBumil, listBumil, type Bumil } from '@/modules/bumil/db'
 import { parseTanggal } from '@/lib/umur'
 import { useAuth } from '@/supabase/useAuth'
@@ -21,6 +23,20 @@ const daftar = ref<Bumil[]>([])
 const cari = ref('')
 const sibuk = ref(true)
 const pesanError = ref('')
+const dlgHapus = ref<InstanceType<typeof ConfirmDialog>>()
+const modalTambah = ref(false)
+const modalUbahOpen = ref(false)
+const modalUbahData = ref<Bumil | null>(null)
+
+function bukaUbah(b: Bumil) {
+  modalUbahData.value = b
+  modalUbahOpen.value = true
+}
+
+function tutupUbah() {
+  modalUbahOpen.value = false
+  modalUbahData.value = null
+}
 // Mode tampilan daftar: kartu (default) ⇄ tabel — diingat per modul via localStorage.
 const modeView = ref<'grid' | 'tabel'>(bacaViewModul(KUNCI_VIEW))
 let timerCari: ReturnType<typeof setTimeout> | undefined
@@ -70,7 +86,12 @@ function formatTanggal(tgl: string | null): string {
 }
 
 async function hapus(bumil: Bumil) {
-  if (!window.confirm(`Hapus data ${bumil.nama} beserta seluruh kunjungannya?`)) return
+  const ok = await dlgHapus.value?.buka(
+    `Hapus data ${bumil.nama} beserta seluruh kunjungannya?`,
+    'Hapus Ibu Hamil',
+    { merah: true },
+  )
+  if (!ok) return
   try {
     await hapusBumil(bumil.id)
     await muat()
@@ -93,12 +114,10 @@ async function hapus(bumil: Bumil) {
             Kelola identitas ibu hamil dan catat kunjungan antenatal setiap bulan.
           </p>
         </div>
-        <RouterLink v-if="isAdmin" to="/bumil/baru">
-          <Button size="lg">
-            <Plus class="size-4" />
-            Tambah Ibu Hamil
-          </Button>
-        </RouterLink>
+        <Button v-if="isAdmin" size="lg" @click="modalTambah = true">
+          <Plus class="size-4" />
+          Tambah Ibu Hamil
+        </Button>
       </div>
 
       <div class="mt-8 flex flex-wrap items-center justify-between gap-3">
@@ -207,16 +226,26 @@ async function hapus(bumil: Bumil) {
                   </p>
                 </div>
               </div>
-              <button
-                v-if="isAdmin"
-                type="button"
-                class="text-muted-foreground hover:bg-red-50 hover:text-red-600 -mr-1.5 mt-1 shrink-0 rounded-lg p-2 transition-colors"
-                aria-label="Hapus ibu hamil"
-                title="Hapus ibu hamil"
-                @click="hapus(b)"
-              >
-                <Trash2 class="size-4" />
-              </button>
+              <div v-if="isAdmin" class="flex items-center gap-1">
+                <button
+                  type="button"
+                  class="text-muted-foreground hover:bg-emerald-50 hover:text-emerald-700 -mr-1.5 mt-1 shrink-0 rounded-lg p-2 transition-colors"
+                  aria-label="Ubah ibu hamil"
+                  title="Ubah ibu hamil"
+                  @click="bukaUbah(b)"
+                >
+                  <Pencil class="size-4" />
+                </button>
+                <button
+                  type="button"
+                  class="text-muted-foreground hover:bg-red-50 hover:text-red-600 -mr-1.5 mt-1 shrink-0 rounded-lg p-2 transition-colors"
+                  aria-label="Hapus ibu hamil"
+                  title="Hapus ibu hamil"
+                  @click="hapus(b)"
+                >
+                  <Trash2 class="size-4" />
+                </button>
+              </div>
             </div>
 
             <div class="border-border/60 grid grid-cols-2 gap-2 border-t pt-3 text-xs">
@@ -286,6 +315,15 @@ async function hapus(bumil: Bumil) {
                       <RouterLink :to="`/bumil/${b.id}`">
                         <Button variant="ghost" size="sm">Detail</Button>
                       </RouterLink>
+                      <Button
+                        v-if="isAdmin"
+                        variant="ghost"
+                        size="sm"
+                        @click="bukaUbah(b)"
+                      >
+                        <Pencil class="size-4" />
+                        Ubah
+                      </Button>
                       <button
                         v-if="isAdmin"
                         type="button"
@@ -307,5 +345,9 @@ async function hapus(bumil: Bumil) {
     </section>
 
     <AppFooter />
+
+    <ConfirmDialog ref="dlgHapus" />
+    <FormModalBumil v-model:open="modalTambah" @tersimpan="muat" />
+    <FormModalBumil v-model:open="modalUbahOpen" :bumil="modalUbahData" @tersimpan="muat" @update:open="(v) => { if (!v) tutupUbah() }" />
   </div>
 </template>

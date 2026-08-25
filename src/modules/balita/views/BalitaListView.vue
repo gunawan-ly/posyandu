@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { FileText, Plus, Search, Trash2, UserRound, Users, X } from '@lucide/vue'
+import { FileText, Pencil, Plus, Search, Trash2, UserRound, Users, X } from '@lucide/vue'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import AppFooter from '@/components/AppFooter.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
 import Skeleton from '@/components/Skeleton.vue'
 import ViewToggle from '@/components/ViewToggle.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import FormModalBalita from '@/modules/balita/views/FormModalBalita.vue'
 import { listBalita, hapusBalita, type Balita } from '@/modules/balita/db'
 import { umurSaatIni, parseTanggal } from '@/lib/umur'
 import { bacaViewModul, simpanViewModul } from '@/lib/viewModul'
@@ -21,6 +23,20 @@ const daftar = ref<Balita[]>([])
 const cari = ref('')
 const sibuk = ref(true)
 const pesanError = ref('')
+const dlgHapus = ref<InstanceType<typeof ConfirmDialog>>()
+const modalTambah = ref(false)
+const modalUbahOpen = ref(false)
+const modalUbahData = ref<Balita | null>(null)
+
+function bukaUbah(b: Balita) {
+  modalUbahData.value = b
+  modalUbahOpen.value = true
+}
+
+function tutupUbah() {
+  modalUbahOpen.value = false
+  modalUbahData.value = null
+}
 // Mode tampilan daftar: kartu (default) ⇄ tabel — diingat per modul via localStorage.
 const modeView = ref<'grid' | 'tabel'>(bacaViewModul(KUNCI_VIEW))
 let timerCari: ReturnType<typeof setTimeout> | undefined
@@ -80,7 +96,12 @@ function formatTanggal(tgl: string | null): string {
 }
 
 async function hapus(balita: Balita) {
-  if (!window.confirm(`Hapus data ${balita.nama} beserta seluruh kunjungannya?`)) return
+  const ok = await dlgHapus.value?.buka(
+    `Hapus data ${balita.nama} beserta seluruh kunjungannya?`,
+    'Hapus Balita',
+    { merah: true },
+  )
+  if (!ok) return
   try {
     await hapusBalita(balita.id)
     await muat()
@@ -110,12 +131,10 @@ async function hapus(balita: Balita) {
               Rekap
             </Button>
           </RouterLink>
-          <RouterLink v-if="isAdmin" to="/balita/baru">
-            <Button size="lg">
-              <Plus class="size-4" />
-              Tambah Balita
-            </Button>
-          </RouterLink>
+          <Button v-if="isAdmin" size="lg" @click="modalTambah = true">
+            <Plus class="size-4" />
+            Tambah Balita
+          </Button>
         </div>
       </div>
 
@@ -208,7 +227,7 @@ async function hapus(balita: Balita) {
       <div v-else-if="modeView === 'grid'" class="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card v-for="b in daftar" :key="b.id" class="h-full">
           <CardContent class="flex flex-col gap-3">
-            <div class="flex items-start justify-between gap-4">
+              <div class="flex items-start justify-between gap-4">
               <div class="flex min-w-0 items-center gap-3">
                 <span class="bg-primary/10 text-primary grid size-10 shrink-0 place-items-center rounded-lg">
                   <UserRound class="size-5" />
@@ -225,16 +244,26 @@ async function hapus(balita: Balita) {
                   </p>
                 </div>
               </div>
-              <button
-                v-if="isAdmin"
-                type="button"
-                class="text-muted-foreground hover:bg-red-50 hover:text-red-600 -mr-1.5 mt-1 shrink-0 rounded-lg p-2 transition-colors"
-                aria-label="Hapus balita"
-                title="Hapus balita"
-                @click="hapus(b)"
-              >
-                <Trash2 class="size-4" />
-              </button>
+              <div v-if="isAdmin" class="flex items-center gap-1">
+                <button
+                  type="button"
+                  class="text-muted-foreground hover:bg-emerald-50 hover:text-emerald-700 -mr-1.5 mt-1 shrink-0 rounded-lg p-2 transition-colors"
+                  aria-label="Ubah balita"
+                  title="Ubah balita"
+                  @click="bukaUbah(b)"
+                >
+                  <Pencil class="size-4" />
+                </button>
+                <button
+                  type="button"
+                  class="text-muted-foreground hover:bg-red-50 hover:text-red-600 -mr-1.5 mt-1 shrink-0 rounded-lg p-2 transition-colors"
+                  aria-label="Hapus balita"
+                  title="Hapus balita"
+                  @click="hapus(b)"
+                >
+                  <Trash2 class="size-4" />
+                </button>
+              </div>
             </div>
 
             <div class="border-border/60 grid grid-cols-2 gap-2 border-t pt-3 text-xs">
@@ -303,6 +332,15 @@ async function hapus(balita: Balita) {
                       <RouterLink :to="`/balita/${b.id}`">
                         <Button variant="ghost" size="sm">Detail</Button>
                       </RouterLink>
+                      <Button
+                        v-if="isAdmin"
+                        variant="ghost"
+                        size="sm"
+                        @click="bukaUbah(b)"
+                      >
+                        <Pencil class="size-4" />
+                        Ubah
+                      </Button>
                       <button
                         v-if="isAdmin"
                         type="button"
@@ -324,5 +362,9 @@ async function hapus(balita: Balita) {
     </section>
 
     <AppFooter />
+
+    <ConfirmDialog ref="dlgHapus" />
+    <FormModalBalita v-model:open="modalTambah" @tersimpan="muat" />
+    <FormModalBalita v-model:open="modalUbahOpen" :balita="modalUbahData" @tersimpan="muat" @update:open="(v) => { if (!v) tutupUbah() }" />
   </div>
 </template>
