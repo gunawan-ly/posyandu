@@ -6,6 +6,7 @@ import AppFooter from '@/components/AppFooter.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
 import Skeleton from '@/components/Skeleton.vue'
 import ViewToggle from '@/components/ViewToggle.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { listApras, hapusApras, type Apras } from '@/modules/apras/db'
@@ -79,13 +80,27 @@ function formatTanggal(tgl: string | null): string {
   return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-async function hapus(anak: Apras) {
-  if (!window.confirm(`Hapus data ${anak.nama} beserta seluruh kunjungannya?`)) return
+// Konfirmasi hapus via ConfirmDialog (pengganti window.confirm).
+const hapusTarget = ref<Apras | null>(null)
+const dialogHapus = ref(false)
+const menghapus = ref(false)
+
+function mintaHapus(a: Apras) {
+  hapusTarget.value = a
+  dialogHapus.value = true
+}
+
+async function hapus() {
+  if (!hapusTarget.value) return
+  menghapus.value = true
   try {
-    await hapusApras(anak.id)
+    await hapusApras(hapusTarget.value.id)
+    dialogHapus.value = false
     await muat()
   } catch (e) {
     pesanError.value = e instanceof Error ? e.message : 'Gagal menghapus data.'
+  } finally {
+    menghapus.value = false
   }
 }
 </script>
@@ -224,7 +239,7 @@ async function hapus(anak: Apras) {
                 class="text-muted-foreground hover:bg-red-50 hover:text-red-600 -mr-1.5 mt-1 shrink-0 rounded-lg p-2 transition-colors"
                 aria-label="Hapus apras"
                 title="Hapus apras"
-                @click="hapus(a)"
+                @click="mintaHapus(a)"
               >
                 <Trash2 class="size-4" />
               </button>
@@ -301,7 +316,7 @@ async function hapus(anak: Apras) {
                         class="text-muted-foreground hover:bg-red-50 hover:text-red-600 rounded-lg p-2 transition-colors"
                         aria-label="Hapus apras"
                         title="Hapus apras"
-                        @click="hapus(a)"
+                        @click="mintaHapus(a)"
                       >
                         <Trash2 class="size-4" />
                       </button>
@@ -316,5 +331,13 @@ async function hapus(anak: Apras) {
     </section>
 
     <AppFooter />
+
+    <ConfirmDialog
+      v-model:open="dialogHapus"
+      judul="Hapus data anak?"
+      :deskripsi="`Data ${hapusTarget?.nama || ''} beserta seluruh riwayat kunjungannya akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.`"
+      :menyimpan="menghapus"
+      @konfirmasi="hapus"
+    />
   </div>
 </template>

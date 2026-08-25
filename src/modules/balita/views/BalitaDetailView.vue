@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 import AppFooter from '@/components/AppFooter.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
 import Skeleton from '@/components/Skeleton.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import FormKunjunganBalita from './detail/FormKunjunganBalita.vue'
@@ -83,29 +84,51 @@ function formatTanggal(tgl: string | null): string {
   return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-async function hapusKunj(balitaId: number, k: Kunjungan) {
-  if (!window.confirm(`Hapus kunjungan ${formatTanggal(k.tanggal_kunjungan)}?`)) return
+// Konfirmasi hapus via ConfirmDialog (pengganti window.confirm).
+const dialogHapusKunj = ref(false)
+const kunjTarget = ref<Kunjungan | null>(null)
+const menghapus = ref(false)
+
+function mintaHapusKunj(_balitaId: number, k: Kunjungan) {
+  kunjTarget.value = k
+  dialogHapusKunj.value = true
+}
+
+async function hapusKunj() {
+  if (!balita.value || !kunjTarget.value) return
+  menghapus.value = true
   try {
-    await hapusKunjungan(k.id)
-    kunjungan.value = await listKunjungan(balitaId)
+    await hapusKunjungan(kunjTarget.value.id)
+    kunjungan.value = await listKunjungan(balita.value.id)
+    dialogHapusKunj.value = false
   } catch (e) {
     pesanError.value = e instanceof Error ? e.message : 'Gagal menghapus kunjungan.'
+  } finally {
+    menghapus.value = false
   }
 }
 
 async function hapusDariTabel(k: Kunjungan) {
   if (!balita.value) return
-  await hapusKunj(balita.value.id, k)
+  mintaHapusKunj(balita.value.id, k)
+}
+
+const dialogHapusProfil = ref(false)
+
+function mintaHapusBal() {
+  dialogHapusProfil.value = true
 }
 
 async function hapusBal() {
   if (!balita.value) return
-  if (!window.confirm(`Hapus ${balita.value.nama} beserta seluruh kunjungannya?`)) return
+  menghapus.value = true
   try {
     await hapusBalita(balita.value.id)
     await router.replace('/balita')
   } catch (e) {
     pesanError.value = e instanceof Error ? e.message : 'Gagal menghapus data.'
+  } finally {
+    menghapus.value = false
   }
 }
 </script>
@@ -182,7 +205,7 @@ async function hapusBal() {
                 Ubah
               </Button>
             </RouterLink>
-            <Button variant="outline" class="text-red-600" @click="hapusBal">
+            <Button variant="outline" class="text-red-600" @click="mintaHapusBal">
               <Trash2 class="size-4" />
               Hapus
             </Button>
@@ -291,5 +314,21 @@ async function hapusBal() {
     </section>
 
     <AppFooter />
+
+    <ConfirmDialog
+      v-model:open="dialogHapusKunj"
+      judul="Hapus kunjungan?"
+      :deskripsi="`Kunjungan tanggal ${formatTanggal(kunjTarget?.tanggal_kunjungan ?? null)} akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.`"
+      :menyimpan="menghapus"
+      @konfirmasi="hapusKunj"
+    />
+
+    <ConfirmDialog
+      v-model:open="dialogHapusProfil"
+      judul="Hapus data balita?"
+      :deskripsi="`Data ${balita?.nama || ''} beserta seluruh riwayat kunjungannya akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.`"
+      :menyimpan="menghapus"
+      @konfirmasi="hapusBal"
+    />
   </div>
 </template>

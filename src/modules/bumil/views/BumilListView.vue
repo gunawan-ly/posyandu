@@ -6,6 +6,7 @@ import AppFooter from '@/components/AppFooter.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
 import Skeleton from '@/components/Skeleton.vue'
 import ViewToggle from '@/components/ViewToggle.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { hapusBumil, listBumil, type Bumil } from '@/modules/bumil/db'
@@ -69,13 +70,27 @@ function formatTanggal(tgl: string | null): string {
   return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-async function hapus(bumil: Bumil) {
-  if (!window.confirm(`Hapus data ${bumil.nama} beserta seluruh kunjungannya?`)) return
+// Konfirmasi hapus via ConfirmDialog (pengganti window.confirm).
+const hapusTarget = ref<Bumil | null>(null)
+const dialogHapus = ref(false)
+const menghapus = ref(false)
+
+function mintaHapus(b: Bumil) {
+  hapusTarget.value = b
+  dialogHapus.value = true
+}
+
+async function hapus() {
+  if (!hapusTarget.value) return
+  menghapus.value = true
   try {
-    await hapusBumil(bumil.id)
+    await hapusBumil(hapusTarget.value.id)
+    dialogHapus.value = false
     await muat()
   } catch (e) {
     pesanError.value = e instanceof Error ? e.message : 'Gagal menghapus data.'
+  } finally {
+    menghapus.value = false
   }
 }
 </script>
@@ -213,7 +228,7 @@ async function hapus(bumil: Bumil) {
                 class="text-muted-foreground hover:bg-red-50 hover:text-red-600 -mr-1.5 mt-1 shrink-0 rounded-lg p-2 transition-colors"
                 aria-label="Hapus ibu hamil"
                 title="Hapus ibu hamil"
-                @click="hapus(b)"
+                @click="mintaHapus(b)"
               >
                 <Trash2 class="size-4" />
               </button>
@@ -292,7 +307,7 @@ async function hapus(bumil: Bumil) {
                         class="text-muted-foreground hover:bg-red-50 hover:text-red-600 rounded-lg p-2 transition-colors"
                         aria-label="Hapus ibu hamil"
                         title="Hapus ibu hamil"
-                        @click="hapus(b)"
+                        @click="mintaHapus(b)"
                       >
                         <Trash2 class="size-4" />
                       </button>
@@ -307,5 +322,13 @@ async function hapus(bumil: Bumil) {
     </section>
 
     <AppFooter />
+
+    <ConfirmDialog
+      v-model:open="dialogHapus"
+      judul="Hapus data ibu hamil?"
+      :deskripsi="`Data ${hapusTarget?.nama || ''} beserta seluruh riwayat kunjungannya akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.`"
+      :menyimpan="menghapus"
+      @konfirmasi="hapus"
+    />
   </div>
 </template>

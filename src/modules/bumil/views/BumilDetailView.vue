@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 import AppFooter from '@/components/AppFooter.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
 import Skeleton from '@/components/Skeleton.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import FormKunjunganBumil from './detail/FormKunjunganBumil.vue'
@@ -79,29 +80,51 @@ async function muatUlangRiwayat() {
   }
 }
 
-async function hapusKunj(bumilId: number, k: KunjunganBumil) {
-  if (!window.confirm(`Hapus kunjungan ${formatTanggal(k.tanggal_kunjungan)}?`)) return
+// Konfirmasi hapus via ConfirmDialog (pengganti window.confirm).
+const dialogHapusKunj = ref(false)
+const kunjTarget = ref<KunjunganBumil | null>(null)
+const menghapus = ref(false)
+
+function mintaHapusKunj(_bumilId: number, k: KunjunganBumil) {
+  kunjTarget.value = k
+  dialogHapusKunj.value = true
+}
+
+async function hapusKunj() {
+  if (!bumil.value || !kunjTarget.value) return
+  menghapus.value = true
   try {
-    await hapusKunjunganBumil(k.id)
-    kunjungan.value = await listKunjunganBumil(bumilId)
+    await hapusKunjunganBumil(kunjTarget.value.id)
+    kunjungan.value = await listKunjunganBumil(bumil.value.id)
+    dialogHapusKunj.value = false
   } catch (e) {
     pesanError.value = e instanceof Error ? e.message : 'Gagal menghapus kunjungan.'
+  } finally {
+    menghapus.value = false
   }
 }
 
 async function hapusDariTabel(k: KunjunganBumil) {
   if (!bumil.value) return
-  await hapusKunj(bumil.value.id, k)
+  mintaHapusKunj(bumil.value.id, k)
+}
+
+const dialogHapusProfil = ref(false)
+
+function mintaHapusBumil() {
+  dialogHapusProfil.value = true
 }
 
 async function hapusBumilData() {
   if (!bumil.value) return
-  if (!window.confirm(`Hapus ${bumil.value.nama} beserta seluruh kunjungannya?`)) return
+  menghapus.value = true
   try {
     await hapusBumil(bumil.value.id)
     await router.replace('/bumil')
   } catch (e) {
     pesanError.value = e instanceof Error ? e.message : 'Gagal menghapus data.'
+  } finally {
+    menghapus.value = false
   }
 }
 </script>
@@ -179,7 +202,7 @@ async function hapusBumilData() {
                 Ubah
               </Button>
             </RouterLink>
-            <Button variant="outline" class="text-red-600" @click="hapusBumilData">
+            <Button variant="outline" class="text-red-600" @click="mintaHapusBumil">
               <Trash2 class="size-4" />
               Hapus
             </Button>
@@ -329,5 +352,21 @@ async function hapusBumilData() {
     </section>
 
     <AppFooter />
+
+    <ConfirmDialog
+      v-model:open="dialogHapusKunj"
+      judul="Hapus kunjungan?"
+      :deskripsi="`Kunjungan tanggal ${formatTanggal(kunjTarget?.tanggal_kunjungan ?? null)} akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.`"
+      :menyimpan="menghapus"
+      @konfirmasi="hapusKunj"
+    />
+
+    <ConfirmDialog
+      v-model:open="dialogHapusProfil"
+      judul="Hapus data ibu hamil?"
+      :deskripsi="`Data ${bumil?.nama || ''} beserta seluruh riwayat kunjungannya akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.`"
+      :menyimpan="menghapus"
+      @konfirmasi="hapusBumilData"
+    />
   </div>
 </template>
