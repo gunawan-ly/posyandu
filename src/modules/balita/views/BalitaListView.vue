@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { listBalita, hapusBalita, type Balita } from '@/modules/balita/db'
 import { umurSaatIni } from '@/lib/umur'
+import { bacaViewModul, simpanViewModul } from '@/lib/viewModul'
 import { useAuth } from '@/supabase/useAuth'
 
 const KUNCI_VIEW = 'view-balita'
@@ -21,11 +22,11 @@ const cari = ref('')
 const sibuk = ref(true)
 const pesanError = ref('')
 // Mode tampilan daftar: kartu (default) ⇄ tabel — diingat per modul via localStorage.
-const modeView = ref<'grid' | 'tabel'>((localStorage.getItem(KUNCI_VIEW) as 'grid' | 'tabel') || 'grid')
+const modeView = ref<'grid' | 'tabel'>(bacaViewModul(KUNCI_VIEW))
 let timerCari: ReturnType<typeof setTimeout> | undefined
 
 watch(modeView, (v) => {
-  localStorage.setItem(KUNCI_VIEW, v)
+  simpanViewModul(KUNCI_VIEW, v)
 })
 
 onMounted(async () => {
