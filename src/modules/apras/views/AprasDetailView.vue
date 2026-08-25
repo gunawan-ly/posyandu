@@ -6,6 +6,7 @@ import AppFooter from '@/components/AppFooter.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
 import Skeleton from '@/components/Skeleton.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import DetailKunjunganModal from '@/components/DetailKunjunganModal.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import FormKunjunganApras from './detail/FormKunjunganApras.vue'
@@ -86,6 +87,30 @@ function formatTanggal(tgl: string | null): string {
 // Konfirmasi hapus via ConfirmDialog (pengganti window.confirm).
 const dialogHapusKunj = ref(false)
 const kunjTarget = ref<KunjunganApras | null>(null)
+
+// Modal detail kunjungan (read-only).
+const modalKunj = ref(false)
+
+function bukaDetailKunj(k: KunjunganApras) {
+  kunjTarget.value = k
+  modalKunj.value = true
+}
+
+const barisModal = computed<Array<[string, string]>>(() => {
+  const k = kunjTarget.value
+  return [
+    ['Umur (bln)', String(k?.umur_bulan ?? '—')],
+    ['BB (kg)', String(k?.berat_badan ?? '—')],
+    ['TB (cm)', String(k?.tinggi_badan ?? '—')],
+    ['LiKA (cm)', String(k?.lingkar_kepala ?? '—')],
+    ['LiLA (cm)', String(k?.lingkar_lengan ?? '—')],
+    ['Obat cacing', String(k?.obat_cacing || '—')],
+    ['Gejala TBC', String(k?.gejala_tbc || '—')],
+    ['Dirujuk', String(k?.dirujuk || '—')],
+    ['Edukasi', String(k?.edukasi || '—')],
+    ['Catatan', String(k?.catatan || '—')],
+  ]
+})
 const menghapus = ref(false)
 
 function mintaHapusKunj(_a: Apras, k: KunjunganApras) {
@@ -210,7 +235,7 @@ async function hapusAnak() {
         <div class="mt-8 grid gap-6 lg:grid-cols-3">
           <!-- Kiri: riwayat -->
           <div class="min-w-0 space-y-6 lg:col-span-2">
-            <TabelRiwayatApras :kunjungan="kunjungan" :is-admin="isAdmin" @hapus="hapusDariTabel" />
+            <TabelRiwayatApras :kunjungan="kunjungan" :is-admin="isAdmin" @lihat="bukaDetailKunj" @hapus="hapusDariTabel" />
           </div>
 
           <!-- Kanan: identitas + form kunjungan -->
@@ -294,6 +319,12 @@ async function hapusAnak() {
     </section>
 
     <AppFooter />
+
+    <DetailKunjunganModal
+      v-model:open="modalKunj"
+      :judul="`Kunjungan ${formatTanggal(kunjTarget?.tanggal_kunjungan ?? null)}`"
+      :baris="barisModal"
+    />
 
     <ConfirmDialog
       v-model:open="dialogHapusKunj"

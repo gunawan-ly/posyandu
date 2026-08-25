@@ -9,7 +9,7 @@ defineProps<{
   isAdmin: boolean
 }>()
 
-const emit = defineEmits<{ hapus: [kunjungan: KunjunganBumil] }>()
+const emit = defineEmits<{ hapus: [kunjungan: KunjunganBumil]; lihat: [kunjungan: KunjunganBumil] }>()
 
 function formatTanggal(tgl: string | null): string {
   const d = parseTanggal(tgl ?? '')
@@ -60,7 +60,12 @@ function formatAngka(n: number | null | undefined): string {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="k in kunjungan" :key="k.id" class="border-border/60 border-b last:border-0">
+            <tr
+              v-for="k in kunjungan"
+              :key="k.id"
+              class="hover:bg-emerald-50/40 cursor-pointer border-border/60 border-b last:border-0"
+              @click="emit('lihat', k)"
+            >
               <td class="py-3 pr-3 font-medium whitespace-nowrap">{{ formatTanggal(k.tanggal_kunjungan) }}</td>
               <td class="py-3 pr-3 text-muted-foreground whitespace-nowrap">{{ formatAngka(k.usia_kehamilan_minggu) }} minggu</td>
               <td class="py-3 pr-3 whitespace-nowrap">{{ formatAngka(k.berat_badan) }}</td>
@@ -100,7 +105,7 @@ function formatAngka(n: number | null | undefined): string {
                   class="text-muted-foreground hover:bg-red-50 hover:text-red-600 rounded-lg p-2 transition-colors"
                   aria-label="Hapus kunjungan"
                   title="Hapus kunjungan"
-                  @click="emit('hapus', k)"
+                  @click.stop="emit('hapus', k)"
                 >
                   <Trash2 class="size-4" />
                 </button>
