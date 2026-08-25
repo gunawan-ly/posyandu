@@ -9,6 +9,7 @@ import ViewToggle from '@/components/ViewToggle.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { hapusBumil, listBumil, type Bumil } from '@/modules/bumil/db'
+import { parseTanggal } from '@/lib/umur'
 import { useAuth } from '@/supabase/useAuth'
 import { bacaViewModul, simpanViewModul } from '@/lib/viewModul'
 
@@ -60,6 +61,12 @@ async function muat() {
 
 function labelKategori(k: string | null): string {
   return k ?? '—'
+}
+
+function formatTanggal(tgl: string | null): string {
+  const d = parseTanggal(tgl ?? '')
+  if (!d) return '—'
+  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 async function hapus(bumil: Bumil) {
@@ -226,44 +233,70 @@ async function hapus(bumil: Bumil) {
         </Card>
       </div>
 
-      <!-- Data: view tabel -->
+      <!-- Data: view tabel (semua kolom identitas; kolom Nama frozen/sticky kiri) -->
       <Card v-else class="mt-8">
         <CardContent>
           <div class="overflow-x-auto">
-            <table class="w-full min-w-[760px] text-sm">
+            <table class="w-full min-w-[1900px] text-sm">
               <thead>
                 <tr class="text-muted-foreground border-border/60 border-b text-left text-xs font-bold tracking-wide uppercase">
-                  <th class="py-2 pr-3 whitespace-nowrap">Nama</th>
+                  <th class="bg-card sticky left-0 z-10 py-2 pr-3 whitespace-nowrap">Nama</th>
                   <th class="py-2 pr-3">Kategori</th>
                   <th class="py-2 pr-3">Umur</th>
                   <th class="py-2 pr-3">NIK</th>
-                  <th class="py-2 pr-3">Suami</th>
+                  <th class="py-2 pr-3 whitespace-nowrap">Tgl lahir</th>
+                  <th class="py-2 pr-3 whitespace-nowrap">Suami</th>
+                  <th class="py-2 pr-3 whitespace-nowrap">No. KK</th>
+                  <th class="py-2 pr-3 whitespace-nowrap">Hamil anak ke</th>
+                  <th class="py-2 pr-3 whitespace-nowrap">Jarak anak sblmnya</th>
+                  <th class="py-2 pr-3 whitespace-nowrap">Tgl bersalin</th>
+                  <th class="py-2 pr-3">Tempat bersalin</th>
+                  <th class="py-2 pr-3">Cara persalinan</th>
+                  <th class="py-2 pr-3 whitespace-nowrap">Anak ke</th>
                   <th class="py-2 pr-3">Dusun</th>
-                  <th v-if="isAdmin" class="py-2"></th>
+                  <th class="py-2 pr-3">Alamat</th>
+                  <th class="sticky left-0 z-10 py-2"></th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="b in daftar" :key="b.id" class="border-border/60 hover:bg-emerald-50/40 border-b last:border-0">
-                  <td class="py-3 pr-3 font-medium whitespace-nowrap">
+                <tr v-for="b in daftar" :key="b.id" class="group border-border/60 hover:bg-emerald-50/40 relative border-b last:border-0">
+                  <td class="bg-white group-hover:bg-emerald-50/40 py-3 pr-3 font-medium whitespace-nowrap sticky left-0 z-10">
                     <RouterLink :to="`/bumil/${b.id}`" class="hover:text-primary font-bold">
                       {{ b.nama }}
                     </RouterLink>
+                    <!-- penanda frozen column -->
+                    <span class="border-border/60 absolute top-0 right-0 bottom-0 border-r opacity-0 group-hover:opacity-100" aria-hidden="true"></span>
                   </td>
                   <td class="py-3 pr-3 whitespace-nowrap">{{ labelKategori(b.kategori) }}</td>
                   <td class="text-muted-foreground py-3 pr-3 whitespace-nowrap">{{ b.umur || '—' }} th</td>
                   <td class="py-3 pr-3 break-all whitespace-nowrap">{{ b.nik || '—' }}</td>
-                  <td class="max-w-[160px] truncate py-3 pr-3 whitespace-nowrap">{{ b.nama_suami || '—' }}</td>
+                  <td class="text-muted-foreground py-3 pr-3 whitespace-nowrap">{{ formatTanggal(b.tanggal_lahir) }}</td>
+                  <td class="max-w-[160px] truncate py-3 pr-3 whitespace-nowrap" :title="b.nama_suami || ''">{{ b.nama_suami || '—' }}</td>
+                  <td class="py-3 pr-3 break-all whitespace-nowrap">{{ b.nomor_kk || '—' }}</td>
+                  <td class="py-3 pr-3 whitespace-nowrap">{{ b.hamil_anak_ke || '—' }}</td>
+                  <td class="py-3 pr-3 whitespace-nowrap">{{ b.jarak_dengan_anak_sebelumnya || '—' }}</td>
+                  <td class="text-muted-foreground py-3 pr-3 whitespace-nowrap">{{ formatTanggal(b.tanggal_bersalin) }}</td>
+                  <td class="max-w-[140px] truncate py-3 pr-3 whitespace-nowrap" :title="b.tempat_bersalin || ''">{{ b.tempat_bersalin || '—' }}</td>
+                  <td class="py-3 pr-3 whitespace-nowrap">{{ b.cara_persalin || '—' }}</td>
+                  <td class="py-3 pr-3 whitespace-nowrap">{{ b.anak_ke || '—' }}</td>
                   <td class="py-3 pr-3 whitespace-nowrap">{{ b.dusun || '—' }}</td>
-                  <td v-if="isAdmin" class="py-3 text-right">
-                    <button
-                      type="button"
-                      class="text-muted-foreground hover:bg-red-50 hover:text-red-600 rounded-lg p-2 transition-colors"
-                      aria-label="Hapus ibu hamil"
-                      title="Hapus ibu hamil"
-                      @click="hapus(b)"
-                    >
-                      <Trash2 class="size-4" />
-                    </button>
+                  <td class="max-w-[220px] truncate py-3 pr-3 whitespace-nowrap" :title="b.alamat || ''">{{ b.alamat || '—' }}</td>
+                  <td class="py-3 text-right whitespace-nowrap">
+                    <div class="flex items-center justify-end gap-1">
+                      <RouterLink :to="`/bumil/${b.id}`">
+                        <Button variant="ghost" size="sm">Detail</Button>
+                      </RouterLink>
+                      <button
+                        v-if="isAdmin"
+                        type="button"
+                        class="text-muted-foreground hover:bg-red-50 hover:text-red-600 rounded-lg p-2 transition-colors"
+                        aria-label="Hapus ibu hamil"
+                        title="Hapus ibu hamil"
+                        @click="hapus(b)"
+                      >
+                        <Trash2 class="size-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               </tbody>
