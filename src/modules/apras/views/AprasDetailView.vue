@@ -242,14 +242,6 @@ async function hapusAnak() {
                     <p class="text-muted-foreground text-xs font-bold uppercase">Posyandu</p>
                     <p class="mt-0.5">{{ apras.posyandu || '—' }}</p>
                   </div>
-                  <div>
-                    <p class="text-muted-foreground text-xs font-bold uppercase">BB lahir</p>
-                    <p class="mt-0.5">{{ apras.bb_lahir ?? '—' }} kg</p>
-                  </div>
-                  <div>
-                    <p class="text-muted-foreground text-xs font-bold uppercase">PB lahir</p>
-                    <p class="mt-0.5">{{ apras.pb_lahir ?? '—' }} cm</p>
-                  </div>
                   <div class="col-span-2">
                     <p class="text-muted-foreground text-xs font-bold uppercase">Alamat</p>
                     <p class="mt-0.5">{{ apras.alamat || '—' }}</p>

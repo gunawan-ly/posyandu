@@ -21,8 +21,6 @@ export interface Apras {
   nomor_kk: string | null
   dusun: string | null
   alamat: string | null
-  bb_lahir: number | null
-  pb_lahir: number | null
   posyandu: string | null
   dibuat_oleh: string | null
   created_at: string
@@ -36,12 +34,10 @@ export interface KunjunganApras {
   tanggal_kunjungan: string | null
   berat_badan: number | null
   tinggi_badan: number | null
-  lingkar_lengan: number | null
   lingkar_kepala: number | null
+  lingkar_lengan: number | null
   gejala_tbc: string | null
-  imunisasi: string | null
   obat_cacing: string | null
-  mt_pangan_lokal: string | null
   edukasi: string | null
   dirujuk: string | null
   catatan: string | null
@@ -61,8 +57,6 @@ export interface InputApras {
   nomor_kk?: string | null
   dusun?: string | null
   alamat?: string | null
-  bb_lahir?: number | null
-  pb_lahir?: number | null
   posyandu?: string | null
 }
 
@@ -70,12 +64,10 @@ export interface InputKunjunganApras {
   tanggal_kunjungan: string
   berat_badan?: number | null
   tinggi_badan?: number | null
-  lingkar_lengan?: number | null
   lingkar_kepala?: number | null
+  lingkar_lengan?: number | null
   gejala_tbc?: string | null
-  imunisasi?: string | null
   obat_cacing?: string | null
-  mt_pangan_lokal?: string | null
   edukasi?: string | null
   dirujuk?: string | null
   catatan?: string | null
@@ -173,12 +165,10 @@ export async function tambahKunjunganApras(
       umur_bulan: umurBulan,
       berat_badan: input.berat_badan ?? null,
       tinggi_badan: input.tinggi_badan ?? null,
-      lingkar_lengan: input.lingkar_lengan ?? null,
       lingkar_kepala: input.lingkar_kepala ?? null,
+      lingkar_lengan: input.lingkar_lengan ?? null,
       gejala_tbc: input.gejala_tbc ?? null,
-      imunisasi: input.imunisasi ?? null,
       obat_cacing: input.obat_cacing ?? null,
-      mt_pangan_lokal: input.mt_pangan_lokal ?? null,
       edukasi: input.edukasi ?? null,
       dirujuk: input.dirujuk ?? null,
       catatan: input.catatan ?? null,

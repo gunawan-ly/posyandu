@@ -33,7 +33,7 @@ function yaTidak(nilai: string | null): string {
       </div>
 
       <div v-else class="overflow-x-auto">
-        <table class="w-full min-w-[900px] text-sm">
+        <table class="w-full min-w-[820px] text-sm">
           <thead>
             <tr class="text-muted-foreground border-border/60 border-b text-left text-xs font-bold tracking-wide uppercase">
               <th class="py-2 pr-3 whitespace-nowrap">Tanggal</th>
@@ -42,10 +42,8 @@ function yaTidak(nilai: string | null): string {
               <th class="py-2 pr-3">TB (cm)</th>
               <th class="py-2 pr-3">LiKA (cm)</th>
               <th class="py-2 pr-3">LiLA (cm)</th>
-              <th class="py-2 pr-3">Imunisasi</th>
               <th class="py-2 pr-3">Cacing</th>
               <th class="py-2 pr-3">TBC</th>
-              <th class="py-2 pr-3">MT</th>
               <th class="py-2 pr-3">Rujuk</th>
               <th class="py-2 pr-3">Edukasi / Catatan</th>
               <th v-if="isAdmin" class="py-2"></th>
@@ -59,10 +57,8 @@ function yaTidak(nilai: string | null): string {
               <td class="py-3 pr-3 whitespace-nowrap">{{ k.tinggi_badan ?? '—' }}</td>
               <td class="py-3 pr-3 whitespace-nowrap">{{ k.lingkar_kepala ?? '—' }}</td>
               <td class="py-3 pr-3 whitespace-nowrap">{{ k.lingkar_lengan ?? '—' }}</td>
-              <td class="py-3 pr-3 whitespace-nowrap">{{ yaTidak(k.imunisasi) }}</td>
               <td class="py-3 pr-3 whitespace-nowrap">{{ yaTidak(k.obat_cacing) }}</td>
               <td class="py-3 pr-3 whitespace-nowrap">{{ yaTidak(k.gejala_tbc) }}</td>
-              <td class="py-3 pr-3 whitespace-nowrap">{{ yaTidak(k.mt_pangan_lokal) }}</td>
               <td class="py-3 pr-3 whitespace-nowrap">{{ yaTidak(k.dirujuk) }}</td>
               <td class="text-muted-foreground max-w-[180px] truncate py-3 pr-3 whitespace-nowrap" :title="[k.edukasi, k.catatan].filter(Boolean).join(' | ') || ''">
                 {{ [k.edukasi, k.catatan].filter(Boolean).join(' | ') || '—' }}

@@ -15,12 +15,10 @@ const emit = defineEmits<{ tersimpan: [] }>()
 const tglKunjungan = ref(new Date().toISOString().slice(0, 10))
 const beratBadan = ref<string>('')
 const tinggiBadan = ref<string>('')
-const lingkarLengan = ref<string>('')
 const lingkarKepala = ref<string>('')
-const imunisasi = ref('')
+const lingkarLengan = ref<string>('')
 const obatCacing = ref('')
 const gejalaTbc = ref('')
-const mtPanganLokal = ref('')
 const dirujuk = ref('')
 const edukasi = ref('')
 const catatan = ref('')
@@ -50,12 +48,10 @@ async function simpanKunjungan() {
       tanggal_kunjungan: tglKunjungan.value,
       berat_badan: bb,
       tinggi_badan: tb,
-      lingkar_lengan: lingkarLengan.value ? Number(lingkarLengan.value) : null,
       lingkar_kepala: lingkarKepala.value ? Number(lingkarKepala.value) : null,
-      imunisasi: imunisasi.value || null,
+      lingkar_lengan: lingkarLengan.value ? Number(lingkarLengan.value) : null,
       obat_cacing: obatCacing.value || null,
       gejala_tbc: gejalaTbc.value || null,
-      mt_pangan_lokal: mtPanganLokal.value || null,
       dirujuk: dirujuk.value || null,
       edukasi: edukasi.value || null,
       catatan: catatan.value || null,
@@ -63,12 +59,10 @@ async function simpanKunjungan() {
     emit('tersimpan')
     beratBadan.value = ''
     tinggiBadan.value = ''
-    lingkarLengan.value = ''
     lingkarKepala.value = ''
-    imunisasi.value = ''
+    lingkarLengan.value = ''
     obatCacing.value = ''
     gejalaTbc.value = ''
-    mtPanganLokal.value = ''
     dirujuk.value = ''
     edukasi.value = ''
     catatan.value = ''
@@ -109,25 +103,18 @@ const klsInput =
         </div>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label for="lila" class="text-muted-foreground mb-1.5 block text-xs font-bold">LiLA (cm)</label>
-            <input id="lila" v-model="lingkarLengan" type="number" inputmode="decimal" step="0.1" min="0" class="w-full" :class="klsInput" />
-          </div>
-          <div>
             <label for="lika" class="text-muted-foreground mb-1.5 block text-xs font-bold">LiKA (cm)</label>
             <input id="lika" v-model="lingkarKepala" type="number" inputmode="decimal" step="0.1" min="0" class="w-full" :class="klsInput" />
+          </div>
+          <div>
+            <label for="lila" class="text-muted-foreground mb-1.5 block text-xs font-bold">LiLA (cm)</label>
+            <input id="lila" v-model="lingkarLengan" type="number" inputmode="decimal" step="0.1" min="0" class="w-full" :class="klsInput" />
           </div>
         </div>
 
         <div class="border-border/60 border-t pt-4">
           <p class="text-muted-foreground mb-3 text-xs font-bold tracking-widest uppercase">Kesehatan &amp; layanan</p>
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div>
-              <label for="imunisasi" class="text-muted-foreground mb-1.5 block text-xs font-bold">Imunisasi</label>
-              <select id="imunisasi" v-model="imunisasi" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
             <div>
               <label for="obat-cacing" class="text-muted-foreground mb-1.5 block text-xs font-bold">Obat cacing</label>
               <select id="obat-cacing" v-model="obatCacing" class="w-full" :class="klsInput">
@@ -138,13 +125,6 @@ const klsInput =
             <div>
               <label for="gejala-tbc" class="text-muted-foreground mb-1.5 block text-xs font-bold">Gejala TBC</label>
               <select id="gejala-tbc" v-model="gejalaTbc" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
-            <div>
-              <label for="mt-pangan" class="text-muted-foreground mb-1.5 block text-xs font-bold">MT pangan lokal</label>
-              <select id="mt-pangan" v-model="mtPanganLokal" class="w-full" :class="klsInput">
                 <option value="">— pilih —</option>
                 <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
               </select>

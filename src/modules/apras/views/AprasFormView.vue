@@ -17,19 +17,20 @@ const idEdit = computed(() => {
   return typeof v === 'string' && /^\d+$/.test(v) ? Number(v) : null
 })
 
+// Urutan form sesuai permintaan pengguna:
+// Nama, NIK anak, JK, Tgl lahir, Tempat lahir, Nama ortu, NIK ortu, No. KK, Anak ke, Dusun, Alamat, Posyandu.
 const nama = ref('')
+const nik = ref('')
 const jenisKelamin = ref('')
 const tanggalLahir = ref('')
 const tempatLahir = ref('')
-const anakKe = ref('')
 const namaOrangTua = ref('')
-const nik = ref('')
+const nikOrangTua = ref('')
 const nomorKk = ref('')
+const anakKe = ref('')
 const dusun = ref('')
 const alamat = ref('')
 const posyandu = ref('')
-const bbLahir = ref<string>('')
-const pbLahir = ref<string>('')
 
 const sibuk = ref(false)
 const memuat = ref(false)
@@ -54,18 +55,17 @@ onMounted(async () => {
 
 function isiForm(a: Apras) {
   nama.value = a.nama
+  nik.value = a.nik ?? ''
   jenisKelamin.value = a.jenis_kelamin ?? ''
   tanggalLahir.value = a.tanggal_lahir
   tempatLahir.value = a.tempat_lahir ?? ''
-  anakKe.value = a.anak_ke ?? ''
   namaOrangTua.value = a.nama_orang_tua ?? ''
-  nik.value = a.nik ?? ''
+  nikOrangTua.value = a.nik_orang_tua ?? ''
   nomorKk.value = a.nomor_kk ?? ''
+  anakKe.value = a.anak_ke ?? ''
   dusun.value = a.dusun ?? ''
   alamat.value = a.alamat ?? ''
   posyandu.value = a.posyandu ?? ''
-  bbLahir.value = a.bb_lahir != null ? String(a.bb_lahir) : ''
-  pbLahir.value = a.pb_lahir != null ? String(a.pb_lahir) : ''
 }
 
 async function simpan() {
@@ -91,18 +91,17 @@ async function simpan() {
 
   const payload = {
     nama: nama.value.trim(),
+    nik: nik.value.trim() || null,
     jenis_kelamin: jenisKelamin.value,
     tanggal_lahir: tanggalLahir.value,
     tempat_lahir: tempatLahir.value.trim() || null,
-    anak_ke: anakKe.value.trim() || null,
     nama_orang_tua: namaOrangTua.value.trim() || null,
-    nik: nik.value.trim() || null,
+    nik_orang_tua: nikOrangTua.value.trim() || null,
     nomor_kk: nomorKk.value.trim() || null,
+    anak_ke: anakKe.value.trim() || null,
     dusun: dusun.value.trim() || null,
     alamat: alamat.value.trim() || null,
     posyandu: posyandu.value.trim() || null,
-    bb_lahir: bbLahir.value ? Number(bbLahir.value) : null,
-    pb_lahir: pbLahir.value ? Number(pbLahir.value) : null,
   }
 
   sibuk.value = true
@@ -149,6 +148,11 @@ const klsInput =
             </div>
 
             <div>
+              <label for="nik" class="text-muted-foreground mb-1.5 block text-xs font-bold">NIK (anak)</label>
+              <input id="nik" v-model="nik" type="text" inputmode="numeric" class="w-full" :class="klsInput" />
+            </div>
+
+            <div>
               <p class="mb-1.5 text-xs font-bold text-muted-foreground">Jenis kelamin *</p>
               <div class="inline-flex w-full rounded-lg border border-emerald-200 bg-emerald-50 p-1" role="group" aria-label="Jenis kelamin">
                 <button
@@ -177,21 +181,15 @@ const klsInput =
               </div>
             </div>
 
-            <div class="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label for="ortu" class="text-muted-foreground mb-1.5 block text-xs font-bold">Nama orang tua</label>
-                <input id="ortu" v-model="namaOrangTua" type="text" class="w-full" :class="klsInput" />
-              </div>
-              <div>
-                <label for="anak-ke" class="text-muted-foreground mb-1.5 block text-xs font-bold">Anak ke</label>
-                <input id="anak-ke" v-model="anakKe" type="text" class="w-full" :class="klsInput" />
-              </div>
+            <div>
+              <label for="ortu" class="text-muted-foreground mb-1.5 block text-xs font-bold">Nama orang tua</label>
+              <input id="ortu" v-model="namaOrangTua" type="text" class="w-full" :class="klsInput" />
             </div>
 
             <div class="grid gap-4 sm:grid-cols-2">
               <div>
-                <label for="nik" class="text-muted-foreground mb-1.5 block text-xs font-bold">NIK</label>
-                <input id="nik" v-model="nik" type="text" inputmode="numeric" class="w-full" :class="klsInput" />
+                <label for="nik-ortu" class="text-muted-foreground mb-1.5 block text-xs font-bold">NIK orang tua</label>
+                <input id="nik-ortu" v-model="nikOrangTua" type="text" inputmode="numeric" class="w-full" :class="klsInput" />
               </div>
               <div>
                 <label for="no-kk" class="text-muted-foreground mb-1.5 block text-xs font-bold">Nomor KK</label>
@@ -201,12 +199,12 @@ const klsInput =
 
             <div class="grid gap-4 sm:grid-cols-2">
               <div>
-                <label for="dusun" class="text-muted-foreground mb-1.5 block text-xs font-bold">Dusun</label>
-                <input id="dusun" v-model="dusun" type="text" class="w-full" :class="klsInput" />
+                <label for="anak-ke" class="text-muted-foreground mb-1.5 block text-xs font-bold">Anak ke</label>
+                <input id="anak-ke" v-model="anakKe" type="text" class="w-full" :class="klsInput" />
               </div>
               <div>
-                <label for="posyandu" class="text-muted-foreground mb-1.5 block text-xs font-bold">Posyandu</label>
-                <input id="posyandu" v-model="posyandu" type="text" class="w-full" :class="klsInput" />
+                <label for="dusun" class="text-muted-foreground mb-1.5 block text-xs font-bold">Dusun</label>
+                <input id="dusun" v-model="dusun" type="text" class="w-full" :class="klsInput" />
               </div>
             </div>
 
@@ -220,15 +218,9 @@ const klsInput =
               />
             </div>
 
-            <div class="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label for="bb-lahir" class="text-muted-foreground mb-1.5 block text-xs font-bold">Berat lahir (kg)</label>
-                <input id="bb-lahir" v-model="bbLahir" type="number" inputmode="decimal" step="0.01" min="0" class="w-full" :class="klsInput" />
-              </div>
-              <div>
-                <label for="pb-lahir" class="text-muted-foreground mb-1.5 block text-xs font-bold">Panjang lahir (cm)</label>
-                <input id="pb-lahir" v-model="pbLahir" type="number" inputmode="decimal" step="0.1" min="0" class="w-full" :class="klsInput" />
-              </div>
+            <div>
+              <label for="posyandu" class="text-muted-foreground mb-1.5 block text-xs font-bold">Posyandu</label>
+              <input id="posyandu" v-model="posyandu" type="text" class="w-full" :class="klsInput" />
             </div>
 
             <p v-if="pesanError" class="flex items-start gap-2 text-sm font-medium text-red-600" role="alert">
