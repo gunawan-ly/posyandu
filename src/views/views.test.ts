@@ -138,13 +138,10 @@ describe('render komponen utama', () => {
       expect(tombol!.element.closest('a')?.getAttribute('href')).toBe(href)
     }
 
-    // Dewasa & Lansia masih terkunci: tombol tanpa tautan, tetap memakai ikon gembok.
-    const tombolLansia = wrapper
-      .findAll('button')
-      .find((b) => b.text().includes('Dewasa & Lansia'))
-    expect(tombolLansia).toBeDefined()
-    expect(tombolLansia!.element.closest('a')).toBeNull()
-    expect(tombolLansia!.find('svg.lucide-lock').exists()).toBe(true)
+    // Dewasa & Lansia aktif: tombol dibungkus tautan ke /lansia.
+    const tautanLansia = wrapper.findAll('a').find((a) => a.attributes('href') === '/lansia')
+    expect(tautanLansia).toBeDefined()
+    expect(tautanLansia!.text()).toContain('Dewasa & Lansia')
   })
 
   it('Tombol Masuk: sudah login → dashboard, belum → halaman login', async () => {

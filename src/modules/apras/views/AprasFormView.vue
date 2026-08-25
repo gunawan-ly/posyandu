@@ -17,8 +17,7 @@ const idEdit = computed(() => {
   return typeof v === 'string' && /^\d+$/.test(v) ? Number(v) : null
 })
 
-// Urutan form sesuai permintaan pengguna:
-// Nama, NIK anak, JK, Tgl lahir, Tempat lahir, Nama ortu, NIK ortu, No. KK, Anak ke, Dusun, Alamat, Posyandu.
+// Urutan form: Nama, NIK, JK, Tgl lahir, Tempat lahir, Nama ortu, NIK ortu, No. KK, Dusun, Alamat, Posyandu.
 const nama = ref('')
 const nik = ref('')
 const jenisKelamin = ref('')
@@ -27,7 +26,6 @@ const tempatLahir = ref('')
 const namaOrangTua = ref('')
 const nikOrangTua = ref('')
 const nomorKk = ref('')
-const anakKe = ref('')
 const dusun = ref('')
 const alamat = ref('')
 const posyandu = ref('')
@@ -62,7 +60,6 @@ function isiForm(a: Apras) {
   namaOrangTua.value = a.nama_orang_tua ?? ''
   nikOrangTua.value = a.nik_orang_tua ?? ''
   nomorKk.value = a.nomor_kk ?? ''
-  anakKe.value = a.anak_ke ?? ''
   dusun.value = a.dusun ?? ''
   alamat.value = a.alamat ?? ''
   posyandu.value = a.posyandu ?? ''
@@ -98,7 +95,6 @@ async function simpan() {
     nama_orang_tua: namaOrangTua.value.trim() || null,
     nik_orang_tua: nikOrangTua.value.trim() || null,
     nomor_kk: nomorKk.value.trim() || null,
-    anak_ke: anakKe.value.trim() || null,
     dusun: dusun.value.trim() || null,
     alamat: alamat.value.trim() || null,
     posyandu: posyandu.value.trim() || null,
@@ -197,14 +193,21 @@ const klsInput =
               </div>
             </div>
 
-            <div class="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label for="anak-ke" class="text-muted-foreground mb-1.5 block text-xs font-bold">Anak ke</label>
-                <input id="anak-ke" v-model="anakKe" type="text" class="w-full" :class="klsInput" />
-              </div>
-              <div>
-                <label for="dusun" class="text-muted-foreground mb-1.5 block text-xs font-bold">Dusun</label>
-                <input id="dusun" v-model="dusun" type="text" class="w-full" :class="klsInput" />
+            <div>
+              <p class="mb-1.5 text-xs font-bold text-muted-foreground">Dusun</p>
+              <div class="inline-flex w-full rounded-lg border border-emerald-200 bg-emerald-50 p-1" role="group" aria-label="Dusun">
+                <button
+                  v-for="d in ['Kayumas', 'Tengah', 'Cempaka']"
+                  :key="d"
+                  type="button"
+                  :class="dusun === d
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'"
+                  class="flex-1 rounded-md px-3 py-2 text-sm font-bold transition-colors"
+                  @click="dusun = d"
+                >
+                  {{ d }}
+                </button>
               </div>
             </div>
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Lock, Sparkles } from '@lucide/vue'
+import { Sparkles } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import Reveal from '@/components/Reveal.vue'
@@ -24,11 +24,10 @@ onMounted(async () => {
 const tujuanMasuk = computed(() => (isAutentikasi.value ? '/dashboard' : '/login'))
 
 // ---- Navigasi modul posyandu (hero) ----
-// Modul aktif diarahkan ke rutenya; Dewasa & Lansia masih dikembangkan
-// dan tampil dengan ikon gembok (tanpa notifikasi klik).
+// Semua modul diarahkan ke rutenya masing-masing.
 interface ModulNav {
   nama: string
-  href?: string
+  href: string
   aktif: boolean
 }
 
@@ -37,7 +36,7 @@ const MODUL_NAV: ModulNav[] = [
   { nama: 'Bayi & Balita', href: '/balita', aktif: true },
   { nama: 'Apras', href: '/apras', aktif: true },
   { nama: 'Remaja', href: '/remaja', aktif: true },
-  { nama: 'Dewasa & Lansia', aktif: false },
+  { nama: 'Dewasa & Lansia', href: '/lansia', aktif: true },
 ]
 </script>
 
@@ -166,7 +165,6 @@ const MODUL_NAV: ModulNav[] = [
                 class="gap-2 px-8 shadow-lg"
                 :class="KAMPANYE_HUT ? 'shadow-red-600/25' : 'shadow-primary/25'"
               >
-                <Lock class="size-4" />
                 Masuk
               </Button>
             </RouterLink>
@@ -176,21 +174,11 @@ const MODUL_NAV: ModulNav[] = [
           <div class="mt-5 flex justify-center">
             <div class="flex flex-wrap items-center justify-center gap-2.5">
               <template v-for="(m, i) in MODUL_NAV" :key="m.nama">
-                <RouterLink v-if="m.aktif && m.href" :to="m.href">
+                <RouterLink :to="m.href">
                   <Button variant="outline" size="sm" class="font-medium">
                     {{ i + 1 }}. {{ m.nama }}
                   </Button>
                 </RouterLink>
-                <Button
-                  v-else
-                  variant="outline"
-                  size="sm"
-                  type="button"
-                  class="text-muted-foreground gap-1.5 opacity-70"
-                >
-                  <Lock class="size-3.5" />
-                  {{ i + 1 }}. {{ m.nama }}
-                </Button>
               </template>
             </div>
           </div>

@@ -201,8 +201,21 @@ const klsInput =
 
             <div class="grid gap-4 sm:grid-cols-2">
               <div>
-                <label for="dusun" class="text-muted-foreground mb-1.5 block text-xs font-bold">Dusun</label>
-                <input id="dusun" v-model="dusun" type="text" class="w-full" :class="klsInput" />
+                <p class="mb-1.5 text-xs font-bold text-muted-foreground">Dusun</p>
+                <div class="inline-flex w-full rounded-lg border border-emerald-200 bg-emerald-50 p-1" role="group" aria-label="Dusun">
+                  <button
+                    v-for="d in ['Kayumas', 'Tengah', 'Cempaka']"
+                    :key="d"
+                    type="button"
+                    :class="dusun === d
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'"
+                    class="flex-1 rounded-md px-3 py-2 text-sm font-bold transition-colors"
+                    @click="dusun = d"
+                  >
+                    {{ d }}
+                  </button>
+                </div>
               </div>
               <div>
                 <label for="posyandu" class="text-muted-foreground mb-1.5 block text-xs font-bold">Posyandu</label>
