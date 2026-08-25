@@ -24,6 +24,9 @@ const TAUTAN = [
 const MODUL = [
   { label: 'Balita', to: '/balita' },
   { label: 'Bumil', to: '/bumil' },
+  { label: 'Apras', to: '/apras' },
+  { label: 'Remaja', to: '/remaja' },
+  { label: 'Dewasa & Lansia', to: '/lansia' },
 ]
 
 // --- Tab Tentang aktif: hash #tentang ATAU section #tentang sedang terlihat ---
@@ -69,17 +72,16 @@ const wadahModul = ref<HTMLElement | null>(null)
 const tombolModul = ref<HTMLButtonElement | null>(null)
 const menuModul = ref<HTMLElement | null>(null)
 
-// Label trigger menyesuaikan modul yang sedang dibuka: Balita / Bumil / default.
+// Label trigger menyesuaikan modul yang sedang dibuka (generik dari daftar MODUL).
 const labelModul = computed(() => {
   const path = route?.path ?? ''
-  if (path.startsWith('/balita')) return 'Balita'
-  if (path.startsWith('/bumil')) return 'Bumil'
-  return 'Modul Data'
+  const cocok = MODUL.find((m) => path.startsWith(m.to))
+  return cocok?.label ?? 'Modul Data'
 })
 
 function modulAktif() {
   const path = route?.path ?? ''
-  return path.startsWith('/balita') || path.startsWith('/bumil')
+  return MODUL.some((m) => path.startsWith(m.to))
 }
 
 function itemModulAktif(to: string) {

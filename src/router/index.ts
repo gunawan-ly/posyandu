@@ -3,6 +3,7 @@ import { supabase } from '@/supabase/client'
 import { aprasRoutes } from '@/modules/apras/routes'
 import { balitaRoutes } from '@/modules/balita/routes'
 import { bumilRoutes } from '@/modules/bumil/routes'
+import { lansiaRoutes } from '@/modules/lansia/routes'
 import { remajaRoutes } from '@/modules/remaja/routes'
 
 const reduksiGerak =
@@ -42,6 +43,7 @@ const router = createRouter({
     ...aprasRoutes,
     ...bumilRoutes,
     ...remajaRoutes,
+    ...lansiaRoutes,
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
 })

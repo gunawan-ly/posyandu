@@ -42,9 +42,11 @@ onMounted(async () => {
 interface StatistikPublik {
   balita_bayi: number
   balita_balita: number
+  apras_total: number
   bumil_hamil: number
   bumil_menyusui: number
   kunjungan_balita_bulan_ini: number
+  kunjungan_apras_bulan_ini: number
   kunjungan_bumil_bulan_ini: number
   kunjungan_bulan_ini: number
   bulan_ini: string
@@ -101,6 +103,13 @@ const KARTU_STATISTIK = computed(() => {
       keterangan: 'sasaran 12–60 bulan',
     },
     {
+      ikon: UserRound,
+      label: 'Apras',
+      nilai: s?.apras_total ?? null,
+      akhiran: 'anak',
+      keterangan: 'sasaran 5–6 tahun',
+    },
+    {
       ikon: HeartPulse,
       label: 'Ibu Hamil',
       nilai: s?.bumil_hamil ?? null,
@@ -120,6 +129,13 @@ const KARTU_STATISTIK = computed(() => {
       nilai: s ? persen(s.kunjungan_balita_bulan_ini, totalBalita) : null,
       akhiran: '%',
       keterangan: s ? `bulan ini dari ${totalBalita} sasaran` : '–',
+    },
+    {
+      ikon: UserRound,
+      label: 'Kunjungan Apras',
+      nilai: s ? persen(s.kunjungan_apras_bulan_ini, s.apras_total) : null,
+      akhiran: '%',
+      keterangan: s ? `bulan ini dari ${s.apras_total} sasaran` : '–',
     },
     {
       ikon: TrendingUp,
