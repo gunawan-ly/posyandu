@@ -7,6 +7,7 @@ import AppNavbar from '@/components/AppNavbar.vue'
 import Skeleton from '@/components/Skeleton.vue'
 import ViewToggle from '@/components/ViewToggle.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import FormModalApras from './FormModalApras.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { listApras, hapusApras, type Apras } from '@/modules/apras/db'
@@ -85,6 +86,20 @@ const hapusTarget = ref<Apras | null>(null)
 const dialogHapus = ref(false)
 const menghapus = ref(false)
 
+// Modal form tambah/edit: idEdit null = tambah.
+const dialogForm = ref(false)
+const idEditForm = ref<number | null>(null)
+
+function bukaFormBaru() {
+  idEditForm.value = null
+  dialogForm.value = true
+}
+
+function bukaEdit(a: { id: number }) {
+  idEditForm.value = a.id
+  dialogForm.value = true
+}
+
 function mintaHapus(a: Apras) {
   hapusTarget.value = a
   dialogHapus.value = true
@@ -119,12 +134,10 @@ async function hapus() {
             kunjungan.
           </p>
         </div>
-        <RouterLink v-if="isAdmin" to="/apras/baru">
-          <Button size="lg">
-            <Plus class="size-4" />
-            Tambah Apras
-          </Button>
-        </RouterLink>
+        <Button v-if="isAdmin" size="lg" @click="bukaFormBaru">
+          <Plus class="size-4" />
+          Tambah Apras
+        </Button>
       </div>
 
       <div class="mt-8 flex flex-wrap items-center justify-between gap-3">
@@ -310,6 +323,7 @@ async function hapus() {
                       <RouterLink :to="`/apras/${a.id}`">
                         <Button variant="ghost" size="sm">Detail</Button>
                       </RouterLink>
+                      <Button v-if="isAdmin" variant="ghost" size="sm" @click="bukaEdit(a)">Ubah</Button>
                       <button
                         v-if="isAdmin"
                         type="button"
@@ -338,6 +352,12 @@ async function hapus() {
       :deskripsi="`Data ${hapusTarget?.nama || ''} beserta seluruh riwayat kunjungannya akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.`"
       :menyimpan="menghapus"
       @konfirmasi="hapus"
+    />
+
+    <FormModalApras
+      v-model:open="dialogForm"
+      :id-edit="idEditForm"
+      @tersimpan="muat"
     />
   </div>
 </template>

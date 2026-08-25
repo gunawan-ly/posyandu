@@ -7,6 +7,7 @@ import AppNavbar from '@/components/AppNavbar.vue'
 import Skeleton from '@/components/Skeleton.vue'
 import ViewToggle from '@/components/ViewToggle.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import FormModalBumil from './FormModalBumil.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { hapusBumil, listBumil, type Bumil } from '@/modules/bumil/db'
@@ -75,6 +76,20 @@ const hapusTarget = ref<Bumil | null>(null)
 const dialogHapus = ref(false)
 const menghapus = ref(false)
 
+// Modal form tambah/edit: idEdit null = tambah.
+const dialogForm = ref(false)
+const idEditForm = ref<number | null>(null)
+
+function bukaFormBaru() {
+  idEditForm.value = null
+  dialogForm.value = true
+}
+
+function bukaEdit(b: { id: number }) {
+  idEditForm.value = b.id
+  dialogForm.value = true
+}
+
 function mintaHapus(b: Bumil) {
   hapusTarget.value = b
   dialogHapus.value = true
@@ -108,12 +123,10 @@ async function hapus() {
             Kelola identitas ibu hamil dan catat kunjungan antenatal setiap bulan.
           </p>
         </div>
-        <RouterLink v-if="isAdmin" to="/bumil/baru">
-          <Button size="lg">
-            <Plus class="size-4" />
-            Tambah Ibu Hamil
-          </Button>
-        </RouterLink>
+        <Button v-if="isAdmin" size="lg" @click="bukaFormBaru">
+          <Plus class="size-4" />
+          Tambah Ibu Hamil
+        </Button>
       </div>
 
       <div class="mt-8 flex flex-wrap items-center justify-between gap-3">
@@ -301,6 +314,7 @@ async function hapus() {
                       <RouterLink :to="`/bumil/${b.id}`">
                         <Button variant="ghost" size="sm">Detail</Button>
                       </RouterLink>
+                      <Button v-if="isAdmin" variant="ghost" size="sm" @click="bukaEdit(b)">Ubah</Button>
                       <button
                         v-if="isAdmin"
                         type="button"
@@ -329,6 +343,12 @@ async function hapus() {
       :deskripsi="`Data ${hapusTarget?.nama || ''} beserta seluruh riwayat kunjungannya akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.`"
       :menyimpan="menghapus"
       @konfirmasi="hapus"
+    />
+
+    <FormModalBumil
+      v-model:open="dialogForm"
+      :id-edit="idEditForm"
+      @tersimpan="muat"
     />
   </div>
 </template>
