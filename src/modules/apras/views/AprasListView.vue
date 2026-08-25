@@ -6,8 +6,6 @@ import AppFooter from '@/components/AppFooter.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
 import Skeleton from '@/components/Skeleton.vue'
 import ViewToggle from '@/components/ViewToggle.vue'
-import ConfirmDialog from '@/components/ConfirmDialog.vue'
-import FormModalApras from './FormModalApras.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { listApras, hapusApras, type Apras } from '@/modules/apras/db'
@@ -81,41 +79,13 @@ function formatTanggal(tgl: string | null): string {
   return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-// Konfirmasi hapus via ConfirmDialog (pengganti window.confirm).
-const hapusTarget = ref<Apras | null>(null)
-const dialogHapus = ref(false)
-const menghapus = ref(false)
-
-// Modal form tambah/edit: idEdit null = tambah.
-const dialogForm = ref(false)
-const idEditForm = ref<number | null>(null)
-
-function bukaFormBaru() {
-  idEditForm.value = null
-  dialogForm.value = true
-}
-
-function bukaEdit(a: { id: number }) {
-  idEditForm.value = a.id
-  dialogForm.value = true
-}
-
-function mintaHapus(a: Apras) {
-  hapusTarget.value = a
-  dialogHapus.value = true
-}
-
-async function hapus() {
-  if (!hapusTarget.value) return
-  menghapus.value = true
+async function hapus(anak: Apras) {
+  if (!window.confirm(`Hapus data ${anak.nama} beserta seluruh kunjungannya?`)) return
   try {
-    await hapusApras(hapusTarget.value.id)
-    dialogHapus.value = false
+    await hapusApras(anak.id)
     await muat()
   } catch (e) {
     pesanError.value = e instanceof Error ? e.message : 'Gagal menghapus data.'
-  } finally {
-    menghapus.value = false
   }
 }
 </script>
@@ -134,10 +104,12 @@ async function hapus() {
             kunjungan.
           </p>
         </div>
-        <Button v-if="isAdmin" size="lg" @click="bukaFormBaru">
-          <Plus class="size-4" />
-          Tambah Apras
-        </Button>
+        <RouterLink v-if="isAdmin" to="/apras/baru">
+          <Button size="lg">
+            <Plus class="size-4" />
+            Tambah Apras
+          </Button>
+        </RouterLink>
       </div>
 
       <div class="mt-8 flex flex-wrap items-center justify-between gap-3">
@@ -252,7 +224,7 @@ async function hapus() {
                 class="text-muted-foreground hover:bg-red-50 hover:text-red-600 -mr-1.5 mt-1 shrink-0 rounded-lg p-2 transition-colors"
                 aria-label="Hapus apras"
                 title="Hapus apras"
-                @click="mintaHapus(a)"
+                @click="hapus(a)"
               >
                 <Trash2 class="size-4" />
               </button>
@@ -323,14 +295,13 @@ async function hapus() {
                       <RouterLink :to="`/apras/${a.id}`">
                         <Button variant="ghost" size="sm">Detail</Button>
                       </RouterLink>
-                      <Button v-if="isAdmin" variant="ghost" size="sm" @click="bukaEdit(a)">Ubah</Button>
                       <button
                         v-if="isAdmin"
                         type="button"
                         class="text-muted-foreground hover:bg-red-50 hover:text-red-600 rounded-lg p-2 transition-colors"
                         aria-label="Hapus apras"
                         title="Hapus apras"
-                        @click="mintaHapus(a)"
+                        @click="hapus(a)"
                       >
                         <Trash2 class="size-4" />
                       </button>
@@ -345,19 +316,5 @@ async function hapus() {
     </section>
 
     <AppFooter />
-
-    <ConfirmDialog
-      v-model:open="dialogHapus"
-      judul="Hapus data anak?"
-      :deskripsi="`Data ${hapusTarget?.nama || ''} beserta seluruh riwayat kunjungannya akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.`"
-      :menyimpan="menghapus"
-      @konfirmasi="hapus"
-    />
-
-    <FormModalApras
-      v-model:open="dialogForm"
-      :id-edit="idEditForm"
-      @tersimpan="muat"
-    />
   </div>
 </template>

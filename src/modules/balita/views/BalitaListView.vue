@@ -6,8 +6,6 @@ import AppFooter from '@/components/AppFooter.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
 import Skeleton from '@/components/Skeleton.vue'
 import ViewToggle from '@/components/ViewToggle.vue'
-import ConfirmDialog from '@/components/ConfirmDialog.vue'
-import FormModalBalita from './FormModalBalita.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { listBalita, hapusBalita, type Balita } from '@/modules/balita/db'
@@ -81,41 +79,13 @@ function formatTanggal(tgl: string | null): string {
   return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-// Konfirmasi hapus via ConfirmDialog (pengganti window.confirm).
-const hapusTarget = ref<Balita | null>(null)
-const dialogHapus = ref(false)
-const menghapus = ref(false)
-
-// Modal form tambah/edit: idEdit null = tambah.
-const dialogForm = ref(false)
-const idEditForm = ref<number | null>(null)
-
-function bukaFormBaru() {
-  idEditForm.value = null
-  dialogForm.value = true
-}
-
-function bukaEdit(b: Balita) {
-  idEditForm.value = b.id
-  dialogForm.value = true
-}
-
-function mintaHapus(balita: Balita) {
-  hapusTarget.value = balita
-  dialogHapus.value = true
-}
-
-async function hapus() {
-  if (!hapusTarget.value) return
-  menghapus.value = true
+async function hapus(balita: Balita) {
+  if (!window.confirm(`Hapus data ${balita.nama} beserta seluruh kunjungannya?`)) return
   try {
-    await hapusBalita(hapusTarget.value.id)
-    dialogHapus.value = false
+    await hapusBalita(balita.id)
     await muat()
   } catch (e) {
     pesanError.value = e instanceof Error ? e.message : 'Gagal menghapus data.'
-  } finally {
-    menghapus.value = false
   }
 }
 </script>
@@ -140,10 +110,12 @@ async function hapus() {
               Rekap
             </Button>
           </RouterLink>
-          <Button v-if="isAdmin" size="lg" @click="bukaFormBaru">
-            <Plus class="size-4" />
-            Tambah Balita
-          </Button>
+          <RouterLink v-if="isAdmin" to="/balita/baru">
+            <Button size="lg">
+              <Plus class="size-4" />
+              Tambah Balita
+            </Button>
+          </RouterLink>
         </div>
       </div>
 
@@ -259,7 +231,7 @@ async function hapus() {
                 class="text-muted-foreground hover:bg-red-50 hover:text-red-600 -mr-1.5 mt-1 shrink-0 rounded-lg p-2 transition-colors"
                 aria-label="Hapus balita"
                 title="Hapus balita"
-                @click="mintaHapus(b)"
+                @click="hapus(b)"
               >
                 <Trash2 class="size-4" />
               </button>
@@ -331,14 +303,13 @@ async function hapus() {
                       <RouterLink :to="`/balita/${b.id}`">
                         <Button variant="ghost" size="sm">Detail</Button>
                       </RouterLink>
-                      <Button v-if="isAdmin" variant="ghost" size="sm" @click="bukaEdit(b)">Ubah</Button>
                       <button
                         v-if="isAdmin"
                         type="button"
                         class="text-muted-foreground hover:bg-red-50 hover:text-red-600 rounded-lg p-2 transition-colors"
                         aria-label="Hapus balita"
                         title="Hapus balita"
-                        @click="mintaHapus(b)"
+                        @click="hapus(b)"
                       >
                         <Trash2 class="size-4" />
                       </button>
@@ -353,19 +324,5 @@ async function hapus() {
     </section>
 
     <AppFooter />
-
-    <ConfirmDialog
-      v-model:open="dialogHapus"
-      judul="Hapus data balita?"
-      :deskripsi="`Data ${hapusTarget?.nama || ''} beserta seluruh riwayat kunjungannya akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.`"
-      :menyimpan="menghapus"
-      @konfirmasi="hapus"
-    />
-
-    <FormModalBalita
-      v-model:open="dialogForm"
-      :id-edit="idEditForm"
-      @tersimpan="muat"
-    />
   </div>
 </template>

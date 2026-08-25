@@ -5,9 +5,6 @@ import { useRoute, useRouter } from 'vue-router'
 import AppFooter from '@/components/AppFooter.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
 import Skeleton from '@/components/Skeleton.vue'
-import ConfirmDialog from '@/components/ConfirmDialog.vue'
-import DetailKunjunganModal from '@/components/DetailKunjunganModal.vue'
-import { labelYaTidak } from '@/modules/balita/db'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import FormKunjunganBalita from './detail/FormKunjunganBalita.vue'
@@ -86,79 +83,29 @@ function formatTanggal(tgl: string | null): string {
   return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-// Konfirmasi hapus via ConfirmDialog (pengganti window.confirm).
-const dialogHapusKunj = ref(false)
-const kunjTarget = ref<Kunjungan | null>(null)
-
-// Modal detail kunjungan (read-only).
-const modalKunj = ref(false)
-
-function bukaDetailKunj(k: Kunjungan) {
-  kunjTarget.value = k
-  modalKunj.value = true
-}
-
-const barisModal = computed<Array<[string, string]>>(() => {
-  const k = kunjTarget.value
-  return [
-    ['Umur (bln)', String(k?.umur_bulan ?? '—')],
-    ['BB (kg)', String(k?.berat_badan ?? '—')],
-    ['TB/PB (cm)', String(k?.tinggi_badan ?? '—')],
-    ['LiKA (cm)', String(k?.lingkar_kepala ?? '—')],
-    ['LiLA (cm)', String(k?.lingkar_lengan ?? '—')],
-    ['BB naik', String(labelYaTidak(k?.bb_naik_tidak))],
-    ['Imunisasi', String(labelYaTidak(k?.imunisasi))],
-    ['Vitamin A', String(labelYaTidak(k?.vitamin_a))],
-    ['ASI eksklusif', String(labelYaTidak(k?.asi_eksklusif))],
-    ['MP-ASI', String(labelYaTidak(k?.mp_asi))],
-    ['Obat cacing', String(labelYaTidak(k?.obat_cacing))],
-    ['Ceklis perkembangan', String(labelYaTidak(k?.ceklis_perkembangan))],
-    ['Gejala TBC', String(labelYaTidak(k?.gejala_tbc))],
-    ['Edukasi', String(k?.edukasi || '—')],
-  ]
-})
-const menghapus = ref(false)
-
-function mintaHapusKunj(_balitaId: number, k: Kunjungan) {
-  kunjTarget.value = k
-  dialogHapusKunj.value = true
-}
-
-async function hapusKunj() {
-  if (!balita.value || !kunjTarget.value) return
-  menghapus.value = true
+async function hapusKunj(balitaId: number, k: Kunjungan) {
+  if (!window.confirm(`Hapus kunjungan ${formatTanggal(k.tanggal_kunjungan)}?`)) return
   try {
-    await hapusKunjungan(kunjTarget.value.id)
-    kunjungan.value = await listKunjungan(balita.value.id)
-    dialogHapusKunj.value = false
+    await hapusKunjungan(k.id)
+    kunjungan.value = await listKunjungan(balitaId)
   } catch (e) {
     pesanError.value = e instanceof Error ? e.message : 'Gagal menghapus kunjungan.'
-  } finally {
-    menghapus.value = false
   }
 }
 
 async function hapusDariTabel(k: Kunjungan) {
   if (!balita.value) return
-  mintaHapusKunj(balita.value.id, k)
-}
-
-const dialogHapusProfil = ref(false)
-
-function mintaHapusBal() {
-  dialogHapusProfil.value = true
+  await hapusKunj(balita.value.id, k)
 }
 
 async function hapusBal() {
   if (!balita.value) return
-  menghapus.value = true
+  if (!window.confirm(`Hapus ${balita.value.nama} beserta seluruh kunjungannya?`)) return
   try {
     await hapusBalita(balita.value.id)
     await router.replace('/balita')
   } catch (e) {
     pesanError.value = e instanceof Error ? e.message : 'Gagal menghapus data.'
-  } finally {
-    menghapus.value = false
   }
 }
 </script>
@@ -235,7 +182,7 @@ async function hapusBal() {
                 Ubah
               </Button>
             </RouterLink>
-            <Button variant="outline" class="text-red-600" @click="mintaHapusBal">
+            <Button variant="outline" class="text-red-600" @click="hapusBal">
               <Trash2 class="size-4" />
               Hapus
             </Button>
@@ -252,7 +199,7 @@ async function hapusBal() {
           <div class="min-w-0 space-y-6 lg:col-span-2">
             <KurvaTabsBalita :balita="balita" :kunjungan="kunjungan" />
 
-            <TabelRiwayatBalita :kunjungan="kunjungan" :is-admin="isAdmin" @lihat="bukaDetailKunj" @hapus="hapusDariTabel" />
+            <TabelRiwayatBalita :kunjungan="kunjungan" :is-admin="isAdmin" @hapus="hapusDariTabel" />
           </div>
 
           <!-- Kanan: identitas + form kunjungan -->
@@ -344,27 +291,5 @@ async function hapusBal() {
     </section>
 
     <AppFooter />
-
-    <DetailKunjunganModal
-      v-model:open="modalKunj"
-      :judul="`Kunjungan ${formatTanggal(kunjTarget?.tanggal_kunjungan ?? null)}`"
-      :baris="barisModal"
-    />
-
-    <ConfirmDialog
-      v-model:open="dialogHapusKunj"
-      judul="Hapus kunjungan?"
-      :deskripsi="`Kunjungan tanggal ${formatTanggal(kunjTarget?.tanggal_kunjungan ?? null)} akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.`"
-      :menyimpan="menghapus"
-      @konfirmasi="hapusKunj"
-    />
-
-    <ConfirmDialog
-      v-model:open="dialogHapusProfil"
-      judul="Hapus data balita?"
-      :deskripsi="`Data ${balita?.nama || ''} beserta seluruh riwayat kunjungannya akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.`"
-      :menyimpan="menghapus"
-      @konfirmasi="hapusBal"
-    />
   </div>
 </template>

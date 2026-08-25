@@ -5,9 +5,6 @@ import { useRoute, useRouter } from 'vue-router'
 import AppFooter from '@/components/AppFooter.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
 import Skeleton from '@/components/Skeleton.vue'
-import ConfirmDialog from '@/components/ConfirmDialog.vue'
-import DetailKunjunganModal from '@/components/DetailKunjunganModal.vue'
-import { labelYaTidak } from '@/modules/bumil/db'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import FormKunjunganBumil from './detail/FormKunjunganBumil.vue'
@@ -82,81 +79,29 @@ async function muatUlangRiwayat() {
   }
 }
 
-// Konfirmasi hapus via ConfirmDialog (pengganti window.confirm).
-const dialogHapusKunj = ref(false)
-const kunjTarget = ref<KunjunganBumil | null>(null)
-
-// Modal detail kunjungan (read-only).
-const modalKunj = ref(false)
-
-function bukaDetailKunj(k: KunjunganBumil) {
-  kunjTarget.value = k
-  modalKunj.value = true
-}
-
-const barisModal = computed<Array<[string, string]>>(() => {
-  const k = kunjTarget.value
-  return [
-    ['Usia kehamilan (minggu)', String(k?.usia_kehamilan_minggu ?? '—')],
-    ['Berat badan (kg)', String(k?.berat_badan ?? '—')],
-    ['BB sesuai kurva KIA', k?.bb_sesuai_kurva_kia || '—'],
-    ['Tekanan darah', k?.tekanan_darah || '—'],
-    ['TD sesuai kurva KIA', k?.td_sesuai_kurva_kia || '—'],
-    ['LiLA (cm)', String(k?.lingkaran_lengan_atas ?? '—')],
-    ['Status LiLA', k?.lila_hijau_merah || '—'],
-    ['Batuk >2 minggu', k?.batuk_terus_menerus || '—'],
-    ['Demam >2 minggu', k?.demam_lebih_dua_minggu || '—'],
-    ['BB tak naik 2 bulan', k?.bb_tidak_naik_dua_bulan || '—'],
-    ['Kontak TBC', k?.kontak_tbc || '—'],
-    ['TTD', labelYaTidak(k?.dapat_tablet_ttd)],
-    ['MT KEK', labelYaTidak(k?.mt_kek_diberikan)],
-    ['Kelas ibu hamil', labelYaTidak(k?.kelas_bumil)],
-    ['Edukasi', k?.dapat_edukasi || '—'],
-    ['Dirujuk', labelYaTidak(k?.dirujuk)],
-  ]
-})
-const menghapus = ref(false)
-
-function mintaHapusKunj(_bumilId: number, k: KunjunganBumil) {
-  kunjTarget.value = k
-  dialogHapusKunj.value = true
-}
-
-async function hapusKunj() {
-  if (!bumil.value || !kunjTarget.value) return
-  menghapus.value = true
+async function hapusKunj(bumilId: number, k: KunjunganBumil) {
+  if (!window.confirm(`Hapus kunjungan ${formatTanggal(k.tanggal_kunjungan)}?`)) return
   try {
-    await hapusKunjunganBumil(kunjTarget.value.id)
-    kunjungan.value = await listKunjunganBumil(bumil.value.id)
-    dialogHapusKunj.value = false
+    await hapusKunjunganBumil(k.id)
+    kunjungan.value = await listKunjunganBumil(bumilId)
   } catch (e) {
     pesanError.value = e instanceof Error ? e.message : 'Gagal menghapus kunjungan.'
-  } finally {
-    menghapus.value = false
   }
 }
 
 async function hapusDariTabel(k: KunjunganBumil) {
   if (!bumil.value) return
-  mintaHapusKunj(bumil.value.id, k)
-}
-
-const dialogHapusProfil = ref(false)
-
-function mintaHapusBumil() {
-  dialogHapusProfil.value = true
+  await hapusKunj(bumil.value.id, k)
 }
 
 async function hapusBumilData() {
   if (!bumil.value) return
-  menghapus.value = true
+  if (!window.confirm(`Hapus ${bumil.value.nama} beserta seluruh kunjungannya?`)) return
   try {
     await hapusBumil(bumil.value.id)
     await router.replace('/bumil')
   } catch (e) {
     pesanError.value = e instanceof Error ? e.message : 'Gagal menghapus data.'
-  } finally {
-    menghapus.value = false
   }
 }
 </script>
@@ -234,7 +179,7 @@ async function hapusBumilData() {
                 Ubah
               </Button>
             </RouterLink>
-            <Button variant="outline" class="text-red-600" @click="mintaHapusBumil">
+            <Button variant="outline" class="text-red-600" @click="hapusBumilData">
               <Trash2 class="size-4" />
               Hapus
             </Button>
@@ -249,7 +194,7 @@ async function hapusBumilData() {
         <div class="mt-8 grid gap-6 lg:grid-cols-3">
           <!-- Kiri: riwayat kunjungan -->
           <div class="min-w-0 space-y-6 lg:col-span-2">
-            <TabelRiwayatBumil :kunjungan="kunjungan" :is-admin="isAdmin" @lihat="bukaDetailKunj" @hapus="hapusDariTabel" />
+            <TabelRiwayatBumil :kunjungan="kunjungan" :is-admin="isAdmin" @hapus="hapusDariTabel" />
 
             <Card v-if="kunjunganTerbaru">
               <CardHeader>
@@ -384,27 +329,5 @@ async function hapusBumilData() {
     </section>
 
     <AppFooter />
-
-    <DetailKunjunganModal
-      v-model:open="modalKunj"
-      :judul="`Kunjungan ${formatTanggal(kunjTarget?.tanggal_kunjungan ?? null)}`"
-      :baris="barisModal"
-    />
-
-    <ConfirmDialog
-      v-model:open="dialogHapusKunj"
-      judul="Hapus kunjungan?"
-      :deskripsi="`Kunjungan tanggal ${formatTanggal(kunjTarget?.tanggal_kunjungan ?? null)} akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.`"
-      :menyimpan="menghapus"
-      @konfirmasi="hapusKunj"
-    />
-
-    <ConfirmDialog
-      v-model:open="dialogHapusProfil"
-      judul="Hapus data ibu hamil?"
-      :deskripsi="`Data ${bumil?.nama || ''} beserta seluruh riwayat kunjungannya akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.`"
-      :menyimpan="menghapus"
-      @konfirmasi="hapusBumilData"
-    />
   </div>
 </template>
