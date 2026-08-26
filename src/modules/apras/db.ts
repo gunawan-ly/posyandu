@@ -141,12 +141,8 @@ export async function listKunjunganApras(aprasId: number): Promise<KunjunganApra
   return (data ?? []) as KunjunganApras[]
 }
 
-export async function tambahKunjunganApras(
-  apras: Apras,
-  input: InputKunjunganApras,
-): Promise<KunjunganApras> {
-  const kl = wajibSupabase()
-
+// Susun isi baris kunjungan apras siap simpan — dipakai bersama tambah & ubah.
+function susunIsiKunjungan(apras: Apras, input: InputKunjunganApras) {
   const lahir = parseTanggal(apras.tanggal_lahir)
   const kunjungan = parseTanggal(input.tanggal_kunjungan)
   if (!kunjungan) throw new Error('Tanggal kunjungan tidak valid.')
@@ -157,23 +153,48 @@ export async function tambahKunjunganApras(
   // Umur dihitung dari tanggal lahir; bila tanggal lahir kosong dikosongkan.
   const umurBulan = lahir ? hitungUmurBulan(lahir, kunjungan) : null
 
+  return {
+    apras_id: apras.id,
+    nama_anak: apras.nama,
+    tanggal_kunjungan: input.tanggal_kunjungan,
+    umur_bulan: umurBulan,
+    berat_badan: input.berat_badan ?? null,
+    tinggi_badan: input.tinggi_badan ?? null,
+    lingkar_kepala: input.lingkar_kepala ?? null,
+    lingkar_lengan: input.lingkar_lengan ?? null,
+    gejala_tbc: input.gejala_tbc ?? null,
+    obat_cacing: input.obat_cacing ?? null,
+    edukasi: input.edukasi ?? null,
+    dirujuk: input.dirujuk ?? null,
+    catatan: input.catatan ?? null,
+  }
+}
+
+export async function tambahKunjunganApras(
+  apras: Apras,
+  input: InputKunjunganApras,
+): Promise<KunjunganApras> {
+  const kl = wajibSupabase()
   const { data, error } = await kl
     .from('apras_kunjungan')
-    .insert({
-      apras_id: apras.id,
-      nama_anak: apras.nama,
-      tanggal_kunjungan: input.tanggal_kunjungan,
-      umur_bulan: umurBulan,
-      berat_badan: input.berat_badan ?? null,
-      tinggi_badan: input.tinggi_badan ?? null,
-      lingkar_kepala: input.lingkar_kepala ?? null,
-      lingkar_lengan: input.lingkar_lengan ?? null,
-      gejala_tbc: input.gejala_tbc ?? null,
-      obat_cacing: input.obat_cacing ?? null,
-      edukasi: input.edukasi ?? null,
-      dirujuk: input.dirujuk ?? null,
-      catatan: input.catatan ?? null,
-    })
+    .insert(susunIsiKunjungan(apras, input))
+    .select()
+    .single()
+  if (error) lemparGalat(error)
+  return data as KunjunganApras
+}
+
+// Ubah kunjungan apras yang sudah ada.
+export async function ubahKunjunganApras(
+  apras: Apras,
+  id: number,
+  input: InputKunjunganApras,
+): Promise<KunjunganApras> {
+  const kl = wajibSupabase()
+  const { data, error } = await kl
+    .from('apras_kunjungan')
+    .update(susunIsiKunjungan(apras, input))
+    .eq('id', id)
     .select()
     .single()
   if (error) lemparGalat(error)

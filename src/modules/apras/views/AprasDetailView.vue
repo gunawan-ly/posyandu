@@ -9,6 +9,13 @@ import AppNavbar from '@/components/AppNavbar.vue'
 import Skeleton from '@/components/Skeleton.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import FormKunjunganApras from './detail/FormKunjunganApras.vue'
 import TabelRiwayatApras from './detail/TabelRiwayatApras.vue'
 import {
@@ -42,6 +49,10 @@ const dlgHapus = ref<InstanceType<typeof ConfirmDialog>>()
 const detailOpen = ref(false)
 const detailJudul = ref('')
 const detailBaris = ref<Array<[string, string | number | null]>>([])
+
+// Modal ubah kunjungan (form yang sama dipakai ulang dalam mode edit)
+const editOpen = ref(false)
+const kunjunganEdit = ref<KunjunganApras | null>(null)
 
 onMounted(muat)
 
@@ -104,6 +115,17 @@ async function hapusKunj(a: Apras, k: KunjunganApras) {
 async function hapusDariTabel(k: KunjunganApras) {
   if (!apras.value) return
   await hapusKunj(apras.value, k)
+}
+
+function ubahDariTabel(k: KunjunganApras) {
+  kunjunganEdit.value = k
+  editOpen.value = true
+}
+
+async function selesaiEdit() {
+  editOpen.value = false
+  kunjunganEdit.value = null
+  await muatUlangRiwayat()
 }
 
 function lihatKunjungan(k: KunjunganApras) {
@@ -219,7 +241,7 @@ async function hapusAnak() {
         <div class="mt-8 grid gap-6 lg:grid-cols-3">
           <!-- Kiri: riwayat -->
           <div class="min-w-0 space-y-6 lg:col-span-2">
-            <TabelRiwayatApras :kunjungan="kunjungan" :is-admin="isAdmin" @hapus="hapusDariTabel" @lihat="lihatKunjungan" />
+            <TabelRiwayatApras :kunjungan="kunjungan" :is-admin="isAdmin" @hapus="hapusDariTabel" @ubah="ubahDariTabel" @lihat="lihatKunjungan" />
           </div>
 
           <!-- Kanan: identitas + form kunjungan -->
@@ -306,5 +328,34 @@ async function hapusAnak() {
 
     <ConfirmDialog ref="dlgHapus" />
     <DetailKunjunganModal v-model:open="detailOpen" :judul="detailJudul" :baris="detailBaris" />
+
+    <Dialog :open="editOpen" @update:open="(v) => { if (!v) selesaiEdit() }">
+      <DialogContent
+        class="glass-fluid gap-0 border-0 p-0 sm:max-w-lg"
+        :show-close-button="false"
+        :style="{
+          animationDuration: '300ms',
+          animationTimingFunction: 'var(--ease-spring)',
+        }"
+      >
+        <DialogHeader class="px-6 pt-6 pb-0">
+          <DialogTitle class="font-display flex items-center gap-2 text-lg">
+            <Pencil class="text-primary size-5 shrink-0" />
+            Ubah kunjungan {{ formatTanggal(kunjunganEdit?.tanggal_kunjungan ?? null) }}
+          </DialogTitle>
+          <DialogDescription class="sr-only">Ubah data kunjungan</DialogDescription>
+        </DialogHeader>
+        <div class="max-h-[80vh] overflow-y-auto px-6 py-4">
+          <FormKunjunganApras
+            v-if="apras && kunjunganEdit"
+            :key="kunjunganEdit.id"
+            :apras="apras"
+            :is-admin="isAdmin"
+            :edit="kunjunganEdit"
+            @tersimpan="selesaiEdit"
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
   </div>
 </template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Plus, TriangleAlert } from '@lucide/vue'
+import { Pencil, Plus, TriangleAlert } from '@lucide/vue'
 import { computed, ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -9,38 +9,47 @@ import {
   OPSI_TD_KURVA,
   OPSI_YA_TIDAK,
   tambahKunjunganBumil,
+  ubahKunjunganBumil,
   type Bumil,
+  type KunjunganBumil,
 } from '@/modules/bumil/db'
 
 const props = defineProps<{
   bumil: Bumil
   isAdmin: boolean
+  /** Mode ubah: kunjungan yang sedang diedit (terisi awal dari data ini). */
+  edit?: KunjunganBumil | null
 }>()
 
 const emit = defineEmits<{ tersimpan: [] }>()
 
-const tglKunjungan = ref(new Date().toISOString().slice(0, 10))
-const usiaKehamilan = ref<string>('')
-const beratBadan = ref<string>('')
-const bbKurvaKia = ref('')
-const lila = ref<string>('')
-const lilaWarna = ref('')
-const tekananDarah = ref('')
-const tdKurvaKia = ref('')
-const batuk = ref('')
-const demam = ref('')
-const bbTidakNaik = ref('')
-const kontakTbc = ref('')
-const dapatTtd = ref('')
-const konsumsiTtd = ref('')
-const mtKek = ref('')
-const konsumsiMtKek = ref('')
-const kelasBumil = ref('')
-const dapatEdukasi = ref('')
-const dirujuk = ref('')
+// Mode ubah: snapshot kunjungan saat setup (komponen di-key per id oleh induk).
+const sunting = props.edit ?? null
+
+const tglKunjungan = ref(sunting?.tanggal_kunjungan || new Date().toISOString().slice(0, 10))
+const usiaKehamilan = ref<string>(sunting?.usia_kehamilan_minggu != null ? String(sunting.usia_kehamilan_minggu) : '')
+const beratBadan = ref<string>(sunting?.berat_badan != null ? String(sunting.berat_badan) : '')
+const bbKurvaKia = ref(sunting?.bb_sesuai_kurva_kia ?? '')
+const lila = ref<string>(sunting?.lingkaran_lengan_atas != null ? String(sunting.lingkaran_lengan_atas) : '')
+const lilaWarna = ref(sunting?.lila_hijau_merah ?? '')
+const tekananDarah = ref(sunting?.tekanan_darah ?? '')
+const tdKurvaKia = ref(sunting?.td_sesuai_kurva_kia ?? '')
+const batuk = ref(sunting?.batuk_terus_menerus ?? '')
+const demam = ref(sunting?.demam_lebih_dua_minggu ?? '')
+const bbTidakNaik = ref(sunting?.bb_tidak_naik_dua_bulan ?? '')
+const kontakTbc = ref(sunting?.kontak_tbc ?? '')
+const dapatTtd = ref(sunting?.dapat_tablet_ttd ?? '')
+const konsumsiTtd = ref(sunting?.konsumsi_ttd ?? '')
+const mtKek = ref(sunting?.mt_kek_diberikan ?? '')
+const konsumsiMtKek = ref(sunting?.konsumsi_mt_kek ?? '')
+const kelasBumil = ref(sunting?.kelas_bumil ?? '')
+const dapatEdukasi = ref(sunting?.dapat_edukasi ?? '')
+const dirujuk = ref(sunting?.dirujuk ?? '')
 const menyimpan = ref(false)
 const pesanSukses = ref('')
 const pesanForm = ref('')
+
+const modeUbah = computed(() => props.edit != null)
 
 // Field hanya relevan untuk ibu hamil; untuk menyusui disembunyikan/dikosongkan.
 const sedangHamil = computed(() => props.bumil.kategori === 'Hamil')
@@ -56,49 +65,57 @@ async function simpanKunjungan() {
     return
   }
 
+  const isi = {
+    tanggal_kunjungan: tglKunjungan.value,
+    usia_kehamilan_minggu: sedangHamil.value && usiaKehamilan.value ? Number(usiaKehamilan.value) : null,
+    berat_badan: bb,
+    bb_sesuai_kurva_kia: sedangHamil.value ? (bbKurvaKia.value || null) : null,
+    lingkaran_lengan_atas: lila.value ? Number(lila.value) : null,
+    lila_hijau_merah: lilaWarna.value || null,
+    tekanan_darah: sedangHamil.value ? (tekananDarah.value || null) : null,
+    td_sesuai_kurva_kia: sedangHamil.value ? (tdKurvaKia.value || null) : null,
+    batuk_terus_menerus: batuk.value || null,
+    demam_lebih_dua_minggu: demam.value || null,
+    bb_tidak_naik_dua_bulan: bbTidakNaik.value || null,
+    kontak_tbc: kontakTbc.value || null,
+    dapat_tablet_ttd: dapatTtd.value || null,
+    konsumsi_ttd: konsumsiTtd.value || null,
+    mt_kek_diberikan: mtKek.value || null,
+    konsumsi_mt_kek: konsumsiMtKek.value || null,
+    kelas_bumil: sedangHamil.value ? (kelasBumil.value || null) : null,
+    dapat_edukasi: dapatEdukasi.value || null,
+    dirujuk: dirujuk.value || null,
+  }
+
   menyimpan.value = true
   try {
-    await tambahKunjunganBumil(props.bumil, {
-      tanggal_kunjungan: tglKunjungan.value,
-      usia_kehamilan_minggu: sedangHamil.value && usiaKehamilan.value ? Number(usiaKehamilan.value) : null,
-      berat_badan: bb,
-      bb_sesuai_kurva_kia: sedangHamil.value ? (bbKurvaKia.value || null) : null,
-      lingkaran_lengan_atas: lila.value ? Number(lila.value) : null,
-      lila_hijau_merah: lilaWarna.value || null,
-      tekanan_darah: sedangHamil.value ? (tekananDarah.value || null) : null,
-      td_sesuai_kurva_kia: sedangHamil.value ? (tdKurvaKia.value || null) : null,
-      batuk_terus_menerus: batuk.value || null,
-      demam_lebih_dua_minggu: demam.value || null,
-      bb_tidak_naik_dua_bulan: bbTidakNaik.value || null,
-      kontak_tbc: kontakTbc.value || null,
-      dapat_tablet_ttd: dapatTtd.value || null,
-      konsumsi_ttd: konsumsiTtd.value || null,
-      mt_kek_diberikan: mtKek.value || null,
-      konsumsi_mt_kek: konsumsiMtKek.value || null,
-      kelas_bumil: sedangHamil.value ? (kelasBumil.value || null) : null,
-      dapat_edukasi: dapatEdukasi.value || null,
-      dirujuk: dirujuk.value || null,
-    })
+    if (props.edit) {
+      await ubahKunjunganBumil(props.bumil, props.edit.id, isi)
+    } else {
+      await tambahKunjunganBumil(props.bumil, isi)
+    }
     emit('tersimpan')
-    usiaKehamilan.value = ''
-    beratBadan.value = ''
-    bbKurvaKia.value = ''
-    lila.value = ''
-    lilaWarna.value = ''
-    tekananDarah.value = ''
-    tdKurvaKia.value = ''
-    batuk.value = ''
-    demam.value = ''
-    bbTidakNaik.value = ''
-    kontakTbc.value = ''
-    dapatTtd.value = ''
-    konsumsiTtd.value = ''
-    mtKek.value = ''
-    konsumsiMtKek.value = ''
-    kelasBumil.value = ''
-    dapatEdukasi.value = ''
-    dirujuk.value = ''
-    pesanSukses.value = 'Kunjungan berhasil dicatat.'
+    if (!props.edit) {
+      usiaKehamilan.value = ''
+      beratBadan.value = ''
+      bbKurvaKia.value = ''
+      lila.value = ''
+      lilaWarna.value = ''
+      tekananDarah.value = ''
+      tdKurvaKia.value = ''
+      batuk.value = ''
+      demam.value = ''
+      bbTidakNaik.value = ''
+      kontakTbc.value = ''
+      dapatTtd.value = ''
+      konsumsiTtd.value = ''
+      mtKek.value = ''
+      konsumsiMtKek.value = ''
+      kelasBumil.value = ''
+      dapatEdukasi.value = ''
+      dirujuk.value = ''
+    }
+    pesanSukses.value = props.edit ? 'Perubahan kunjungan tersimpan.' : 'Kunjungan berhasil dicatat.'
   } catch (e) {
     pesanForm.value = e instanceof Error ? e.message : 'Gagal menyimpan kunjungan.'
   } finally {
@@ -111,8 +128,8 @@ const klsInput =
 </script>
 
 <template>
-  <Card v-if="isAdmin">
-    <CardHeader>
+  <Card v-if="isAdmin" :class="modeUbah ? 'border-none bg-transparent shadow-none' : ''">
+    <CardHeader v-if="!modeUbah">
       <CardTitle class="font-display text-lg font-normal">Catat kunjungan</CardTitle>
     </CardHeader>
     <CardContent class="flex flex-col gap-4">
@@ -260,8 +277,9 @@ const klsInput =
         </p>
 
         <Button size="lg" class="w-full" type="submit" :disabled="menyimpan">
-          <Plus class="size-4" />
-          {{ menyimpan ? 'Menyimpan…' : 'Simpan Kunjungan' }}
+          <Pencil v-if="modeUbah" class="size-4" />
+          <Plus v-else class="size-4" />
+          {{ menyimpan ? 'Menyimpan…' : modeUbah ? 'Simpan Perubahan' : 'Simpan Kunjungan' }}
         </Button>
       </form>
 

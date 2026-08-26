@@ -1,30 +1,37 @@
 <script setup lang="ts">
-import { Plus, TriangleAlert } from '@lucide/vue'
-import { ref } from 'vue'
+import { Pencil, Plus, TriangleAlert } from '@lucide/vue'
+import { computed, ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { tambahKunjunganApras, type Apras } from '@/modules/apras/db'
+import { tambahKunjunganApras, ubahKunjunganApras, type Apras, type KunjunganApras } from '@/modules/apras/db'
 
 const props = defineProps<{
   apras: Apras
   isAdmin: boolean
+  /** Mode ubah: kunjungan yang sedang diedit (terisi awal dari data ini). */
+  edit?: KunjunganApras | null
 }>()
 
 const emit = defineEmits<{ tersimpan: [] }>()
 
-const tglKunjungan = ref(new Date().toISOString().slice(0, 10))
-const beratBadan = ref<string>('')
-const tinggiBadan = ref<string>('')
-const lingkarKepala = ref<string>('')
-const lingkarLengan = ref<string>('')
-const obatCacing = ref('')
-const gejalaTbc = ref('')
-const dirujuk = ref('')
-const edukasi = ref('')
-const catatan = ref('')
+// Mode ubah: snapshot kunjungan saat setup (komponen di-key per id oleh induk).
+const sunting = props.edit ?? null
+
+const tglKunjungan = ref(sunting?.tanggal_kunjungan || new Date().toISOString().slice(0, 10))
+const beratBadan = ref<string>(sunting?.berat_badan != null ? String(sunting.berat_badan) : '')
+const tinggiBadan = ref<string>(sunting?.tinggi_badan != null ? String(sunting.tinggi_badan) : '')
+const lingkarKepala = ref<string>(sunting?.lingkar_kepala != null ? String(sunting.lingkar_kepala) : '')
+const lingkarLengan = ref<string>(sunting?.lingkar_lengan != null ? String(sunting.lingkar_lengan) : '')
+const obatCacing = ref(sunting?.obat_cacing ?? '')
+const gejalaTbc = ref(sunting?.gejala_tbc ?? '')
+const dirujuk = ref(sunting?.dirujuk ?? '')
+const edukasi = ref(sunting?.edukasi ?? '')
+const catatan = ref(sunting?.catatan ?? '')
 const menyimpan = ref(false)
 const pesanSukses = ref('')
 const pesanForm = ref('')
+
+const modeUbah = computed(() => props.edit != null)
 
 async function simpanKunjungan() {
   pesanForm.value = ''
@@ -42,31 +49,39 @@ async function simpanKunjungan() {
     return
   }
 
+  const isi = {
+    tanggal_kunjungan: tglKunjungan.value,
+    berat_badan: bb,
+    tinggi_badan: tb,
+    lingkar_kepala: lingkarKepala.value ? Number(lingkarKepala.value) : null,
+    lingkar_lengan: lingkarLengan.value ? Number(lingkarLengan.value) : null,
+    obat_cacing: obatCacing.value || null,
+    gejala_tbc: gejalaTbc.value || null,
+    dirujuk: dirujuk.value || null,
+    edukasi: edukasi.value || null,
+    catatan: catatan.value || null,
+  }
+
   menyimpan.value = true
   try {
-    await tambahKunjunganApras(props.apras, {
-      tanggal_kunjungan: tglKunjungan.value,
-      berat_badan: bb,
-      tinggi_badan: tb,
-      lingkar_kepala: lingkarKepala.value ? Number(lingkarKepala.value) : null,
-      lingkar_lengan: lingkarLengan.value ? Number(lingkarLengan.value) : null,
-      obat_cacing: obatCacing.value || null,
-      gejala_tbc: gejalaTbc.value || null,
-      dirujuk: dirujuk.value || null,
-      edukasi: edukasi.value || null,
-      catatan: catatan.value || null,
-    })
+    if (props.edit) {
+      await ubahKunjunganApras(props.apras, props.edit.id, isi)
+    } else {
+      await tambahKunjunganApras(props.apras, isi)
+    }
     emit('tersimpan')
-    beratBadan.value = ''
-    tinggiBadan.value = ''
-    lingkarKepala.value = ''
-    lingkarLengan.value = ''
-    obatCacing.value = ''
-    gejalaTbc.value = ''
-    dirujuk.value = ''
-    edukasi.value = ''
-    catatan.value = ''
-    pesanSukses.value = 'Kunjungan berhasil dicatat.'
+    if (!props.edit) {
+      beratBadan.value = ''
+      tinggiBadan.value = ''
+      lingkarKepala.value = ''
+      lingkarLengan.value = ''
+      obatCacing.value = ''
+      gejalaTbc.value = ''
+      dirujuk.value = ''
+      edukasi.value = ''
+      catatan.value = ''
+    }
+    pesanSukses.value = props.edit ? 'Perubahan kunjungan tersimpan.' : 'Kunjungan berhasil dicatat.'
   } catch (e) {
     pesanForm.value = e instanceof Error ? e.message : 'Gagal menyimpan kunjungan.'
   } finally {
@@ -81,8 +96,8 @@ const klsInput =
 </script>
 
 <template>
-  <Card v-if="isAdmin">
-    <CardHeader>
+  <Card v-if="isAdmin" :class="modeUbah ? 'border-none bg-transparent shadow-none' : ''">
+    <CardHeader v-if="!modeUbah">
       <CardTitle class="font-display text-lg font-normal">Catat kunjungan</CardTitle>
     </CardHeader>
     <CardContent class="flex flex-col gap-4">
@@ -171,8 +186,9 @@ const klsInput =
         </p>
 
         <Button size="lg" class="w-full" type="submit" :disabled="menyimpan">
-          <Plus class="size-4" />
-          {{ menyimpan ? 'Menyimpan…' : 'Simpan Kunjungan' }}
+          <Pencil v-if="modeUbah" class="size-4" />
+          <Plus v-else class="size-4" />
+          {{ menyimpan ? 'Menyimpan…' : modeUbah ? 'Simpan Perubahan' : 'Simpan Kunjungan' }}
         </Button>
       </form>
 

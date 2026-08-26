@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Trash2 } from '@lucide/vue'
+import { Pencil, Trash2 } from '@lucide/vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { KunjunganApras } from '@/modules/apras/db'
 import { parseTanggal } from '@/lib/umur'
@@ -11,6 +11,7 @@ defineProps<{
 
 const emit = defineEmits<{
   hapus: [kunjungan: KunjunganApras]
+  ubah: [kunjungan: KunjunganApras]
   lihat: [kunjungan: KunjunganApras]
 }>()
 
@@ -72,6 +73,15 @@ function yaTidak(nilai: string | null): string {
                 {{ [k.edukasi, k.catatan].filter(Boolean).join(' | ') || '—' }}
               </td>
               <td v-if="isAdmin" class="py-3 text-right">
+                <button
+                  type="button"
+                  class="text-muted-foreground hover:bg-emerald-50 hover:text-emerald-700 rounded-lg p-2 transition-colors"
+                  aria-label="Ubah kunjungan"
+                  title="Ubah kunjungan"
+                  @click.stop="emit('ubah', k)"
+                >
+                  <Pencil class="size-4" />
+                </button>
                 <button
                   type="button"
                   class="text-muted-foreground hover:bg-red-50 hover:text-red-600 rounded-lg p-2 transition-colors"

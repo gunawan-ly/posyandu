@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Trash2 } from '@lucide/vue'
+import { Pencil, Trash2 } from '@lucide/vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { labelYaTidak, type Kunjungan } from '@/modules/balita/db'
@@ -13,6 +13,7 @@ defineProps<{
 
 const emit = defineEmits<{
   hapus: [kunjungan: Kunjungan]
+  ubah: [kunjungan: Kunjungan]
   lihat: [kunjungan: Kunjungan]
 }>()
 
@@ -88,6 +89,15 @@ function formatTanggal(tgl: string | null): string {
               <td class="py-3 pr-3 whitespace-nowrap">{{ labelYaTidak(k.gejala_tbc) }}</td>
               <td class="text-muted-foreground py-3 pr-3 max-w-[160px] truncate whitespace-nowrap" :title="k.edukasi || ''">{{ k.edukasi || '—' }}</td>
               <td v-if="isAdmin" class="py-3 text-right">
+                <button
+                  type="button"
+                  class="text-muted-foreground hover:bg-emerald-50 hover:text-emerald-700 rounded-lg p-2 transition-colors"
+                  aria-label="Ubah kunjungan"
+                  title="Ubah kunjungan"
+                  @click.stop="emit('ubah', k)"
+                >
+                  <Pencil class="size-4" />
+                </button>
                 <button
                   type="button"
                   class="text-muted-foreground hover:bg-red-50 hover:text-red-600 rounded-lg p-2 transition-colors"

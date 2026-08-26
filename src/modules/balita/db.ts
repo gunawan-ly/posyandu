@@ -208,9 +208,10 @@ export async function listBalitaById(ids: number[]): Promise<Balita[]> {
   return (data ?? []) as Balita[]
 }
 
-export async function tambahKunjungan(balita: Balita, input: InputKunjungan): Promise<Kunjungan> {
-  const kl = wajibSupabase()
-
+// Susun isi baris kunjungan siap simpan: validasi tanggal, hitung umur
+// kalender + status z-score WHO (BB/U, TB/U, BB/TB) & LiKA/LiLA.
+// Dipakai bersama oleh tambahKunjungan & ubahKunjungan agar alur sama.
+function susunIsiKunjungan(balita: Balita, input: InputKunjungan) {
   const lahir = parseTanggal(balita.tanggal_lahir)
   const kunjungan = parseTanggal(input.tanggal_kunjungan)
   if (!kunjungan) throw new Error('Tanggal kunjungan tidak valid.')
@@ -234,36 +235,54 @@ export async function tambahKunjungan(balita: Balita, input: InputKunjungan): Pr
   const statusLika = zLika != null ? labelStatus(klasifikasiLika(zLika)) : (input.status_lingkar_kepala ?? null)
   const statusLila = zLila != null ? labelStatus(klasifikasiLila(zLila)) : (input.status_lingkar_lengan ?? null)
 
+  return {
+    balita_id: balita.id,
+    nama_anak: balita.nama,
+    tanggal_kunjungan: input.tanggal_kunjungan,
+    bulan: kodeBulan(input.tanggal_kunjungan),
+    berat_badan: input.berat_badan,
+    tinggi_badan: input.tinggi_badan,
+    lingkar_lengan: input.lingkar_lengan ?? null,
+    status_lingkar_lengan: statusLila,
+    lingkar_kepala: input.lingkar_kepala ?? null,
+    status_lingkar_kepala: statusLika,
+    imunisasi: input.imunisasi ?? null,
+    vitamin_a: input.vitamin_a ?? null,
+    asi_eksklusif: input.asi_eksklusif ?? null,
+    mp_asi: input.mp_asi ?? null,
+    obat_cacing: input.obat_cacing ?? null,
+    bb_naik_tidak: input.bb_naik_tidak ?? null,
+    ceklis_perkembangan: input.ceklis_perkembangan ?? null,
+    gejala_tbc: input.gejala_tbc ?? null,
+    edukasi: input.edukasi ?? null,
+    umur_bulan: umurBulan,
+    bb_menurut_umur: hasil ? labelStatus(hasil.status_bb_u) : null,
+    pbtb_menurut_umur: hasil ? labelStatus(hasil.status_tb_u) : null,
+    bb_menurut_pbtb: hasil ? labelStatus(hasil.status_bb_tb) : null,
+    z_bb_u: hasil?.z_bb_u ?? null,
+    z_tb_u: hasil?.z_tb_u ?? null,
+    z_bb_tb: hasil?.z_bb_tb ?? null,
+  }
+}
+
+export async function tambahKunjungan(balita: Balita, input: InputKunjungan): Promise<Kunjungan> {
+  const kl = wajibSupabase()
   const { data, error } = await kl
     .from('balita_kunjungan')
-    .insert({
-      balita_id: balita.id,
-      nama_anak: balita.nama,
-      tanggal_kunjungan: input.tanggal_kunjungan,
-      bulan: kodeBulan(input.tanggal_kunjungan),
-      berat_badan: input.berat_badan,
-      tinggi_badan: input.tinggi_badan,
-      lingkar_lengan: input.lingkar_lengan ?? null,
-      status_lingkar_lengan: statusLila,
-      lingkar_kepala: input.lingkar_kepala ?? null,
-      status_lingkar_kepala: statusLika,
-      imunisasi: input.imunisasi ?? null,
-      vitamin_a: input.vitamin_a ?? null,
-      asi_eksklusif: input.asi_eksklusif ?? null,
-      mp_asi: input.mp_asi ?? null,
-      obat_cacing: input.obat_cacing ?? null,
-      bb_naik_tidak: input.bb_naik_tidak ?? null,
-      ceklis_perkembangan: input.ceklis_perkembangan ?? null,
-      gejala_tbc: input.gejala_tbc ?? null,
-      edukasi: input.edukasi ?? null,
-      umur_bulan: umurBulan,
-      bb_menurut_umur: hasil ? labelStatus(hasil.status_bb_u) : null,
-      pbtb_menurut_umur: hasil ? labelStatus(hasil.status_tb_u) : null,
-      bb_menurut_pbtb: hasil ? labelStatus(hasil.status_bb_tb) : null,
-      z_bb_u: hasil?.z_bb_u ?? null,
-      z_tb_u: hasil?.z_tb_u ?? null,
-      z_bb_tb: hasil?.z_bb_tb ?? null,
-    })
+    .insert(susunIsiKunjungan(balita, input))
+    .select()
+    .single()
+  if (error) lemparGalat(error)
+  return data as Kunjungan
+}
+
+// Ubah kunjungan yang sudah ada; status dihitung ulang dengan alur yang sama.
+export async function ubahKunjungan(balita: Balita, id: number, input: InputKunjungan): Promise<Kunjungan> {
+  const kl = wajibSupabase()
+  const { data, error } = await kl
+    .from('balita_kunjungan')
+    .update(susunIsiKunjungan(balita, input))
+    .eq('id', id)
     .select()
     .single()
   if (error) lemparGalat(error)
