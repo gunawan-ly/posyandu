@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Pencil, Plus, TriangleAlert } from '@lucide/vue'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { labelYaTidak, tambahKunjungan, ubahKunjungan, type Balita, type Kunjungan } from '@/modules/balita/db'
 import { hitungZLik, hitungZLil, klasifikasiLika, klasifikasiLila } from '@/lib/kalkulator'
+import { statusNaikDariTanggal, type HasilKbm } from '@/lib/kbm'
 import { labelStatus } from '@/lib/status'
 import { hitungUmurBulan, parseTanggal } from '@/lib/umur'
 
@@ -13,6 +14,8 @@ const props = defineProps<{
   isAdmin: boolean
   /** Mode ubah: kunjungan yang sedang diedit (terisi awal dari data ini). */
   edit?: Kunjungan | null
+  /** Riwayat kunjungan anak — dasar penilaian otomatis KBM (BB naik/tidak). */
+  riwayat?: Kunjungan[]
 }>()
 
 const emit = defineEmits<{ tersimpan: [] }>()
@@ -74,6 +77,62 @@ const zLikaLive = computed<number | null>(() => {
 const statusLikaLive = computed<string>(() =>
   zLikaLive.value != null ? labelStatus(klasifikasiLika(zLikaLive.value)) : '',
 )
+
+// ---- Penilaian otomatis BB naik/tidak berdasarkan tabel KBM (per usia) ----
+
+// Kunjungan terakhir SEBELUM tanggal form yang memiliki BB (kunjungan yang
+// sedang diedit otomatis tersaring karena tanggalnya tidak lebih awal).
+const kunjunganLalu = computed<Kunjungan | null>(() => {
+  let terpilih: Kunjungan | null = null
+  for (const k of props.riwayat ?? []) {
+    if (!k.berat_badan || !k.tanggal_kunjungan) continue
+    if (k.tanggal_kunjungan >= tglKunjungan.value) continue
+    if (!terpilih || k.tanggal_kunjungan > (terpilih.tanggal_kunjungan ?? '')) terpilih = k
+  }
+  return terpilih
+})
+
+const hasilKbm = computed<HasilKbm | null>(() => {
+  const lalu = kunjunganLalu.value
+  const bb = Number(beratBadan.value)
+  if (!lalu?.berat_badan || !beratBadan.value || !(bb > 0)) return null
+  return statusNaikDariTanggal(
+    props.balita.tanggal_lahir,
+    tglKunjungan.value,
+    lalu.tanggal_kunjungan ?? '',
+    bb,
+    lalu.berat_badan,
+  )
+})
+
+const umurSaatKunjungan = computed<number | null>(() => {
+  const lahir = parseTanggal(props.balita.tanggal_lahir)
+  const kini = parseTanggal(tglKunjungan.value)
+  return lahir && kini ? hitungUmurBulan(lahir, kini) : null
+})
+
+// Pilihan manual kader mengalahkan saran otomatis sampai tanggal/BB berubah.
+const bbNaikManual = ref(false)
+watch([tglKunjungan, beratBadan], () => {
+  bbNaikManual.value = false
+})
+watch(hasilKbm, (h) => {
+  // Mode tambah: isi otomatis. Mode ubah: nilai tersimpan tetap dihormati.
+  if (h && !bbNaikManual.value && !props.edit) {
+    bbNaik.value = h.naik ? 'Naik' : 'Tidak Naik'
+  }
+})
+
+function formatBerat(g: number): string {
+  if (Math.abs(g) >= 1000) return `${(g / 1000).toFixed(2).replace('.', ',')} kg`
+  return `${g} g`
+}
+
+function formatTanggalSingkat(tgl: string | null): string {
+  const d = parseTanggal(tgl ?? '')
+  if (!d) return '—'
+  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+}
 
 async function simpanKunjungan() {
   pesanForm.value = ''
@@ -190,12 +249,28 @@ const klsInput =
           </span>
         </div>
 
+        <div v-if="hasilKbm" class="border-border/60 rounded-lg border px-3 py-2 text-sm" role="status">
+          Kenaikan BB sejak {{ formatTanggalSingkat(kunjunganLalu?.tanggal_kunjungan ?? null) }}:
+          <span class="font-bold" :class="hasilKbm.kenaikanG >= 0 ? 'text-emerald-700' : 'text-red-600'">
+            {{ formatBerat(hasilKbm.kenaikanG) }}
+          </span>
+          <span class="text-muted-foreground">
+            · KBM {{ formatBerat(hasilKbm.kbmG) }}
+            <template v-if="umurSaatKunjungan != null">(usia {{ umurSaatKunjungan }} bln)</template>
+          </span>
+          →
+          <span class="font-bold" :class="hasilKbm.naik ? 'text-emerald-700' : 'text-red-600'">
+            {{ hasilKbm.naik ? 'Naik' : 'Tidak Naik' }}
+          </span>
+          <span v-if="!modeUbah" class="text-muted-foreground block text-xs">Pilihan "BB naik" di bawah terisi otomatis; boleh diubah manual.</span>
+        </div>
+
         <div class="border-border/60 border-t pt-4">
           <p class="text-muted-foreground mb-3 text-xs font-bold tracking-widest uppercase">Gizi & kesehatan</p>
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label for="bb-naik" class="text-muted-foreground mb-1.5 block text-xs font-bold">BB naik</label>
-              <select id="bb-naik" v-model="bbNaik" class="w-full" :class="klsInput">
+              <select id="bb-naik" v-model="bbNaik" class="w-full" :class="klsInput" @change="bbNaikManual = true">
                 <option value="">— pilih —</option>
                 <option v-for="s in OPSI_NAIK" :key="s" :value="s">{{ s }}</option>
               </select>

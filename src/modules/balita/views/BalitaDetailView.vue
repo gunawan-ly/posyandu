@@ -333,7 +333,7 @@ async function hapusBal() {
               </CardContent>
             </Card>
 
-            <FormKunjunganBalita :balita="balita" :is-admin="isAdmin" @tersimpan="muatUlangRiwayat" />
+            <FormKunjunganBalita :balita="balita" :is-admin="isAdmin" :riwayat="kunjungan" @tersimpan="muatUlangRiwayat" />
           </div>
         </div>
 
@@ -381,6 +381,7 @@ async function hapusBal() {
             :balita="balita"
             :is-admin="isAdmin"
             :edit="kunjunganEdit"
+            :riwayat="kunjungan"
             @tersimpan="selesaiEdit"
           />
         </div>
