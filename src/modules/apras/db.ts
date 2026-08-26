@@ -1,4 +1,5 @@
 import { wajibSupabase } from '@/supabase/client'
+import { lemparGalat } from '@/lib/galat'
 import { hitungUmurBulan, parseTanggal } from '@/lib/umur'
 
 // Lapisan akses data modul Apras (anak pra sekolah usia 61–72 bulan / 5–6 tahun).
@@ -84,7 +85,7 @@ export async function listApras(cari = ''): Promise<Apras[]> {
     }
   }
   const { data, error } = await q
-  if (error) throw error
+  if (error) lemparGalat(error)
   return (data ?? []) as Apras[]
 }
 
@@ -95,7 +96,7 @@ export async function ambilApras(id: number): Promise<Apras | null> {
     .select('*')
     .eq('id', id)
     .maybeSingle()
-  if (error) throw error
+  if (error) lemparGalat(error)
   return (data ?? null) as Apras | null
 }
 
@@ -106,7 +107,7 @@ export async function buatApras(input: InputApras): Promise<Apras> {
     .insert(input)
     .select()
     .single()
-  if (error) throw error
+  if (error) lemparGalat(error)
   return data as Apras
 }
 
@@ -118,14 +119,14 @@ export async function ubahApras(id: number, patch: Partial<InputApras>): Promise
     .eq('id', id)
     .select()
     .single()
-  if (error) throw error
+  if (error) lemparGalat(error)
   return data as Apras
 }
 
 export async function hapusApras(id: number): Promise<void> {
   const kl = wajibSupabase()
   const { error } = await kl.from('apras_identitas').delete().eq('id', id)
-  if (error) throw error
+  if (error) lemparGalat(error)
 }
 
 export async function listKunjunganApras(aprasId: number): Promise<KunjunganApras[]> {
@@ -136,7 +137,7 @@ export async function listKunjunganApras(aprasId: number): Promise<KunjunganApra
     .eq('apras_id', aprasId)
     .order('tanggal_kunjungan', { ascending: true })
     .order('id', { ascending: true })
-  if (error) throw error
+  if (error) lemparGalat(error)
   return (data ?? []) as KunjunganApras[]
 }
 
@@ -175,12 +176,12 @@ export async function tambahKunjunganApras(
     })
     .select()
     .single()
-  if (error) throw error
+  if (error) lemparGalat(error)
   return data as KunjunganApras
 }
 
 export async function hapusKunjunganApras(id: number): Promise<void> {
   const kl = wajibSupabase()
   const { error } = await kl.from('apras_kunjungan').delete().eq('id', id)
-  if (error) throw error
+  if (error) lemparGalat(error)
 }

@@ -1,4 +1,5 @@
 import { wajibSupabase } from '@/supabase/client'
+import { lemparGalat } from '@/lib/galat'
 import { parseTanggal } from '@/lib/umur'
 
 // Lapisan akses data modul Bumil. Tidak ada kalkulator z-score WHO untuk
@@ -118,7 +119,7 @@ export async function listBumil(cari = ''): Promise<Bumil[]> {
     }
   }
   const { data, error } = await q
-  if (error) throw error
+  if (error) lemparGalat(error)
   return (data ?? []) as Bumil[]
 }
 
@@ -129,7 +130,7 @@ export async function ambilBumil(id: number): Promise<Bumil | null> {
     .select('*')
     .eq('id', id)
     .maybeSingle()
-  if (error) throw error
+  if (error) lemparGalat(error)
   return (data ?? null) as Bumil | null
 }
 
@@ -140,7 +141,7 @@ export async function buatBumil(input: InputBumil): Promise<Bumil> {
     .insert(input)
     .select()
     .single()
-  if (error) throw error
+  if (error) lemparGalat(error)
   return data as Bumil
 }
 
@@ -152,14 +153,14 @@ export async function ubahBumil(id: number, patch: Partial<InputBumil>): Promise
     .eq('id', id)
     .select()
     .single()
-  if (error) throw error
+  if (error) lemparGalat(error)
   return data as Bumil
 }
 
 export async function hapusBumil(id: number): Promise<void> {
   const kl = wajibSupabase()
   const { error } = await kl.from('bumil_identitas').delete().eq('id', id)
-  if (error) throw error
+  if (error) lemparGalat(error)
 }
 
 export async function listKunjunganBumil(bumilId: number): Promise<KunjunganBumil[]> {
@@ -170,7 +171,7 @@ export async function listKunjunganBumil(bumilId: number): Promise<KunjunganBumi
     .eq('bumil_id', bumilId)
     .order('tanggal_kunjungan', { ascending: true })
     .order('id', { ascending: true })
-  if (error) throw error
+  if (error) lemparGalat(error)
   return (data ?? []) as KunjunganBumil[]
 }
 
@@ -207,12 +208,12 @@ export async function tambahKunjunganBumil(bumil: Bumil, input: InputKunjunganBu
     })
     .select()
     .single()
-  if (error) throw error
+  if (error) lemparGalat(error)
   return data as KunjunganBumil
 }
 
 export async function hapusKunjunganBumil(id: number): Promise<void> {
   const kl = wajibSupabase()
   const { error } = await kl.from('bumil_kunjungan').delete().eq('id', id)
-  if (error) throw error
+  if (error) lemparGalat(error)
 }

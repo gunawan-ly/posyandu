@@ -1,4 +1,5 @@
 import { wajibSupabase } from '@/supabase/client'
+import { lemparGalat } from '@/lib/galat'
 import { hitungSemuaStatus, hitungZLik, hitungZLil, klasifikasiLika, klasifikasiLila } from '@/lib/kalkulator'
 import { labelStatus } from '@/lib/status'
 import { hitungUmurBulan, parseTanggal } from '@/lib/umur'
@@ -124,7 +125,7 @@ export async function listBalita(cari = ''): Promise<Balita[]> {
     }
   }
   const { data, error } = await q
-  if (error) throw error
+  if (error) lemparGalat(error)
   return (data ?? []) as Balita[]
 }
 
@@ -135,7 +136,7 @@ export async function ambilBalita(id: number): Promise<Balita | null> {
     .select('*')
     .eq('id', id)
     .maybeSingle()
-  if (error) throw error
+  if (error) lemparGalat(error)
   return (data ?? null) as Balita | null
 }
 
@@ -146,7 +147,7 @@ export async function buatBalita(input: InputBalita): Promise<Balita> {
     .insert(input)
     .select()
     .single()
-  if (error) throw error
+  if (error) lemparGalat(error)
   return data as Balita
 }
 
@@ -158,14 +159,14 @@ export async function ubahBalita(id: number, patch: Partial<InputBalita>): Promi
     .eq('id', id)
     .select()
     .single()
-  if (error) throw error
+  if (error) lemparGalat(error)
   return data as Balita
 }
 
 export async function hapusBalita(id: number): Promise<void> {
   const kl = wajibSupabase()
   const { error } = await kl.from('balita_identitas').delete().eq('id', id)
-  if (error) throw error
+  if (error) lemparGalat(error)
 }
 
 export async function listKunjungan(balitaId: number): Promise<Kunjungan[]> {
@@ -176,7 +177,7 @@ export async function listKunjungan(balitaId: number): Promise<Kunjungan[]> {
     .eq('balita_id', balitaId)
     .order('tanggal_kunjungan', { ascending: true })
     .order('id', { ascending: true })
-  if (error) throw error
+  if (error) lemparGalat(error)
   return (data ?? []) as Kunjungan[]
 }
 
@@ -190,7 +191,7 @@ export async function listKunjunganPeriode(awal: string, akhir: string): Promise
     .lte('tanggal_kunjungan', akhir)
     .order('tanggal_kunjungan', { ascending: true })
     .order('id', { ascending: true })
-  if (error) throw error
+  if (error) lemparGalat(error)
   return (data ?? []) as Kunjungan[]
 }
 
@@ -203,7 +204,7 @@ export async function listBalitaById(ids: number[]): Promise<Balita[]> {
     .select('*')
     .in('id', ids)
     .order('nama')
-  if (error) throw error
+  if (error) lemparGalat(error)
   return (data ?? []) as Balita[]
 }
 
@@ -265,14 +266,14 @@ export async function tambahKunjungan(balita: Balita, input: InputKunjungan): Pr
     })
     .select()
     .single()
-  if (error) throw error
+  if (error) lemparGalat(error)
   return data as Kunjungan
 }
 
 export async function hapusKunjungan(id: number): Promise<void> {
   const kl = wajibSupabase()
   const { error } = await kl.from('balita_kunjungan').delete().eq('id', id)
-  if (error) throw error
+  if (error) lemparGalat(error)
 }
 
 // ---- Dashboard kader: kunjungan terakhir per balita (via RPC security invoker) ----
@@ -290,7 +291,7 @@ export interface KunjunganTerakhir {
 export async function kunjunganTerakhir(): Promise<KunjunganTerakhir[]> {
   const kl = wajibSupabase()
   const { data, error } = await kl.rpc('kunjungan_terakhir')
-  if (error) throw error
+  if (error) lemparGalat(error)
   return (data ?? []) as KunjunganTerakhir[]
 }
 

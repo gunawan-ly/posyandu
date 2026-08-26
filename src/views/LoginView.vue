@@ -40,8 +40,7 @@ async function submit() {
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/dashboard'
     await router.replace(redirect)
   } catch (e) {
-    const m = e instanceof Error ? e.message : 'Terjadi kesalahan. Coba lagi.'
-    pesanError.value = m.replace(/^.*?message:\s*/, '')
+    pesanError.value = e instanceof Error ? e.message : 'Terjadi kesalahan. Coba lagi.'
   } finally {
     sibuk.value = false
   }

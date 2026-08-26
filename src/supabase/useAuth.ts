@@ -1,5 +1,6 @@
 import { computed, readonly, ref } from 'vue'
 import type { User } from '@supabase/supabase-js'
+import { lemparGalat } from '@/lib/galat'
 import { supabase } from '@/supabase/client'
 
 // Tujuan redirect setelah konfirmasi email. Bisa di-set lewat VITE_APP_URL,
@@ -42,7 +43,7 @@ async function inisialisasi() {
 async function masuk(email: string, kataSandi: string) {
   if (!supabase) throw new Error('Supabase belum dikonfigurasi.')
   const { error } = await supabase.auth.signInWithPassword({ email, password: kataSandi })
-  if (error) throw error
+  if (error) lemparGalat(error)
 }
 
 async function daftar(email: string, kataSandi: string) {
@@ -52,7 +53,7 @@ async function daftar(email: string, kataSandi: string) {
     password: kataSandi,
     options: { emailRedirectTo: urlAplikasi },
   })
-  if (error) throw error
+  if (error) lemparGalat(error)
   return data
 }
 
