@@ -15,7 +15,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Gerbang mutu (v2.30.1): lint + test wajib hijau sebelum build & deploy.
+  cek:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+
   build:
+    needs: cek
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
