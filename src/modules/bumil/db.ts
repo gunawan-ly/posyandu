@@ -1,3 +1,4 @@
+import { escapeIlike } from '@/lib/cari'
 import { wajibSupabase } from '@/supabase/client'
 import { lemparGalat } from '@/lib/galat'
 import { parseTanggal } from '@/lib/umur'
@@ -113,7 +114,7 @@ export async function listBumil(cari = ''): Promise<Bumil[]> {
   let q = kl.from('bumil_identitas').select('*').order('nama')
   if (cari.trim()) {
     // Buang karakter khusus filter .or() PostgREST (koma, kurung) agar tidak memecah query.
-    const kata = cari.trim().replace(/[,()]/g, '')
+    const kata = escapeIlike(cari.trim().replace(/[,()]/g, ''))
     if (kata) {
       q = q.or(`nama.ilike.%${kata}%,nama_suami.ilike.%${kata}%,nik.ilike.%${kata}%,dusun.ilike.%${kata}%`)
     }

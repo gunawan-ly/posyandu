@@ -1,3 +1,4 @@
+import { escapeIlike } from '@/lib/cari'
 import { wajibSupabase } from '@/supabase/client'
 import { lemparGalat } from '@/lib/galat'
 import { hitungUmurBulan, parseTanggal } from '@/lib/umur'
@@ -79,7 +80,7 @@ export async function listApras(cari = ''): Promise<Apras[]> {
   let q = kl.from('apras_identitas').select('*').order('nama')
   if (cari.trim()) {
     // Buang karakter khusus filter .or() PostgREST (koma, kurung) agar tidak memecah query.
-    const kata = cari.trim().replace(/[,()]/g, '')
+    const kata = escapeIlike(cari.trim().replace(/[,()]/g, ''))
     if (kata) {
       q = q.or(`nama.ilike.%${kata}%,nama_orang_tua.ilike.%${kata}%,nik.ilike.%${kata}%`)
     }

@@ -1,3 +1,4 @@
+import { escapeIlike } from '@/lib/cari'
 import { wajibSupabase } from '@/supabase/client'
 import { lemparGalat } from '@/lib/galat'
 import { hitungSemuaStatus, hitungZLik, hitungZLil, klasifikasiLika, klasifikasiLila } from '@/lib/kalkulator'
@@ -119,7 +120,7 @@ export async function listBalita(cari = ''): Promise<Balita[]> {
   let q = kl.from('balita_identitas').select('*').order('nama')
   if (cari.trim()) {
     // Buang karakter khusus filter .or() PostgREST (koma, kurung) agar tidak memecah query.
-    const kata = cari.trim().replace(/[,()]/g, '')
+    const kata = escapeIlike(cari.trim().replace(/[,()]/g, ''))
     if (kata) {
       q = q.or(`nama.ilike.%${kata}%,nama_orang_tua.ilike.%${kata}%,nik.ilike.%${kata}%`)
     }

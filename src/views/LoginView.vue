@@ -37,7 +37,9 @@ async function submit() {
   sibuk.value = true
   try {
     await masuk(email.value.trim(), kataSandi.value)
-    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/dashboard'
+    // Hanya terima path internal (tolak "//host" & URL absolut) — cegah open redirect.
+    const mentah = typeof route.query.redirect === 'string' ? route.query.redirect : ''
+    const redirect = /^\/(?!\/)/.test(mentah) ? mentah : '/dashboard'
     await router.replace(redirect)
   } catch (e) {
     pesanError.value = e instanceof Error ? e.message : 'Terjadi kesalahan. Coba lagi.'
