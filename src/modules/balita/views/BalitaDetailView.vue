@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import FormKunjunganBalita from './detail/FormKunjunganBalita.vue'
+import FormModalBalita from './FormModalBalita.vue'
 import KurvaTabsBalita from './detail/KurvaTabsBalita.vue'
 import TabelRiwayatBalita from './detail/TabelRiwayatBalita.vue'
 import {
@@ -54,6 +55,9 @@ const detailBaris = ref<Array<[string, string | number | null]>>([])
 // Modal ubah kunjungan (form yang sama dipakai ulang dalam mode edit)
 const editOpen = ref(false)
 const kunjunganEdit = ref<Kunjungan | null>(null)
+
+// Modal ubah identitas balita (konsolidasi form, v2.30.0)
+const ubahOpen = ref(false)
 
 onMounted(muat)
 
@@ -239,12 +243,10 @@ async function hapusBal() {
             </div>
           </div>
           <div v-if="isAdmin" class="flex items-center gap-2">
-            <RouterLink :to="`/balita/${balita.id}/edit`">
-              <Button variant="outline">
-                <Pencil class="size-4" />
-                Ubah
-              </Button>
-            </RouterLink>
+            <Button variant="outline" @click="ubahOpen = true">
+              <Pencil class="size-4" />
+              Ubah
+            </Button>
             <Button variant="outline" class="text-red-600" @click="hapusBal">
               <Trash2 class="size-4" />
               Hapus
@@ -357,6 +359,7 @@ async function hapusBal() {
 
     <ConfirmDialog ref="dlgHapus" />
     <DetailKunjunganModal v-model:open="detailOpen" :judul="detailJudul" :baris="detailBaris" />
+    <FormModalBalita v-model:open="ubahOpen" :balita="balita" @tersimpan="muat" />
 
     <Dialog :open="editOpen" @update:open="(v) => { if (!v) selesaiEdit() }">
       <DialogContent

@@ -88,13 +88,16 @@ describe('render komponen utama', () => {
   })
 
   it('Rute /apras terdaftar dan memuat halaman daftar Apras penuh', async () => {
-    // Meta guard rute: daftar & detail butuh login, tambah/edit butuh admin.
+    // Meta guard rute: daftar & detail butuh login. Rute tambah/edit lama
+    // dialihkan ke daftar sejak konsolidasi form modal (v2.30.0).
     const ruteDaftar = aprasRoutes.find((r) => r.path === '/apras')
     const ruteBaru = aprasRoutes.find((r) => r.path === '/apras/baru')
+    const ruteEdit = aprasRoutes.find((r) => r.path === '/apras/:id/edit')
     const ruteDetail = aprasRoutes.find((r) => r.path === '/apras/:id')
     expect(ruteDaftar?.name).toBe('apras')
     expect(ruteDaftar?.meta).toMatchObject({ requiresAuth: true })
-    expect(ruteBaru?.meta).toMatchObject({ requiresAuth: true, requiresAdmin: true })
+    expect(ruteBaru?.redirect).toBe('/apras')
+    expect(ruteEdit?.redirect).toBe('/apras')
     expect(ruteDetail?.meta).toMatchObject({ requiresAuth: true })
 
     // Halaman daftar penuh (bukan placeholder lagi): judul + aksi admin.

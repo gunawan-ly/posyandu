@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import FormKunjunganBumil from './detail/FormKunjunganBumil.vue'
+import FormModalBumil from './FormModalBumil.vue'
 import TabelRiwayatBumil from './detail/TabelRiwayatBumil.vue'
 import {
   ambilBumil,
@@ -53,6 +54,9 @@ const detailBaris = ref<Array<[string, string | number | null]>>([])
 // Modal ubah kunjungan (form yang sama dipakai ulang dalam mode edit)
 const editOpen = ref(false)
 const kunjunganEdit = ref<KunjunganBumil | null>(null)
+
+// Modal ubah identitas bumil (konsolidasi form, v2.30.0)
+const ubahOpen = ref(false)
 
 onMounted(muat)
 
@@ -235,12 +239,10 @@ async function hapusBumilData() {
             </div>
           </div>
           <div v-if="isAdmin" class="flex items-center gap-2">
-            <RouterLink :to="`/bumil/${bumil.id}/edit`">
-              <Button variant="outline">
-                <Pencil class="size-4" />
-                Ubah
-              </Button>
-            </RouterLink>
+            <Button variant="outline" @click="ubahOpen = true">
+              <Pencil class="size-4" />
+              Ubah
+            </Button>
             <Button variant="outline" class="text-red-600" @click="hapusBumilData">
               <Trash2 class="size-4" />
               Hapus
@@ -394,6 +396,7 @@ async function hapusBumilData() {
 
     <ConfirmDialog ref="dlgHapus" />
     <DetailKunjunganModal v-model:open="detailOpen" :judul="detailJudul" :baris="detailBaris" />
+    <FormModalBumil v-model:open="ubahOpen" :bumil="bumil" @tersimpan="muat" />
 
     <Dialog :open="editOpen" @update:open="(v) => { if (!v) selesaiEdit() }">
       <DialogContent

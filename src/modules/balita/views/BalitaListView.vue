@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { FileText, Pencil, Plus, Search, Trash2, UserRound, Users, X } from '@lucide/vue'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import AppFooter from '@/components/AppFooter.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
@@ -27,6 +27,19 @@ const dlgHapus = ref<InstanceType<typeof ConfirmDialog>>()
 const modalTambah = ref(false)
 const modalUbahOpen = ref(false)
 const modalUbahData = ref<Balita | null>(null)
+
+// CTA dengan tautan /balita?tambah=1 (mis. Dashboard) langsung membuka form tambah.
+const route = useRoute()
+const router = useRouter()
+watch(
+  () => route.query.tambah,
+  (v) => {
+    if (v !== '1') return
+    modalTambah.value = true
+    void router.replace({ query: { ...route.query, tambah: undefined } })
+  },
+  { immediate: true },
+)
 
 function bukaUbah(b: Balita) {
   modalUbahData.value = b

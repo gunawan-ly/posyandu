@@ -16,16 +16,13 @@ export const balitaRoutes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
+    // Konsolidasi form (v2.30.0): tambah/ubah hanya lewat modal di daftar.
     path: '/balita/baru',
-    name: 'balita-baru',
-    component: () => import('@/modules/balita/views/BalitaFormView.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true },
+    redirect: '/balita',
   },
   {
     path: '/balita/:id/edit',
-    name: 'balita-edit',
-    component: () => import('@/modules/balita/views/BalitaFormView.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true },
+    redirect: '/balita',
   },
   {
     path: '/balita/:id',

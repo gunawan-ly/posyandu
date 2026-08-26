@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import InputDusun from '@/components/InputDusun.vue'
 import { Button } from '@/components/ui/button'
 import { ambilBumil, buatBumil, KATEGORI_BUMIL, ubahBumil, type Bumil } from '@/modules/bumil/db'
 import { parseTanggal } from '@/lib/umur'
@@ -249,16 +250,7 @@ const klsInput =
             <input id="fm-jarak" v-model="jarakAnakSebelumnya" type="text" :class="klsInput" placeholder="cth: 3 tahun" />
           </div>
 
-          <div class="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label for="fm-dusun" class="text-muted-foreground mb-1.5 block text-xs font-bold">Dusun</label>
-              <input id="fm-dusun" v-model="dusun" type="text" :class="klsInput" />
-            </div>
-            <div>
-              <label for="fm-cara-persalin" class="text-muted-foreground mb-1.5 block text-xs font-bold">Cara persalinan</label>
-              <input id="fm-cara-persalin" v-model="caraPersalin" type="text" :class="klsInput" placeholder="cth: Normal / SC" />
-            </div>
-          </div>
+          <InputDusun v-model="dusun" />
 
           <div>
             <label for="fm-alamat" class="text-muted-foreground mb-1.5 block text-xs font-bold">Alamat</label>
@@ -271,6 +263,7 @@ const klsInput =
           </div>
 
           <div class="border-border/60 grid gap-4 border-t pt-4 sm:grid-cols-2">
+            <p class="text-muted-foreground col-span-full mb-0 text-xs font-bold tracking-widest uppercase">Data persalinan</p>
             <div>
               <label for="fm-tgl-bersalin" class="text-muted-foreground mb-1.5 block text-xs font-bold">Tanggal bersalin</label>
               <input id="fm-tgl-bersalin" v-model="tanggalBersalin" type="date" class="w-full [color-scheme:light]" :class="klsInput" />
@@ -278,6 +271,10 @@ const klsInput =
             <div>
               <label for="fm-tempat-bersalin" class="text-muted-foreground mb-1.5 block text-xs font-bold">Tempat bersalin</label>
               <input id="fm-tempat-bersalin" v-model="tempatBersalin" type="text" :class="klsInput" />
+            </div>
+            <div>
+              <label for="fm-cara-persalin" class="text-muted-foreground mb-1.5 block text-xs font-bold">Cara persalinan</label>
+              <input id="fm-cara-persalin" v-model="caraPersalin" type="text" :class="klsInput" placeholder="cth: Normal / SC" />
             </div>
           </div>
 

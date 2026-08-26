@@ -9,16 +9,13 @@ export const bumilRoutes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
+    // Konsolidasi form (v2.30.0): tambah/ubah hanya lewat modal di daftar.
     path: '/bumil/baru',
-    name: 'bumil-baru',
-    component: () => import('@/modules/bumil/views/BumilFormView.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true },
+    redirect: '/bumil',
   },
   {
     path: '/bumil/:id/edit',
-    name: 'bumil-edit',
-    component: () => import('@/modules/bumil/views/BumilFormView.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true },
+    redirect: '/bumil',
   },
   {
     path: '/bumil/:id',

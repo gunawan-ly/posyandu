@@ -344,7 +344,7 @@ function formatTanggal(tgl: string | null): string {
               Pantau status gizi dan kelola data kunjungan balita.
             </p>
             <div class="mt-6 flex flex-wrap items-center gap-3">
-              <RouterLink v-if="isAdmin" to="/balita/baru">
+              <RouterLink v-if="isAdmin" to="/balita?tambah=1">
                 <Button size="lg" class="gap-2 shadow-lg shadow-primary/25">
                   <Plus class="size-4" />
                   Tambah Balita

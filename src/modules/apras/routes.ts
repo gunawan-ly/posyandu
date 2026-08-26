@@ -9,16 +9,13 @@ export const aprasRoutes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
+    // Konsolidasi form (v2.30.0): tambah/ubah hanya lewat modal di daftar.
     path: '/apras/baru',
-    name: 'apras-baru',
-    component: () => import('@/modules/apras/views/AprasFormView.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true },
+    redirect: '/apras',
   },
   {
     path: '/apras/:id/edit',
-    name: 'apras-edit',
-    component: () => import('@/modules/apras/views/AprasFormView.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true },
+    redirect: '/apras',
   },
   {
     path: '/apras/:id',
