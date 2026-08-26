@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import InputDusun from '@/components/InputDusun.vue'
+import InputPosyandu from '@/components/InputPosyandu.vue'
 import { Button } from '@/components/ui/button'
 import { ambilApras, buatApras, ubahApras, type Apras } from '@/modules/apras/db'
 import { parseTanggal } from '@/lib/umur'
@@ -234,10 +235,7 @@ const klsInput =
             />
           </div>
 
-          <div>
-            <label for="fm-posyandu" class="text-muted-foreground mb-1.5 block text-xs font-bold">Posyandu</label>
-            <input id="fm-posyandu" v-model="posyandu" type="text" :class="klsInput" />
-          </div>
+          <InputPosyandu v-model="posyandu" />
 
           <p v-if="pesanError" class="flex items-start gap-2 text-sm font-medium text-red-600" role="alert">
             <TriangleAlert class="mt-0.5 size-4 shrink-0" />

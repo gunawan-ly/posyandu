@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import InputDusun from '@/components/InputDusun.vue'
+import InputPosyandu from '@/components/InputPosyandu.vue'
 import { ambilBalita, buatBalita, ubahBalita, type Balita } from '@/modules/balita/db'
 import { parseTanggal } from '@/lib/umur'
 
@@ -251,10 +252,7 @@ const klsInput =
             />
           </div>
 
-          <div>
-            <label for="fm-posyandu" class="text-muted-foreground mb-1.5 block text-xs font-bold">Posyandu</label>
-            <input id="fm-posyandu" v-model="posyandu" type="text" :class="klsInput" />
-          </div>
+          <InputPosyandu v-model="posyandu" />
 
           <div class="grid gap-4 sm:grid-cols-2">
             <div>

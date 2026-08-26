@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import InputSegmen from './InputSegmen.vue'
 
-// Pilihan Dusun — toggle segmen gaya sama dengan pemilihan jenis kelamin.
-const OPSI_DUSUN = ['Kayumas', 'Tengah', 'Cempaka'] as const
+// Pilihan Posyandu — toggle segmen gaya sama dengan pemilihan jenis kelamin.
+const OPSI_POSYANDU = ['Coklat 1', 'Coklat 2', 'Luar Daerah'] as const
 
 defineProps<{ modelValue: string }>()
 const emit = defineEmits<{ 'update:modelValue': [nilai: string] }>()
@@ -11,8 +11,8 @@ const emit = defineEmits<{ 'update:modelValue': [nilai: string] }>()
 <template>
   <InputSegmen
     :model-value="modelValue"
-    label="Dusun"
-    :opsi="OPSI_DUSUN"
+    label="Posyandu"
+    :opsi="OPSI_POSYANDU"
     @update:model-value="emit('update:modelValue', $event)"
   />
 </template>
