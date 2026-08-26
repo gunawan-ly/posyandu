@@ -8,6 +8,7 @@ import StatusBadge from '@/components/StatusBadge.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { hitungSemuaStatus } from '@/lib/kalkulator'
+import InputSegmen from '@/components/InputSegmen.vue'
 
 const jk = ref<'L' | 'P'>('L')
 const umur = ref(24)
@@ -84,24 +85,12 @@ const MANFAAT = [
                     <HeartPulse class="text-primary size-5" />
                     Kalkulator kilat
                   </p>
-                  <div
-                    class="inline-flex rounded-xl border border-emerald-200 bg-emerald-50 p-1"
-                    role="group"
-                    aria-label="Jenis kelamin"
-                  >
-                    <button
-                      v-for="(label, k) in { L: 'Laki-laki', P: 'Perempuan' }"
-                      :key="k"
-                      type="button"
-                      :class="jk === k
-                        ? 'bg-primary text-primary-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground'"
-                      class="rounded-lg px-3 py-1.5 text-sm font-bold transition-colors"
-                      @click="jk = k"
-                    >
-                      {{ label }}
-                    </button>
-                  </div>
+                  <InputSegmen
+                    v-model="jk"
+                    label="Jenis kelamin"
+                    :opsi="['L', 'P']"
+                    :display="{ L: 'Laki-laki', P: 'Perempuan' }"
+                  />
                 </div>
 
                 <div class="rounded-2xl border border-border bg-white p-3 sm:p-4">

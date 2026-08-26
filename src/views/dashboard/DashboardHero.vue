@@ -39,8 +39,8 @@ const { isAutentikasi, isAdmin, user } = useAuth()
           <span class="text-primary">lima sasaran kesehatan.</span>
         </h1>
         <p class="text-muted-foreground mx-auto mt-5 max-w-xl text-base leading-relaxed">
-          Pantau layanan posyandu dalam satu sistem digital — dari pencatatan balita hingga
-          pemantauan bumil, remaja, dewasa, dan lansia.
+          Pantau layanan posyandu dalam satu sistem digital — pencatatan balita, anak pra
+          sekolah, dan ibu hamil dalam satu tempat.
         </p>
         <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
           <RouterLink to="/login">
@@ -73,7 +73,7 @@ const { isAutentikasi, isAdmin, user } = useAuth()
         </div>
         <p class="text-muted-foreground mt-3 max-w-xl text-sm" :title="user?.email">
           Anda masuk sebagai <span class="text-foreground font-medium">{{ user?.email }}</span>.
-          Pantau status gizi dan kelola data kunjungan balita.
+          Pantau status gizi dan kelola data kunjungan.
         </p>
         <div class="mt-6 flex flex-wrap items-center gap-3">
           <RouterLink v-if="isAdmin" to="/balita?tambah=1">

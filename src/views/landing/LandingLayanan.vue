@@ -75,8 +75,7 @@ const LAYANAN: ModulLayanan[] = [
           Satu posyandu, lima sasaran kesehatan.
         </h2>
         <p class="text-muted-foreground mt-4 max-w-2xl text-sm leading-relaxed">
-          Setiap kelompok warga memiliki pencatatan dan pemantauan sendiri dalam satu sistem.
-          Balita & bumil sudah berjalan; layanan lainnya menyusul.
+          Balita, anak pra sekolah, dan ibu sudah aktif. Remaja, dewasa & lansia menyusul.
         </p>
       </Reveal>
 

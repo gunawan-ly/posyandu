@@ -14,7 +14,7 @@ import { RouterLink } from 'vue-router'
           <span class="font-display text-lg font-normal">Posyandu Wapalo</span>
         </div>
         <p class="text-muted-foreground max-w-xs text-sm">
-          Sistem informasi posyandu digital: pencatatan data balita &amp; kunjungan, pemantauan
+          Sistem informasi posyandu digital: pencatatan data posyandu &amp; kunjungan, pemantauan
           tumbuh kembang, dan kalkulator status gizi berbasis standar WHO.
         </p>
       </div>

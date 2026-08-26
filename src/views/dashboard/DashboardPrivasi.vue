@@ -12,7 +12,7 @@ import { ShieldCheck } from '@lucide/vue'
         <div>
           <h2 class="font-display text-lg font-semibold">Data anak Anda aman.</h2>
           <p class="text-muted-foreground mt-1.5 text-sm leading-relaxed">
-            Pencatatan dan pemantauan data balita hanya dapat dilakukan kader yang sudah masuk.
+            Pencatatan dan pemantauan data posyandu hanya dapat dilakukan kader yang sudah masuk.
             Setiap data pribadi anak dilindungi autentikasi dan aturan akses ketat — pengunjung
             umum hanya melihat angka agregat, bukan data perorangan.
           </p>

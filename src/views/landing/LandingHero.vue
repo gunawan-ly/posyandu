@@ -153,7 +153,7 @@ const MODUL_NAV: ModulNav[] = [
 
           <p class="text-muted-foreground mx-auto mt-4 max-w-xl text-lg leading-relaxed">
             Posyandu Wapalo membantu kader mencatat pengukuran, memantau status gizi, dan menjaga
-            riwayat tumbuh kembang — dari balita, ibu hamil, hingga dewasa dan lansia.
+            riwayat tumbuh kembang bagi balita, anak pra sekolah, dan ibu hamil/menyusui.
           </p>
 
           <!-- CTA utama: Masuk (paling atas tengah) — tujuan cerdas sesi -->
