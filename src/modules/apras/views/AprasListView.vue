@@ -286,7 +286,6 @@ async function hapus(anak: Apras) {
                   <th class="py-2 pr-3">NIK</th>
                   <th class="py-2 pr-3 whitespace-nowrap">Tempat lahir</th>
                   <th class="py-2 pr-3 whitespace-nowrap">Tgl lahir</th>
-                  <th class="py-2 pr-3 whitespace-nowrap">Anak ke</th>
                   <th class="py-2 pr-3 whitespace-nowrap">Orang tua</th>
                   <th class="py-2 pr-3 whitespace-nowrap">NIK ortu</th>
                   <th class="py-2 pr-3 whitespace-nowrap">No. KK</th>
@@ -312,7 +311,6 @@ async function hapus(anak: Apras) {
                   <td class="py-3 pr-3 break-all whitespace-nowrap">{{ a.nik || '—' }}</td>
                   <td class="max-w-[140px] truncate py-3 pr-3 whitespace-nowrap" :title="a.tempat_lahir || ''">{{ a.tempat_lahir || '—' }}</td>
                   <td class="text-muted-foreground py-3 pr-3 whitespace-nowrap">{{ formatTanggal(a.tanggal_lahir) }}</td>
-                  <td class="py-3 pr-3 whitespace-nowrap">{{ a.anak_ke || '—' }}</td>
                   <td class="max-w-[160px] truncate py-3 pr-3 whitespace-nowrap" :title="a.nama_orang_tua || ''">{{ a.nama_orang_tua || '—' }}</td>
                   <td class="py-3 pr-3 break-all whitespace-nowrap">{{ a.nik_orang_tua || '—' }}</td>
                   <td class="py-3 pr-3 break-all whitespace-nowrap">{{ a.nomor_kk || '—' }}</td>
@@ -324,15 +322,16 @@ async function hapus(anak: Apras) {
                       <RouterLink :to="`/apras/${a.id}`">
                         <Button variant="ghost" size="sm">Detail</Button>
                       </RouterLink>
-                      <Button
+                      <button
                         v-if="isAdmin"
-                        variant="ghost"
-                        size="sm"
+                        type="button"
+                        class="text-muted-foreground hover:bg-emerald-50 hover:text-emerald-700 rounded-lg p-2 transition-colors"
+                        aria-label="Ubah apras"
+                        title="Ubah apras"
                         @click="bukaUbah(a)"
                       >
                         <Pencil class="size-4" />
-                        Ubah
-                      </Button>
+                      </button>
                       <button
                         v-if="isAdmin"
                         type="button"

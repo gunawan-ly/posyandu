@@ -323,15 +323,16 @@ async function hapus(bumil: Bumil) {
                       <RouterLink :to="`/bumil/${b.id}`">
                         <Button variant="ghost" size="sm">Detail</Button>
                       </RouterLink>
-                      <Button
+                      <button
                         v-if="isAdmin"
-                        variant="ghost"
-                        size="sm"
+                        type="button"
+                        class="text-muted-foreground hover:bg-emerald-50 hover:text-emerald-700 rounded-lg p-2 transition-colors"
+                        aria-label="Ubah ibu hamil"
+                        title="Ubah ibu hamil"
                         @click="bukaUbah(b)"
                       >
                         <Pencil class="size-4" />
-                        Ubah
-                      </Button>
+                      </button>
                       <button
                         v-if="isAdmin"
                         type="button"
