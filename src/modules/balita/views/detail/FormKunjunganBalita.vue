@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { labelYaTidak, tambahKunjungan, ubahKunjungan, type Balita, type Kunjungan } from '@/modules/balita/db'
 import { hitungZLik, hitungZLil, klasifikasiLika, klasifikasiLila } from '@/lib/kalkulator'
+import { adalahGalatJaringan } from '@/lib/galat'
 import { statusNaikDariTanggal, type HasilKbm } from '@/lib/kbm'
+import { tambahKeAntre } from '@/lib/offlineAntre'
 import { labelStatus } from '@/lib/status'
 import { hitungUmurBulan, parseTanggal } from '@/lib/umur'
 
@@ -134,6 +136,22 @@ function formatTanggalSingkat(tgl: string | null): string {
   return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+function kosongkanForm() {
+  beratBadan.value = ''
+  tinggiBadan.value = ''
+  lingkarLengan.value = ''
+  lingkarKepala.value = ''
+  bbNaik.value = ''
+  imunisasi.value = ''
+  vitaminA.value = ''
+  asiEksklusif.value = ''
+  mpAsi.value = ''
+  obatCacing.value = ''
+  ceklisPerkembangan.value = ''
+  gejalaTbc.value = ''
+  edukasi.value = ''
+}
+
 async function simpanKunjungan() {
   pesanForm.value = ''
   pesanSukses.value = ''
@@ -150,48 +168,49 @@ async function simpanKunjungan() {
     return
   }
 
+  const isi = {
+    tanggal_kunjungan: tglKunjungan.value,
+    berat_badan: bb,
+    tinggi_badan: tb,
+    lingkar_lengan: lingkarLengan.value ? Number(lingkarLengan.value) : null,
+    lingkar_kepala: lingkarKepala.value ? Number(lingkarKepala.value) : null,
+    bb_naik_tidak: bbNaik.value || null,
+    imunisasi: imunisasi.value || null,
+    vitamin_a: vitaminA.value || null,
+    asi_eksklusif: asiEksklusif.value || null,
+    mp_asi: mpAsi.value || null,
+    obat_cacing: obatCacing.value || null,
+    ceklis_perkembangan: ceklisPerkembangan.value || null,
+    gejala_tbc: gejalaTbc.value || null,
+    edukasi: edukasi.value || null,
+  }
+
   menyimpan.value = true
   try {
-    const isi = {
-      tanggal_kunjungan: tglKunjungan.value,
-      berat_badan: bb,
-      tinggi_badan: tb,
-      lingkar_lengan: lingkarLengan.value ? Number(lingkarLengan.value) : null,
-      lingkar_kepala: lingkarKepala.value ? Number(lingkarKepala.value) : null,
-      bb_naik_tidak: bbNaik.value || null,
-      imunisasi: imunisasi.value || null,
-      vitamin_a: vitaminA.value || null,
-      asi_eksklusif: asiEksklusif.value || null,
-      mp_asi: mpAsi.value || null,
-      obat_cacing: obatCacing.value || null,
-      ceklis_perkembangan: ceklisPerkembangan.value || null,
-      gejala_tbc: gejalaTbc.value || null,
-      edukasi: edukasi.value || null,
-    }
     if (props.edit) {
       await ubahKunjungan(props.balita, props.edit.id, isi)
     } else {
       await tambahKunjungan(props.balita, isi)
     }
     emit('tersimpan')
-    if (!props.edit) {
-      beratBadan.value = ''
-      tinggiBadan.value = ''
-      lingkarLengan.value = ''
-      lingkarKepala.value = ''
-      bbNaik.value = ''
-      imunisasi.value = ''
-      vitaminA.value = ''
-      asiEksklusif.value = ''
-      mpAsi.value = ''
-      obatCacing.value = ''
-      ceklisPerkembangan.value = ''
-      gejalaTbc.value = ''
-      edukasi.value = ''
-    }
+    if (!props.edit) kosongkanForm()
     pesanSukses.value = props.edit ? 'Perubahan kunjungan tersimpan.' : 'Kunjungan berhasil dicatat.'
   } catch (e) {
-    pesanForm.value = e instanceof Error ? e.message : 'Gagal menyimpan kunjungan.'
+    // Offline: simpan input mentah ke antrean — status dihitung ulang saat sync.
+    if (adalahGalatJaringan(e) && !props.edit) {
+      tambahKeAntre({
+        modul: 'balita',
+        identitasId: props.balita.id,
+        nama: props.balita.nama,
+        tanggal_kunjungan: tglKunjungan.value,
+        isi,
+      })
+      kosongkanForm()
+      pesanSukses.value =
+        'Perangkat sedang offline — kunjungan tersimpan di perangkat dan otomatis terkirim saat online.'
+    } else {
+      pesanForm.value = e instanceof Error ? e.message : 'Gagal menyimpan kunjungan.'
+    }
   } finally {
     menyimpan.value = false
   }

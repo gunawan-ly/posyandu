@@ -1,7 +1,11 @@
 import { createApp } from 'vue'
+import { registerSW } from 'virtual:pwa-register'
 import App from './App.vue'
 import router from './router'
 import './style.css'
+
+// Service worker PWA (auto-update): app shell ter-cache agar bisa dibuka offline.
+registerSW({ immediate: true })
 
 const app = createApp(App).use(router)
 

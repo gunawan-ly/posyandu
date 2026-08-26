@@ -3,6 +3,8 @@ import { Pencil, Plus, TriangleAlert } from '@lucide/vue'
 import { computed, ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { adalahGalatJaringan } from '@/lib/galat'
+import { tambahKeAntre } from '@/lib/offlineAntre'
 import {
   OPSI_BB_KURVA,
   OPSI_LILA,
@@ -54,6 +56,27 @@ const modeUbah = computed(() => props.edit != null)
 // Field hanya relevan untuk ibu hamil; untuk menyusui disembunyikan/dikosongkan.
 const sedangHamil = computed(() => props.bumil.kategori === 'Hamil')
 
+function kosongkanForm() {
+  usiaKehamilan.value = ''
+  beratBadan.value = ''
+  bbKurvaKia.value = ''
+  lila.value = ''
+  lilaWarna.value = ''
+  tekananDarah.value = ''
+  tdKurvaKia.value = ''
+  batuk.value = ''
+  demam.value = ''
+  bbTidakNaik.value = ''
+  kontakTbc.value = ''
+  dapatTtd.value = ''
+  konsumsiTtd.value = ''
+  mtKek.value = ''
+  konsumsiMtKek.value = ''
+  kelasBumil.value = ''
+  dapatEdukasi.value = ''
+  dirujuk.value = ''
+}
+
 async function simpanKunjungan() {
   pesanForm.value = ''
   pesanSukses.value = ''
@@ -95,29 +118,24 @@ async function simpanKunjungan() {
       await tambahKunjunganBumil(props.bumil, isi)
     }
     emit('tersimpan')
-    if (!props.edit) {
-      usiaKehamilan.value = ''
-      beratBadan.value = ''
-      bbKurvaKia.value = ''
-      lila.value = ''
-      lilaWarna.value = ''
-      tekananDarah.value = ''
-      tdKurvaKia.value = ''
-      batuk.value = ''
-      demam.value = ''
-      bbTidakNaik.value = ''
-      kontakTbc.value = ''
-      dapatTtd.value = ''
-      konsumsiTtd.value = ''
-      mtKek.value = ''
-      konsumsiMtKek.value = ''
-      kelasBumil.value = ''
-      dapatEdukasi.value = ''
-      dirujuk.value = ''
-    }
+    if (!props.edit) kosongkanForm()
     pesanSukses.value = props.edit ? 'Perubahan kunjungan tersimpan.' : 'Kunjungan berhasil dicatat.'
   } catch (e) {
-    pesanForm.value = e instanceof Error ? e.message : 'Gagal menyimpan kunjungan.'
+    // Offline: simpan input mentah ke antrean — dikirim ulang saat online.
+    if (adalahGalatJaringan(e) && !props.edit) {
+      tambahKeAntre({
+        modul: 'bumil',
+        identitasId: props.bumil.id,
+        nama: props.bumil.nama ?? 'Ibu hamil',
+        tanggal_kunjungan: tglKunjungan.value,
+        isi,
+      })
+      kosongkanForm()
+      pesanSukses.value =
+        'Perangkat sedang offline — kunjungan tersimpan di perangkat dan otomatis terkirim saat online.'
+    } else {
+      pesanForm.value = e instanceof Error ? e.message : 'Gagal menyimpan kunjungan.'
+    }
   } finally {
     menyimpan.value = false
   }

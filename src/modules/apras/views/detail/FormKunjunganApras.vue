@@ -3,6 +3,8 @@ import { Pencil, Plus, TriangleAlert } from '@lucide/vue'
 import { computed, ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { adalahGalatJaringan } from '@/lib/galat'
+import { tambahKeAntre } from '@/lib/offlineAntre'
 import { tambahKunjunganApras, ubahKunjunganApras, type Apras, type KunjunganApras } from '@/modules/apras/db'
 
 const props = defineProps<{
@@ -32,6 +34,18 @@ const pesanSukses = ref('')
 const pesanForm = ref('')
 
 const modeUbah = computed(() => props.edit != null)
+
+function kosongkanForm() {
+  beratBadan.value = ''
+  tinggiBadan.value = ''
+  lingkarKepala.value = ''
+  lingkarLengan.value = ''
+  obatCacing.value = ''
+  gejalaTbc.value = ''
+  dirujuk.value = ''
+  edukasi.value = ''
+  catatan.value = ''
+}
 
 async function simpanKunjungan() {
   pesanForm.value = ''
@@ -70,20 +84,24 @@ async function simpanKunjungan() {
       await tambahKunjunganApras(props.apras, isi)
     }
     emit('tersimpan')
-    if (!props.edit) {
-      beratBadan.value = ''
-      tinggiBadan.value = ''
-      lingkarKepala.value = ''
-      lingkarLengan.value = ''
-      obatCacing.value = ''
-      gejalaTbc.value = ''
-      dirujuk.value = ''
-      edukasi.value = ''
-      catatan.value = ''
-    }
+    if (!props.edit) kosongkanForm()
     pesanSukses.value = props.edit ? 'Perubahan kunjungan tersimpan.' : 'Kunjungan berhasil dicatat.'
   } catch (e) {
-    pesanForm.value = e instanceof Error ? e.message : 'Gagal menyimpan kunjungan.'
+    // Offline: simpan input mentah ke antrean — dikirim ulang saat online.
+    if (adalahGalatJaringan(e) && !props.edit) {
+      tambahKeAntre({
+        modul: 'apras',
+        identitasId: props.apras.id,
+        nama: props.apras.nama,
+        tanggal_kunjungan: tglKunjungan.value,
+        isi,
+      })
+      kosongkanForm()
+      pesanSukses.value =
+        'Perangkat sedang offline — kunjungan tersimpan di perangkat dan otomatis terkirim saat online.'
+    } else {
+      pesanForm.value = e instanceof Error ? e.message : 'Gagal menyimpan kunjungan.'
+    }
   } finally {
     menyimpan.value = false
   }

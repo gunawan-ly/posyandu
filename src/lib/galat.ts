@@ -35,11 +35,19 @@ const PESA_AUTH: Array<[RegExp, string]> = [
   [/user already registered|already been registered/i, 'Email sudah terdaftar.'],
 ]
 
+// Deteksi galat jaringan (fetch gagal) — dipakai juga antrean offline
+// untuk membedakan "belum ada koneksi" dari kegagalan sungguhan.
+export function adalahGalatJaringan(e: unknown): boolean {
+  if (e instanceof TypeError) return true
+  const teks = e instanceof Error ? e.message : String(e ?? '')
+  return /failed to fetch|fetch failed|networkerror|load failed/i.test(teks)
+}
+
 export function pesanGalat(e: unknown): string {
   if (e instanceof TypeError) return GALAT_JARINGAN
 
   const teks = e instanceof Error ? e.message : String(e ?? '')
-  if (/failed to fetch|fetch failed|networkerror|load failed/i.test(teks)) return GALAT_JARINGAN
+  if (adalahGalatJaringan(e)) return GALAT_JARINGAN
 
   for (const [pola, pesan] of PESA_AUTH) {
     if (pola.test(teks)) return pesan
