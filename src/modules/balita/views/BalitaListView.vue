@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { FileText, Pencil, Plus, Search, Trash2, UserRound, Users, X } from '@lucide/vue'
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import AppFooter from '@/components/AppFooter.vue'
@@ -11,22 +11,22 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import FormModalBalita from '@/modules/balita/views/FormModalBalita.vue'
 import { listBalita, hapusBalita, type Balita } from '@/modules/balita/db'
-import { umurSaatIni, parseTanggal } from '@/lib/umur'
-import { bacaViewModul, simpanViewModul } from '@/lib/viewModul'
+import { useDaftarModul } from '@/composables/useDaftarModul'
+import { formatUmur, formatTanggal, labelJk } from '@/lib/label'
 import { useAuth } from '@/supabase/useAuth'
 
-const KUNCI_VIEW = 'view-balita'
-
 const { isAdmin } = useAuth()
-
-const daftar = ref<Balita[]>([])
-const cari = ref('')
-const sibuk = ref(true)
-const pesanError = ref('')
 const dlgHapus = ref<InstanceType<typeof ConfirmDialog>>()
-const modalTambah = ref(false)
-const modalUbahOpen = ref(false)
-const modalUbahData = ref<Balita | null>(null)
+
+const {
+  daftar, cari, sibuk, pesanError, modalTambah, modalUbahOpen, modalUbahData,
+  modeView, bukaUbah, bersihkanCari, muat, hapusItem,
+} = useDaftarModul<Balita>({
+  kunciView: 'view-balita',
+  muat: listBalita,
+  hapus: hapusBalita,
+  namaItem: 'balita',
+})
 
 // CTA dengan tautan /balita?tambah=1 (mis. Dashboard) langsung membuka form tambah.
 const route = useRoute()
@@ -41,73 +41,6 @@ watch(
   { immediate: true },
 )
 
-function bukaUbah(b: Balita) {
-  modalUbahData.value = b
-  modalUbahOpen.value = true
-}
-
-function tutupUbah() {
-  modalUbahOpen.value = false
-  modalUbahData.value = null
-}
-// Mode tampilan daftar: kartu (default) ⇄ tabel — diingat per modul via localStorage.
-const modeView = ref<'grid' | 'tabel'>(bacaViewModul(KUNCI_VIEW))
-let timerCari: ReturnType<typeof setTimeout> | undefined
-
-watch(modeView, (v) => {
-  simpanViewModul(KUNCI_VIEW, v)
-})
-
-onMounted(async () => {
-  await muat()
-})
-
-// Pencarian real-time: refetch otomatis ±300 ms setelah berhenti mengetik.
-watch(cari, () => {
-  if (timerCari) clearTimeout(timerCari)
-  timerCari = setTimeout(() => void muat(), 300)
-})
-
-onBeforeUnmount(() => {
-  if (timerCari) clearTimeout(timerCari)
-})
-
-function bersihkanCari() {
-  cari.value = ''
-}
-
-async function muat() {
-  sibuk.value = true
-  pesanError.value = ''
-  try {
-    daftar.value = await listBalita(cari.value)
-  } catch (e) {
-    pesanError.value = e instanceof Error ? e.message : 'Gagal memuat data balita.'
-  } finally {
-    sibuk.value = false
-  }
-}
-
-function formatUmur(tanggalLahir: string): string {
-  const u = umurSaatIni(tanggalLahir)
-  if (u == null) return '—'
-  const tahun = Math.floor(u / 12)
-  const sisa = u % 12
-  if (tahun === 0) return `${sisa} bulan`
-  if (sisa === 0) return `${tahun} tahun`
-  return `${tahun} th ${sisa} bln`
-}
-
-function labelJk(jk: string | null): string {
-  return jk === 'Perempuan' ? 'Perempuan' : jk === 'Laki - Laki' ? 'Laki-laki' : '—'
-}
-
-function formatTanggal(tgl: string | null): string {
-  const d = parseTanggal(tgl ?? '')
-  if (!d) return '—'
-  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
-}
-
 async function hapus(balita: Balita) {
   const ok = await dlgHapus.value?.buka(
     `Hapus data ${balita.nama} beserta seluruh kunjungannya?`,
@@ -115,12 +48,7 @@ async function hapus(balita: Balita) {
     { merah: true },
   )
   if (!ok) return
-  try {
-    await hapusBalita(balita.id)
-    await muat()
-  } catch (e) {
-    pesanError.value = e instanceof Error ? e.message : 'Gagal menghapus data.'
-  }
+  await hapusItem(balita)
 }
 </script>
 
@@ -222,11 +150,11 @@ async function hapus(balita: Balita) {
           </p>
           <p class="text-muted-foreground mt-1 max-w-sm text-sm">
             <template v-if="cari">
-              Tidak ditemukan balita dengan kata kunci “{{ cari }}”. Coba kata kunci lain atau hapus
+              Tidak ditemukan balita dengan kata kunci "{{ cari }}". Coba kata kunci lain atau hapus
               pencarian.
             </template>
             <template v-else>
-              Mulai dengan menambahkan balita pertama melalui tombol “Tambah Balita”.
+              Mulai dengan menambahkan balita pertama melalui tombol "Tambah Balita".
             </template>
           </p>
           <Button v-if="cari" variant="outline" size="sm" class="mt-4" @click="bersihkanCari">
@@ -379,6 +307,6 @@ async function hapus(balita: Balita) {
 
     <ConfirmDialog ref="dlgHapus" />
     <FormModalBalita v-model:open="modalTambah" @tersimpan="muat" />
-    <FormModalBalita v-model:open="modalUbahOpen" :balita="modalUbahData" @tersimpan="muat" @update:open="(v) => { if (!v) tutupUbah() }" />
+    <FormModalBalita v-model:open="modalUbahOpen" :balita="modalUbahData" @tersimpan="muat" @update:open="(v) => { if (!v) { modalUbahOpen = false; modalUbahData = null } }" />
   </div>
 </template>

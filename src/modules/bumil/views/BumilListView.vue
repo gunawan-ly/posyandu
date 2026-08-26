@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { FileText, HeartPulse, Pencil, Plus, Search, Trash2, UserRound, X } from '@lucide/vue'
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import AppFooter from '@/components/AppFooter.vue'
@@ -11,78 +11,25 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import FormModalBumil from '@/modules/bumil/views/FormModalBumil.vue'
 import { hapusBumil, listBumil, type Bumil } from '@/modules/bumil/db'
-import { parseTanggal } from '@/lib/umur'
+import { useDaftarModul } from '@/composables/useDaftarModul'
+import { formatTanggal } from '@/lib/label'
 import { useAuth } from '@/supabase/useAuth'
-import { bacaViewModul, simpanViewModul } from '@/lib/viewModul'
-
-const KUNCI_VIEW = 'view-bumil'
 
 const { isAdmin } = useAuth()
-
-const daftar = ref<Bumil[]>([])
-const cari = ref('')
-const sibuk = ref(true)
-const pesanError = ref('')
 const dlgHapus = ref<InstanceType<typeof ConfirmDialog>>()
-const modalTambah = ref(false)
-const modalUbahOpen = ref(false)
-const modalUbahData = ref<Bumil | null>(null)
 
-function bukaUbah(b: Bumil) {
-  modalUbahData.value = b
-  modalUbahOpen.value = true
-}
-
-function tutupUbah() {
-  modalUbahOpen.value = false
-  modalUbahData.value = null
-}
-// Mode tampilan daftar: kartu (default) ⇄ tabel — diingat per modul via localStorage.
-const modeView = ref<'grid' | 'tabel'>(bacaViewModul(KUNCI_VIEW))
-let timerCari: ReturnType<typeof setTimeout> | undefined
-
-watch(modeView, (v) => {
-  simpanViewModul(KUNCI_VIEW, v)
+const {
+  daftar, cari, sibuk, pesanError, modalTambah, modalUbahOpen, modalUbahData,
+  modeView, bukaUbah, bersihkanCari, muat, hapusItem,
+} = useDaftarModul<Bumil>({
+  kunciView: 'view-bumil',
+  muat: listBumil,
+  hapus: hapusBumil,
+  namaItem: 'ibu hamil',
 })
-
-onMounted(async () => {
-  await muat()
-})
-
-// Pencarian real-time: refetch otomatis ±300 ms setelah berhenti mengetik.
-watch(cari, () => {
-  if (timerCari) clearTimeout(timerCari)
-  timerCari = setTimeout(() => void muat(), 300)
-})
-
-onBeforeUnmount(() => {
-  if (timerCari) clearTimeout(timerCari)
-})
-
-function bersihkanCari() {
-  cari.value = ''
-}
-
-async function muat() {
-  sibuk.value = true
-  pesanError.value = ''
-  try {
-    daftar.value = await listBumil(cari.value)
-  } catch (e) {
-    pesanError.value = e instanceof Error ? e.message : 'Gagal memuat data ibu hamil.'
-  } finally {
-    sibuk.value = false
-  }
-}
 
 function labelKategori(k: string | null): string {
   return k ?? '—'
-}
-
-function formatTanggal(tgl: string | null): string {
-  const d = parseTanggal(tgl ?? '')
-  if (!d) return '—'
-  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 async function hapus(bumil: Bumil) {
@@ -92,12 +39,7 @@ async function hapus(bumil: Bumil) {
     { merah: true },
   )
   if (!ok) return
-  try {
-    await hapusBumil(bumil.id)
-    await muat()
-  } catch (e) {
-    pesanError.value = e instanceof Error ? e.message : 'Gagal menghapus data.'
-  }
+  await hapusItem(bumil)
 }
 </script>
 
@@ -199,11 +141,11 @@ async function hapus(bumil: Bumil) {
           </p>
           <p class="text-muted-foreground mt-1 max-w-sm text-sm">
             <template v-if="cari">
-              Tidak ditemukan ibu dengan kata kunci “{{ cari }}”. Coba kata kunci lain atau hapus
+              Tidak ditemukan ibu dengan kata kunci "{{ cari }}". Coba kata kunci lain atau hapus
               pencarian.
             </template>
             <template v-else>
-              Mulai dengan menambahkan ibu hamil pertama melalui tombol “Tambah Ibu Hamil”.
+              Mulai dengan menambahkan ibu hamil pertama melalui tombol "Tambah Ibu Hamil".
             </template>
           </p>
           <Button v-if="cari" variant="outline" size="sm" class="mt-4" @click="bersihkanCari">
@@ -357,6 +299,6 @@ async function hapus(bumil: Bumil) {
 
     <ConfirmDialog ref="dlgHapus" />
     <FormModalBumil v-model:open="modalTambah" @tersimpan="muat" />
-    <FormModalBumil v-model:open="modalUbahOpen" :bumil="modalUbahData" @tersimpan="muat" @update:open="(v) => { if (!v) tutupUbah() }" />
+    <FormModalBumil v-model:open="modalUbahOpen" :bumil="modalUbahData" @tersimpan="muat" @update:open="(v) => { if (!v) { modalUbahOpen = false; modalUbahData = null } }" />
   </div>
 </template>

@@ -9,13 +9,8 @@ import { hitungUmurBulan, parseTanggal } from '@/lib/umur'
 // kalkulator TypeScript; hasilnya disimpan sebagai label Indonesia agar
 // konsisten dengan data eksisting di Supabase.
 
-// Tampilkan nilai Ya/Tidak secara konsisten (data lama memakai Y/T).
-export function labelYaTidak(nilai: string | null | undefined): string {
-  if (nilai == null || nilai === '') return '—'
-  if (nilai === 'Y') return 'Ya'
-  if (nilai === 'T') return 'Tidak'
-  return nilai
-}
+// Re-export dari sumber tunggal di lib/label.
+export { labelYaTidak } from '@/lib/label'
 
 const KODE_BULAN = ['JAN', 'FEB', 'MAR', 'APR', 'MEI', 'JUN', 'JUL', 'AGST', 'SEP', 'OKT', 'NOV', 'DES']
 

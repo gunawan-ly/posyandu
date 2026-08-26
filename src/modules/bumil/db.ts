@@ -15,13 +15,8 @@ export const OPSI_LILA = ['Hijau', 'Merah'] as const
 export const OPSI_TD_KURVA = ['Normal', 'Tinggi'] as const
 export const OPSI_YA_TIDAK = ['Ya', 'Tidak'] as const
 
-// Tampilkan nilai Ya/Tidak secara konsisten (data lama memakai Y/T).
-export function labelYaTidak(nilai: string | null | undefined): string {
-  if (nilai == null || nilai === '') return '—'
-  if (nilai === 'Y') return 'Ya'
-  if (nilai === 'T') return 'Tidak'
-  return nilai
-}
+// Re-export dari sumber tunggal di lib/label.
+export { labelYaTidak } from '@/lib/label'
 
 export interface Bumil {
   id: number

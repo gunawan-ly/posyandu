@@ -5,7 +5,7 @@ import AppNavbar from '@/components/AppNavbar.vue'
 import { Card, CardContent } from '@/components/ui/card'
 
 // Komponen placeholder generik untuk modul posyandu yang belum aktif.
-// Dipakai wrapper tiap modul (mis. AprasListView, RemajaListView) dengan teks dari props.
+// Dipakai wrapper tiap modul (mis. RemajaListView, LansiaListView) dengan teks dari props.
 defineProps<{
   namaModul: string
   rentangUsia: string

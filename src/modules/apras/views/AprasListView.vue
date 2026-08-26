@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Pencil, Plus, Search, Trash2, UserRound, Users, X } from '@lucide/vue'
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import AppFooter from '@/components/AppFooter.vue'
@@ -11,89 +11,22 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import FormModalApras from '@/modules/apras/views/FormModalApras.vue'
 import { listApras, hapusApras, type Apras } from '@/modules/apras/db'
-import { umurSaatIni, parseTanggal } from '@/lib/umur'
-import { bacaViewModul, simpanViewModul } from '@/lib/viewModul'
+import { useDaftarModul } from '@/composables/useDaftarModul'
+import { formatUmur, labelJk } from '@/lib/label'
 import { useAuth } from '@/supabase/useAuth'
 
-const KUNCI_VIEW = 'view-apras'
-
 const { isAdmin } = useAuth()
-
-const daftar = ref<Apras[]>([])
-const cari = ref('')
-const sibuk = ref(true)
-const pesanError = ref('')
 const dlgHapus = ref<InstanceType<typeof ConfirmDialog>>()
-const modalTambah = ref(false)
-const modalUbahOpen = ref(false)
-const modalUbahData = ref<Apras | null>(null)
 
-function bukaUbah(a: Apras) {
-  modalUbahData.value = a
-  modalUbahOpen.value = true
-}
-
-function tutupUbah() {
-  modalUbahOpen.value = false
-  modalUbahData.value = null
-}
-// Mode tampilan daftar: kartu (default) ⇄ tabel — diingat per modul via localStorage.
-const modeView = ref<'grid' | 'tabel'>(bacaViewModul(KUNCI_VIEW))
-let timerCari: ReturnType<typeof setTimeout> | undefined
-
-watch(modeView, (v) => {
-  simpanViewModul(KUNCI_VIEW, v)
+const {
+  daftar, cari, sibuk, pesanError, modalTambah, modalUbahOpen, modalUbahData,
+  modeView, bukaUbah, bersihkanCari, muat, hapusItem,
+} = useDaftarModul<Apras>({
+  kunciView: 'view-apras',
+  muat: listApras,
+  hapus: hapusApras,
+  namaItem: 'apras',
 })
-
-onMounted(async () => {
-  await muat()
-})
-
-// Pencarian real-time: refetch otomatis ±300 ms setelah berhenti mengetik.
-watch(cari, () => {
-  if (timerCari) clearTimeout(timerCari)
-  timerCari = setTimeout(() => void muat(), 300)
-})
-
-onBeforeUnmount(() => {
-  if (timerCari) clearTimeout(timerCari)
-})
-
-function bersihkanCari() {
-  cari.value = ''
-}
-
-async function muat() {
-  sibuk.value = true
-  pesanError.value = ''
-  try {
-    daftar.value = await listApras(cari.value)
-  } catch (e) {
-    pesanError.value = e instanceof Error ? e.message : 'Gagal memuat data apras.'
-  } finally {
-    sibuk.value = false
-  }
-}
-
-function formatUmur(tanggalLahir: string): string {
-  const u = umurSaatIni(tanggalLahir)
-  if (u == null) return '—'
-  const tahun = Math.floor(u / 12)
-  const sisa = u % 12
-  if (tahun === 0) return `${sisa} bulan`
-  if (sisa === 0) return `${tahun} tahun`
-  return `${tahun} th ${sisa} bln`
-}
-
-function labelJk(jk: string | null): string {
-  return jk === 'Perempuan' ? 'Perempuan' : jk === 'Laki - Laki' ? 'Laki-laki' : '—'
-}
-
-function formatTanggal(tgl: string | null): string {
-  const d = parseTanggal(tgl ?? '')
-  if (!d) return '—'
-  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
-}
 
 async function hapus(anak: Apras) {
   const ok = await dlgHapus.value?.buka(
@@ -102,12 +35,7 @@ async function hapus(anak: Apras) {
     { merah: true },
   )
   if (!ok) return
-  try {
-    await hapusApras(anak.id)
-    await muat()
-  } catch (e) {
-    pesanError.value = e instanceof Error ? e.message : 'Gagal menghapus data.'
-  }
+  await hapusItem(anak)
 }
 </script>
 
@@ -202,11 +130,11 @@ async function hapus(anak: Apras) {
           </p>
           <p class="text-muted-foreground mt-1 max-w-sm text-sm">
             <template v-if="cari">
-              Tidak ditemukan anak dengan kata kunci “{{ cari }}”. Coba kata kunci lain atau hapus
+              Tidak ditemukan anak dengan kata kunci "{{ cari }}". Coba kata kunci lain atau hapus
               pencarian.
             </template>
             <template v-else>
-              Mulai dengan menambahkan anak pertama melalui tombol “Tambah Apras”.
+              Mulai dengan menambahkan anak pertama melalui tombol "Tambah Apras".
             </template>
           </p>
           <Button v-if="cari" variant="outline" size="sm" class="mt-4" @click="bersihkanCari">
@@ -310,7 +238,7 @@ async function hapus(anak: Apras) {
                   <td class="text-muted-foreground py-3 pr-3 whitespace-nowrap">{{ formatUmur(a.tanggal_lahir) }}</td>
                   <td class="py-3 pr-3 break-all whitespace-nowrap">{{ a.nik || '—' }}</td>
                   <td class="max-w-[140px] truncate py-3 pr-3 whitespace-nowrap" :title="a.tempat_lahir || ''">{{ a.tempat_lahir || '—' }}</td>
-                  <td class="text-muted-foreground py-3 pr-3 whitespace-nowrap">{{ formatTanggal(a.tanggal_lahir) }}</td>
+                  <td class="text-muted-foreground py-3 pr-3 whitespace-nowrap">{{ a.tanggal_lahir }}</td>
                   <td class="max-w-[160px] truncate py-3 pr-3 whitespace-nowrap" :title="a.nama_orang_tua || ''">{{ a.nama_orang_tua || '—' }}</td>
                   <td class="py-3 pr-3 break-all whitespace-nowrap">{{ a.nik_orang_tua || '—' }}</td>
                   <td class="py-3 pr-3 break-all whitespace-nowrap">{{ a.nomor_kk || '—' }}</td>
@@ -356,6 +284,6 @@ async function hapus(anak: Apras) {
 
     <ConfirmDialog ref="dlgHapus" />
     <FormModalApras v-model:open="modalTambah" @tersimpan="muat" />
-    <FormModalApras v-model:open="modalUbahOpen" :apras="modalUbahData" @tersimpan="muat" @update:open="(v) => { if (!v) tutupUbah() }" />
+    <FormModalApras v-model:open="modalUbahOpen" :apras="modalUbahData" @tersimpan="muat" @update:open="(v) => { if (!v) { modalUbahOpen = false; modalUbahData = null } }" />
   </div>
 </template>

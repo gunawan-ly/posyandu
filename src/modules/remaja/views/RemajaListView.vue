@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import PlaceholderModul from '@/modules/apras/views/PlaceholderModul.vue'
+import PlaceholderModul from '@/components/PlaceholderModul.vue'
 </script>
 
 <template>

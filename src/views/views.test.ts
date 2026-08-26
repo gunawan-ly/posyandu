@@ -19,6 +19,7 @@ vi.mock('@/modules/balita/db', () => ({
 // Rekap gabungan (v2.32.0): BalitaRekapView kini juga mengambil data Apras.
 vi.mock('@/modules/apras/db', () => ({
   listApras: vi.fn().mockResolvedValue([]),
+  hapusApras: vi.fn().mockResolvedValue(undefined),
   listKunjunganAprasPeriode: vi.fn().mockResolvedValue([]),
 }))
 
