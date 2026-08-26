@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button'
 import InputDusun from '@/components/InputDusun.vue'
 import InputPosyandu from '@/components/InputPosyandu.vue'
+import InputSegmen from '@/components/InputSegmen.vue'
 import { ambilBalita, buatBalita, ubahBalita, type Balita } from '@/modules/balita/db'
 import { parseTanggal } from '@/lib/umur'
 
@@ -185,23 +186,12 @@ const klsInput =
             <input id="fm-nama" v-model="nama" type="text" :class="klsInput" placeholder="cth: An Nahda Ramadhania" />
           </div>
 
-          <div>
-            <p class="mb-1.5 text-xs font-bold text-muted-foreground">Jenis Kelamin *</p>
-            <div class="inline-flex w-full rounded-lg border border-emerald-200 bg-emerald-50 p-1" role="group" aria-label="Jenis kelamin">
-              <button
-                v-for="(label, k) in { 'Laki - Laki': 'Laki-laki', Perempuan: 'Perempuan' }"
-                :key="k"
-                type="button"
-                :class="jenisKelamin === k
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'"
-                class="flex-1 rounded-md px-3 py-2 text-sm font-bold transition-colors"
-                @click="jenisKelamin = k"
-              >
-                {{ label }}
-              </button>
-            </div>
-          </div>
+          <InputSegmen
+            v-model="jenisKelamin"
+            label="Jenis Kelamin *"
+            :opsi="['Laki-laki', 'Perempuan']"
+            :display="{ 'Laki-laki': 'Laki - Laki' }"
+          />
 
           <div>
             <label for="fm-nik" class="text-muted-foreground mb-1.5 block text-xs font-bold">NIK</label>

@@ -3,6 +3,7 @@ import { Pencil, Plus, TriangleAlert } from '@lucide/vue'
 import { computed, ref, watch } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import InputSegmen from '@/components/InputSegmen.vue'
 import { labelYaTidak, tambahKunjungan, ubahKunjungan, type Balita, type Kunjungan } from '@/modules/balita/db'
 import { hitungZLik, hitungZLil, klasifikasiLika, klasifikasiLila } from '@/lib/kalkulator'
 import { adalahGalatJaringan } from '@/lib/galat'
@@ -216,9 +217,10 @@ async function simpanKunjungan() {
   }
 }
 
-const OPSI_YA_TIDAK = ['Ya', 'Tidak']
-const OPSI_NAIK = ['Naik', 'Tidak Naik']
-const OPSI_CEKLIS = ['L', 'TL']
+const OPSI_YA_TIDAK = ['Ya', 'Tidak'] as const
+const OPSI_NAIK = ['Naik', 'Tidak Naik'] as const
+const OPSI_CEKLIS = ['L', 'TL'] as const
+const TAMPILAN_CEKLIS: Record<string, string> = { L: 'Lengkap', TL: 'Tidak Lengkap' }
 
 const klsInput =
   'border-input bg-background h-12 md:h-10 w-full min-w-0 rounded-md border px-3 py-2 text-base shadow-sm outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-3 disabled:pointer-events-none disabled:opacity-50 md:text-sm'
@@ -247,12 +249,12 @@ const klsInput =
         </div>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label for="lila" class="text-muted-foreground mb-1.5 block text-xs font-bold">LiLA (cm)</label>
-            <input id="lila" v-model="lingkarLengan" type="number" inputmode="decimal" step="0.1" min="0" class="w-full" :class="klsInput" />
-          </div>
-          <div>
             <label for="lika" class="text-muted-foreground mb-1.5 block text-xs font-bold">LiKA (cm)</label>
             <input id="lika" v-model="lingkarKepala" type="number" inputmode="decimal" step="0.1" min="0" class="w-full" :class="klsInput" />
+          </div>
+          <div>
+            <label for="lila" class="text-muted-foreground mb-1.5 block text-xs font-bold">LiLA (cm)</label>
+            <input id="lila" v-model="lingkarLengan" type="number" inputmode="decimal" step="0.1" min="0" class="w-full" :class="klsInput" />
           </div>
         </div>
 
@@ -287,62 +289,24 @@ const klsInput =
         <div class="border-border/60 border-t pt-4">
           <p class="text-muted-foreground mb-3 text-xs font-bold tracking-widest uppercase">Gizi & kesehatan</p>
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div>
-              <label for="bb-naik" class="text-muted-foreground mb-1.5 block text-xs font-bold">BB naik</label>
-              <select id="bb-naik" v-model="bbNaik" class="w-full" :class="klsInput" @change="bbNaikManual = true">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_NAIK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
-            <div>
-              <label for="ceklis-perkembangan" class="text-muted-foreground mb-1.5 block text-xs font-bold">Ceklis perkembangan</label>
-              <select id="ceklis-perkembangan" v-model="ceklisPerkembangan" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_CEKLIS" :key="s" :value="s">{{ s === 'L' ? 'L (Lengkap)' : 'TL (Tidak Lengkap)' }}</option>
-              </select>
-            </div>
-            <div>
-              <label for="imunisasi" class="text-muted-foreground mb-1.5 block text-xs font-bold">Imunisasi</label>
-              <select id="imunisasi" v-model="imunisasi" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
-            <div>
-              <label for="vitamin-a" class="text-muted-foreground mb-1.5 block text-xs font-bold">Vitamin A</label>
-              <select id="vitamin-a" v-model="vitaminA" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
-            <div>
-              <label for="asi-eksklusif" class="text-muted-foreground mb-1.5 block text-xs font-bold">ASI eksklusif</label>
-              <select id="asi-eksklusif" v-model="asiEksklusif" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
-            <div>
-              <label for="mp-asi" class="text-muted-foreground mb-1.5 block text-xs font-bold">MP-ASI</label>
-              <select id="mp-asi" v-model="mpAsi" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
-            <div>
-              <label for="obat-cacing" class="text-muted-foreground mb-1.5 block text-xs font-bold">Obat cacing</label>
-              <select id="obat-cacing" v-model="obatCacing" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
-            <div>
-              <label for="gejala-tbc" class="text-muted-foreground mb-1.5 block text-xs font-bold">Gejala TBC</label>
-              <select id="gejala-tbc" v-model="gejalaTbc" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
+            <InputSegmen
+              v-model="bbNaik"
+              label="BB naik"
+              :opsi="OPSI_NAIK"
+              @update:model-value="bbNaikManual = true"
+            />
+            <InputSegmen
+              v-model="ceklisPerkembangan"
+              label="Ceklis perkembangan"
+              :opsi="OPSI_CEKLIS"
+              :display="TAMPILAN_CEKLIS"
+            />
+            <InputSegmen v-model="imunisasi" label="Imunisasi" :opsi="OPSI_YA_TIDAK" />
+            <InputSegmen v-model="vitaminA" label="Vitamin A" :opsi="OPSI_YA_TIDAK" />
+            <InputSegmen v-model="asiEksklusif" label="ASI eksklusif" :opsi="OPSI_YA_TIDAK" />
+            <InputSegmen v-model="mpAsi" label="MP-ASI" :opsi="OPSI_YA_TIDAK" />
+            <InputSegmen v-model="obatCacing" label="Obat cacing" :opsi="OPSI_YA_TIDAK" />
+            <InputSegmen v-model="gejalaTbc" label="Gejala TBC" :opsi="OPSI_YA_TIDAK" />
           </div>
           <div class="mt-3">
             <label for="edukasi" class="text-muted-foreground mb-1.5 block text-xs font-bold">Edukasi (opsional)</label>

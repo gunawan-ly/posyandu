@@ -3,6 +3,7 @@ import { Pencil, Plus, TriangleAlert } from '@lucide/vue'
 import { computed, ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import InputSegmen from '@/components/InputSegmen.vue'
 import { adalahGalatJaringan } from '@/lib/galat'
 import { tambahKeAntre } from '@/lib/offlineAntre'
 import { tambahKunjunganApras, ubahKunjunganApras, type Apras, type KunjunganApras } from '@/modules/apras/db'
@@ -107,7 +108,7 @@ async function simpanKunjungan() {
   }
 }
 
-const OPSI_YA_TIDAK = ['Ya', 'Tidak']
+const OPSI_YA_TIDAK = ['Ya', 'Tidak'] as const
 
 const klsInput =
   'border-input bg-background h-12 md:h-10 w-full min-w-0 rounded-md border px-3 py-2 text-base shadow-sm outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-3 disabled:pointer-events-none disabled:opacity-50 md:text-sm'
@@ -148,27 +149,9 @@ const klsInput =
         <div class="border-border/60 border-t pt-4">
           <p class="text-muted-foreground mb-3 text-xs font-bold tracking-widest uppercase">Kesehatan &amp; layanan</p>
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div>
-              <label for="obat-cacing" class="text-muted-foreground mb-1.5 block text-xs font-bold">Obat cacing</label>
-              <select id="obat-cacing" v-model="obatCacing" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
-            <div>
-              <label for="gejala-tbc" class="text-muted-foreground mb-1.5 block text-xs font-bold">Gejala TBC</label>
-              <select id="gejala-tbc" v-model="gejalaTbc" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
-            <div>
-              <label for="dirujuk" class="text-muted-foreground mb-1.5 block text-xs font-bold">Dirujuk</label>
-              <select id="dirujuk" v-model="dirujuk" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
+            <InputSegmen v-model="obatCacing" label="Obat cacing" :opsi="OPSI_YA_TIDAK" />
+            <InputSegmen v-model="gejalaTbc" label="Gejala TBC" :opsi="OPSI_YA_TIDAK" />
+            <InputSegmen v-model="dirujuk" label="Dirujuk" :opsi="OPSI_YA_TIDAK" />
           </div>
           <div class="mt-3 space-y-3">
             <div>

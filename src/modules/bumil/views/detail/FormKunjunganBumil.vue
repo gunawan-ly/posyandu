@@ -3,6 +3,7 @@ import { Pencil, Plus, TriangleAlert } from '@lucide/vue'
 import { computed, ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import InputSegmen from '@/components/InputSegmen.vue'
 import { adalahGalatJaringan } from '@/lib/galat'
 import { tambahKeAntre } from '@/lib/offlineAntre'
 import {
@@ -174,20 +175,8 @@ const klsInput =
         </div>
 
         <div v-if="sedangHamil" class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div>
-            <label for="bb-kurva" class="text-muted-foreground mb-1.5 block text-xs font-bold">BB sesuai kurva KIA</label>
-            <select id="bb-kurva" v-model="bbKurvaKia" class="w-full" :class="klsInput">
-              <option value="">— pilih —</option>
-              <option v-for="s in OPSI_BB_KURVA" :key="s" :value="s">{{ s }}</option>
-            </select>
-          </div>
-          <div>
-            <label for="td-kurva" class="text-muted-foreground mb-1.5 block text-xs font-bold">TD sesuai kurva KIA</label>
-            <select id="td-kurva" v-model="tdKurvaKia" class="w-full" :class="klsInput">
-              <option value="">— pilih —</option>
-              <option v-for="s in OPSI_TD_KURVA" :key="s" :value="s">{{ s }}</option>
-            </select>
-          </div>
+          <InputSegmen v-model="bbKurvaKia" label="BB sesuai kurva KIA" :opsi="OPSI_BB_KURVA" />
+          <InputSegmen v-model="tdKurvaKia" label="TD sesuai kurva KIA" :opsi="OPSI_TD_KURVA" />
         </div>
 
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -195,13 +184,7 @@ const klsInput =
             <label for="lila" class="text-muted-foreground mb-1.5 block text-xs font-bold">LiLA (cm)</label>
             <input id="lila" v-model="lila" type="number" inputmode="decimal" step="0.1" min="0" placeholder="cth: 23,5" class="w-full" :class="klsInput" />
           </div>
-          <div>
-            <label for="lila-warna" class="text-muted-foreground mb-1.5 block text-xs font-bold">Status LiLA</label>
-            <select id="lila-warna" v-model="lilaWarna" class="w-full" :class="klsInput">
-              <option value="">— pilih —</option>
-              <option v-for="s in OPSI_LILA" :key="s" :value="s">{{ s }}</option>
-            </select>
-          </div>
+          <InputSegmen v-model="lilaWarna" label="Status LiLA" :opsi="OPSI_LILA" />
         </div>
 
         <div v-if="sedangHamil">
@@ -212,97 +195,19 @@ const klsInput =
         <div class="border-border/60 border-t pt-4">
           <p class="text-muted-foreground mb-3 text-xs font-bold tracking-widest uppercase">Skrining & intervensi</p>
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div>
-              <label for="batuk" class="text-muted-foreground mb-1.5 block text-xs font-bold">Batuk terus-menerus</label>
-              <select id="batuk" v-model="batuk" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
-            <div>
-              <label for="demam" class="text-muted-foreground mb-1.5 block text-xs font-bold">Demam > 2 minggu</label>
-              <select id="demam" v-model="demam" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
-            <div>
-              <label for="bb-turun" class="text-muted-foreground mb-1.5 block text-xs font-bold">BB tidak naik 2 bulan</label>
-              <select id="bb-turun" v-model="bbTidakNaik" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
-            <div>
-              <label for="kontak-tbc" class="text-muted-foreground mb-1.5 block text-xs font-bold">Kontak TBC</label>
-              <select id="kontak-tbc" v-model="kontakTbc" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
-            <div>
-              <label for="dapat-ttd" class="text-muted-foreground mb-1.5 block text-xs font-bold">Dapat tablet TTD</label>
-              <select id="dapat-ttd" v-model="dapatTtd" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
-            <div>
-              <label for="konsumsi-ttd" class="text-muted-foreground mb-1.5 block text-xs font-bold">Konsumsi TTD</label>
-              <select id="konsumsi-ttd" v-model="konsumsiTtd" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
-            <div>
-              <label for="mt-kek" class="text-muted-foreground mb-1.5 block text-xs font-bold">MT KEK diberikan</label>
-              <select id="mt-kek" v-model="mtKek" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
-            <div>
-              <label for="konsumsi-mt" class="text-muted-foreground mb-1.5 block text-xs font-bold">Konsumsi MT KEK</label>
-              <select id="konsumsi-mt" v-model="konsumsiMtKek" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
-            <div v-if="sedangHamil">
-              <label for="kelas-bumil" class="text-muted-foreground mb-1.5 block text-xs font-bold">Kelas ibu hamil</label>
-              <select id="kelas-bumil" v-model="kelasBumil" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
-            <div v-if="!sedangHamil">
-              <label for="vitamin-a-nifas" class="text-muted-foreground mb-1.5 block text-xs font-bold">Vitamin A (nifas)</label>
-              <select id="vitamin-a-nifas" v-model="vitaminA" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
-            <div v-if="!sedangHamil">
-              <label for="kb-pasca" class="text-muted-foreground mb-1.5 block text-xs font-bold">KB pasca persalinan</label>
-              <select id="kb-pasca" v-model="kbPascaPersalinan" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
-            <div>
-              <label for="dapat-edukasi" class="text-muted-foreground mb-1.5 block text-xs font-bold">Dapat edukasi</label>
-              <select id="dapat-edukasi" v-model="dapatEdukasi" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
-            <div>
-              <label for="dirujuk" class="text-muted-foreground mb-1.5 block text-xs font-bold">Dirujuk</label>
-              <select id="dirujuk" v-model="dirujuk" class="w-full" :class="klsInput">
-                <option value="">— pilih —</option>
-                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </div>
+            <InputSegmen v-model="batuk" label="Batuk terus-menerus" :opsi="OPSI_YA_TIDAK" />
+            <InputSegmen v-model="demam" label="Demam > 2 minggu" :opsi="OPSI_YA_TIDAK" />
+            <InputSegmen v-model="bbTidakNaik" label="BB tidak naik 2 bulan" :opsi="OPSI_YA_TIDAK" />
+            <InputSegmen v-model="kontakTbc" label="Kontak TBC" :opsi="OPSI_YA_TIDAK" />
+            <InputSegmen v-model="dapatTtd" label="Dapat tablet TTD" :opsi="OPSI_YA_TIDAK" />
+            <InputSegmen v-model="konsumsiTtd" label="Konsumsi TTD" :opsi="OPSI_YA_TIDAK" />
+            <InputSegmen v-model="mtKek" label="MT KEK diberikan" :opsi="OPSI_YA_TIDAK" />
+            <InputSegmen v-model="konsumsiMtKek" label="Konsumsi MT KEK" :opsi="OPSI_YA_TIDAK" />
+            <InputSegmen v-if="sedangHamil" v-model="kelasBumil" label="Kelas ibu hamil" :opsi="OPSI_YA_TIDAK" />
+            <InputSegmen v-if="!sedangHamil" v-model="vitaminA" label="Vitamin A (nifas)" :opsi="OPSI_YA_TIDAK" />
+            <InputSegmen v-if="!sedangHamil" v-model="kbPascaPersalinan" label="KB pasca persalinan" :opsi="OPSI_YA_TIDAK" />
+            <InputSegmen v-model="dapatEdukasi" label="Dapat edukasi" :opsi="OPSI_YA_TIDAK" />
+            <InputSegmen v-model="dirujuk" label="Dirujuk" :opsi="OPSI_YA_TIDAK" />
           </div>
         </div>
 

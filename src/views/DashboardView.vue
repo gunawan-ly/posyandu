@@ -17,7 +17,8 @@ const {
   statistikLoading,
   statistikError,
   labelBulanIni,
-  KARTU_STATISTIK,
+  SASARAN,
+  KUNJUNGAN,
   muat: muatStatistik,
 } = useStatistikPublik()
 
@@ -63,7 +64,8 @@ onMounted(async () => {
         :statistik-loading="statistikLoading"
         :statistik-error="statistikError"
         :label-bulan-ini="labelBulanIni"
-        :kartu-statistik="KARTU_STATISTIK"
+        :sasaran="SASARAN"
+        :kunjungan="KUNJUNGAN"
 
       />
 

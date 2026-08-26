@@ -9,8 +9,12 @@ const props = withDefaults(
     modelValue: string
     opsi: readonly string[]
     label?: string
+    /** Pemetaan nilai → label tampil (opsional). Bila ada, tombol menampilkan label
+     *  dari peta ini, bukan nilai mentah. Berguna bila nilai tersimpan berbeda dari
+     *  teks yang ingin ditampilkan (mis. 'L' → 'L (Lengkap)'). */
+    display?: Record<string, string>
   }>(),
-  { label: '' },
+  { label: '', display: undefined },
 )
 
 const emit = defineEmits<{ 'update:modelValue': [nilai: string] }>()
@@ -40,7 +44,7 @@ const diLuarOpsi = computed(
         class="flex-1 rounded-md px-3 py-2 text-sm font-bold transition-colors"
         @click="emit('update:modelValue', o)"
       >
-        {{ o }}
+        {{ display?.[o] ?? o }}
       </button>
     </div>
     <p v-if="diLuarOpsi" class="text-muted-foreground mt-1 text-xs">

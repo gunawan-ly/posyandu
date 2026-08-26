@@ -1,26 +1,25 @@
 <script setup lang="ts">
 import {
+  Baby,
   CalendarDays,
   BarChart3,
-} from '@lucide/vue'
-import { onMounted } from 'vue'
-import Reveal from '@/components/Reveal.vue'
-import { Card, CardContent } from '@/components/ui/card'
-import { useStatistikPublik } from '@/composables/useStatistikPublik'
-import {
-  Baby,
   HeartPulse,
   Sparkles,
   TrendingUp,
   UserRound,
   Users,
 } from '@lucide/vue'
+import { onMounted } from 'vue'
+import Reveal from '@/components/Reveal.vue'
+import { Card, CardContent } from '@/components/ui/card'
+import { useStatistikPublik } from '@/composables/useStatistikPublik'
 
 const {
   statistik,
   statistikError,
   labelBulanIni,
-  KARTU_STATISTIK,
+  SASARAN,
+  KUNJUNGAN,
   muat,
 } = useStatistikPublik()
 
@@ -59,23 +58,46 @@ onMounted(() => { muat() })
                 </span>
               </div>
             </div>
-            <dl class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              <div v-for="k in KARTU_STATISTIK" :key="k.label" class="flex items-start gap-3">
-                <span class="bg-primary/10 text-primary grid size-11 shrink-0 place-items-center rounded-xl">
-                  <component :is="IKON_MAP[k.key]" class="size-5" />
-                </span>
-                <div>
-                  <dt class="text-muted-foreground text-xs font-bold">{{ k.label }}</dt>
-                  <dd class="mt-0.5">
-                    <span class="font-display text-2xl font-semibold tabular-nums">
-                      {{ k.nilai ?? '–' }}
-                    </span>
-                    <span class="text-muted-foreground text-sm"> {{ k.akhiran }}</span>
-                  </dd>
-                  <dd class="text-muted-foreground mt-0.5 text-xs">{{ k.keterangan }}</dd>
+            <div class="grid gap-6 sm:grid-cols-2">
+              <!-- Kolom kiri: Sasaran Penduduk -->
+              <div class="space-y-1">
+                <p class="text-muted-foreground mb-3 text-xs font-bold tracking-widest uppercase">Sasaran penduduk</p>
+                <div v-for="k in SASARAN" :key="k.key" class="flex items-start gap-3">
+                  <span class="bg-primary/10 text-primary grid size-11 shrink-0 place-items-center rounded-xl">
+                    <component :is="IKON_MAP[k.key]" class="size-5" />
+                  </span>
+                  <div>
+                    <dt class="text-muted-foreground text-xs font-bold">{{ k.label }}</dt>
+                    <dd class="mt-0.5">
+                      <span class="font-display text-2xl font-semibold tabular-nums">
+                        {{ k.nilai ?? '–' }}
+                      </span>
+                      <span class="text-muted-foreground text-sm"> {{ k.akhiran }}</span>
+                    </dd>
+                    <dd class="text-muted-foreground mt-0.5 text-xs">{{ k.keterangan }}</dd>
+                  </div>
                 </div>
               </div>
-            </dl>
+              <!-- Kolom kanan: Kunjungan Bulan Ini -->
+              <div class="space-y-1">
+                <p class="text-muted-foreground mb-3 text-xs font-bold tracking-widest uppercase">Kunjungan bulan ini</p>
+                <div v-for="k in KUNJUNGAN" :key="k.key" class="flex items-start gap-3">
+                  <span class="bg-primary/10 text-primary grid size-11 shrink-0 place-items-center rounded-xl">
+                    <component :is="IKON_MAP[k.key]" class="size-5" />
+                  </span>
+                  <div>
+                    <dt class="text-muted-foreground text-xs font-bold">{{ k.label }}</dt>
+                    <dd class="mt-0.5">
+                      <span class="font-display text-2xl font-semibold tabular-nums">
+                        {{ k.nilai ?? '–' }}
+                      </span>
+                      <span class="text-muted-foreground text-sm"> {{ k.akhiran }}</span>
+                    </dd>
+                    <dd class="text-muted-foreground mt-0.5 text-xs">{{ k.keterangan }}</dd>
+                  </div>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </Reveal>
