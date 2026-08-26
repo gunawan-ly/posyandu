@@ -148,6 +148,8 @@ function lihatKunjungan(k: KunjunganBumil) {
     ['Konsumsi TTD', k.konsumsi_ttd],
     ['MT KEK diberikan', k.mt_kek_diberikan],
     ['Konsumsi MT KEK', k.konsumsi_mt_kek],
+    ['Vitamin A (nifas)', k.vitamin_a],
+    ['KB pasca persalinan', k.kb_pasca_persalinan],
     ['Kelas bumil', k.kelas_bumil],
     ['Edukasi', k.dapat_edukasi],
     ['Dirujuk', k.dirujuk],

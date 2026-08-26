@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { HeartPulse, Pencil, Plus, Search, Trash2, UserRound, X } from '@lucide/vue'
+import { FileText, HeartPulse, Pencil, Plus, Search, Trash2, UserRound, X } from '@lucide/vue'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
@@ -114,10 +114,18 @@ async function hapus(bumil: Bumil) {
             Kelola identitas ibu hamil dan catat kunjungan antenatal setiap bulan.
           </p>
         </div>
-        <Button v-if="isAdmin" size="lg" @click="modalTambah = true">
-          <Plus class="size-4" />
-          Tambah Ibu Hamil
-        </Button>
+        <div class="flex flex-wrap items-center gap-2">
+          <Button variant="outline" size="lg" as-child>
+            <RouterLink to="/bumil/rekap">
+              <FileText class="size-4" />
+              Rekap Tahunan
+            </RouterLink>
+          </Button>
+          <Button v-if="isAdmin" size="lg" @click="modalTambah = true">
+            <Plus class="size-4" />
+            Tambah Ibu Hamil
+          </Button>
+        </div>
       </div>
 
       <div class="mt-8 flex flex-wrap items-center justify-between gap-3">

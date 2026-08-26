@@ -45,6 +45,8 @@ const konsumsiTtd = ref(sunting?.konsumsi_ttd ?? '')
 const mtKek = ref(sunting?.mt_kek_diberikan ?? '')
 const konsumsiMtKek = ref(sunting?.konsumsi_mt_kek ?? '')
 const kelasBumil = ref(sunting?.kelas_bumil ?? '')
+const vitaminA = ref(sunting?.vitamin_a ?? '')
+const kbPascaPersalinan = ref(sunting?.kb_pasca_persalinan ?? '')
 const dapatEdukasi = ref(sunting?.dapat_edukasi ?? '')
 const dirujuk = ref(sunting?.dirujuk ?? '')
 const menyimpan = ref(false)
@@ -73,6 +75,8 @@ function kosongkanForm() {
   mtKek.value = ''
   konsumsiMtKek.value = ''
   kelasBumil.value = ''
+  vitaminA.value = ''
+  kbPascaPersalinan.value = ''
   dapatEdukasi.value = ''
   dirujuk.value = ''
 }
@@ -106,6 +110,8 @@ async function simpanKunjungan() {
     mt_kek_diberikan: mtKek.value || null,
     konsumsi_mt_kek: konsumsiMtKek.value || null,
     kelas_bumil: sedangHamil.value ? (kelasBumil.value || null) : null,
+    vitamin_a: !sedangHamil.value ? (vitaminA.value || null) : null,
+    kb_pasca_persalinan: !sedangHamil.value ? (kbPascaPersalinan.value || null) : null,
     dapat_edukasi: dapatEdukasi.value || null,
     dirujuk: dirujuk.value || null,
   }
@@ -265,6 +271,20 @@ const klsInput =
             <div v-if="sedangHamil">
               <label for="kelas-bumil" class="text-muted-foreground mb-1.5 block text-xs font-bold">Kelas ibu hamil</label>
               <select id="kelas-bumil" v-model="kelasBumil" class="w-full" :class="klsInput">
+                <option value="">— pilih —</option>
+                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
+              </select>
+            </div>
+            <div v-if="!sedangHamil">
+              <label for="vitamin-a-nifas" class="text-muted-foreground mb-1.5 block text-xs font-bold">Vitamin A (nifas)</label>
+              <select id="vitamin-a-nifas" v-model="vitaminA" class="w-full" :class="klsInput">
+                <option value="">— pilih —</option>
+                <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
+              </select>
+            </div>
+            <div v-if="!sedangHamil">
+              <label for="kb-pasca" class="text-muted-foreground mb-1.5 block text-xs font-bold">KB pasca persalinan</label>
+              <select id="kb-pasca" v-model="kbPascaPersalinan" class="w-full" :class="klsInput">
                 <option value="">— pilih —</option>
                 <option v-for="s in OPSI_YA_TIDAK" :key="s" :value="s">{{ s }}</option>
               </select>

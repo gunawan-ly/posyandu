@@ -9,6 +9,12 @@ export const bumilRoutes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/bumil/rekap',
+    name: 'bumil-rekap',
+    component: () => import('@/modules/bumil/views/BumilRekapView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     // Konsolidasi form (v2.30.0): tambah/ubah hanya lewat modal di daftar.
     path: '/bumil/baru',
     redirect: '/bumil',

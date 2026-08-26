@@ -64,6 +64,8 @@ export interface KunjunganBumil {
   mt_kek_diberikan: string | null
   konsumsi_mt_kek: string | null
   kelas_bumil: string | null
+  vitamin_a: string | null
+  kb_pasca_persalinan: string | null
   dapat_edukasi: string | null
   dirujuk: string | null
   created_at: string
@@ -105,6 +107,8 @@ export interface InputKunjunganBumil {
   mt_kek_diberikan?: string | null
   konsumsi_mt_kek?: string | null
   kelas_bumil?: string | null
+  vitamin_a?: string | null
+  kb_pasca_persalinan?: string | null
   dapat_edukasi?: string | null
   dirujuk?: string | null
 }
@@ -176,6 +180,20 @@ export async function listKunjunganBumil(bumilId: number): Promise<KunjunganBumi
   return (data ?? []) as KunjunganBumil[]
 }
 
+// Rekap: kunjungan semua bumil dalam rentang tanggal (inklusi batas, YYYY-MM-DD).
+export async function listKunjunganPeriode(awal: string, akhir: string): Promise<KunjunganBumil[]> {
+  const kl = wajibSupabase()
+  const { data, error } = await kl
+    .from('bumil_kunjungan')
+    .select('*')
+    .gte('tanggal_kunjungan', awal)
+    .lte('tanggal_kunjungan', akhir)
+    .order('tanggal_kunjungan', { ascending: true })
+    .order('id', { ascending: true })
+  if (error) lemparGalat(error)
+  return (data ?? []) as KunjunganBumil[]
+}
+
 // Susun isi baris kunjungan bumil siap simpan — dipakai bersama tambah & ubah.
 function susunIsiKunjungan(bumil: Bumil, input: InputKunjunganBumil) {
   const kunjungan = parseTanggal(input.tanggal_kunjungan)
@@ -201,6 +219,8 @@ function susunIsiKunjungan(bumil: Bumil, input: InputKunjunganBumil) {
     mt_kek_diberikan: input.mt_kek_diberikan ?? null,
     konsumsi_mt_kek: input.konsumsi_mt_kek ?? null,
     kelas_bumil: input.kelas_bumil ?? null,
+    vitamin_a: input.vitamin_a ?? null,
+    kb_pasca_persalinan: input.kb_pasca_persalinan ?? null,
     dapat_edukasi: input.dapat_edukasi ?? null,
     dirujuk: input.dirujuk ?? null,
   }
