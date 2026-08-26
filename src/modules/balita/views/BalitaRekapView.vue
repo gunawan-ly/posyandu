@@ -18,6 +18,8 @@ import {
 } from '@/components/ui/select'
 import { kodeDariLabel } from '@/lib/status'
 import { parseTanggal } from '@/lib/umur'
+import { listApras, listKunjunganAprasPeriode } from '@/modules/apras/db'
+import { gabungAnakApras, gabungKunjunganApras } from '@/modules/apras/rekap'
 import { listBalita, listKunjunganPeriode } from '@/modules/balita/db'
 import {
   BARIS_RINGKASAN,
@@ -28,8 +30,11 @@ import {
   unduhXlsx,
 } from '@/modules/balita/ekspor'
 import {
+  gabungAnakBalita,
+  gabungKunjunganBalita,
   hitungRekapBulanan,
   rekapPerBalita,
+  susunBarisApras,
   susunBarisRekap,
   type BarisRekap,
   type PeriodeRekap,
@@ -96,15 +101,44 @@ async function muat() {
   loading.value = true
   error.value = ''
   try {
-    const [semuaBalita, kunjungan] = await Promise.all([
+    const [semuaBalita, kunjunganBalita, semuaApras, kunjunganApras] = await Promise.all([
       listBalita(),
       listKunjunganPeriode(awalISO(p), akhirISO(p)),
+      listApras(),
+      listKunjunganAprasPeriode(awalISO(p), akhirISO(p)),
     ])
-    const mapK = rekapPerBalita(kunjungan)
-    rekap.value = hitungRekapBulanan(kunjungan, semuaBalita, p)
-    baris.value = semuaBalita
-      .filter((b) => mapK.has(b.id))
-      .map((b) => susunBarisRekap(b, mapK.get(b.id)!))
+
+    // Gabungan Balita + Apras: angka ringkasan dilebur (apras masuk keranjang
+    // Balita berdasarkan umur), satu suara per anak lintas modul.
+    const anakGabungan = [
+      ...semuaBalita.map(gabungAnakBalita),
+      ...semuaApras.map(gabungAnakApras),
+    ]
+    const kunjunganGabungan = [
+      ...kunjunganBalita.map(gabungKunjunganBalita),
+      ...kunjunganApras.map(gabungKunjunganApras),
+    ]
+    rekap.value = hitungRekapBulanan(kunjunganGabungan, anakGabungan, p)
+
+    // Rincian per anak: kedua modul dengan penanda kolom Modul.
+    const perBalita = rekapPerBalita(kunjunganBalita)
+    const barisBalita = semuaBalita
+      .filter((b) => perBalita.has(b.id))
+      .map((b) => susunBarisRekap(b, perBalita.get(b.id)!))
+    const perApras = new Map<number, (typeof kunjunganApras)[number]>()
+    for (const k of [...kunjunganApras].sort((a, b) => {
+      const ta = a.tanggal_kunjungan ?? ''
+      const tb = b.tanggal_kunjungan ?? ''
+      if (ta !== tb) return ta < tb ? -1 : 1
+      return a.id - b.id
+    })) {
+      if (k.apras_id != null) perApras.set(k.apras_id, k)
+    }
+    const barisApras = semuaApras
+      .filter((a) => perApras.has(a.id))
+      .map((a) => susunBarisApras(a, perApras.get(a.id)!))
+
+    baris.value = [...barisBalita, ...barisApras].sort((x, y) => x.nama.localeCompare(y.nama))
     label.value = labelPeriode(p)
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Gagal memuat rekap balita.'
@@ -368,7 +402,7 @@ function kodeStatus(st: string | null | undefined): string | null {
 
         <Card class="mt-6">
           <CardHeader>
-            <CardTitle class="font-display text-lg font-normal">Rincian Per Balita</CardTitle>
+            <CardTitle class="font-display text-lg font-normal">Rincian Per Anak</CardTitle>
             <CardDescription>{{ baris.length }} balita hadir pada periode {{ label }}</CardDescription>
           </CardHeader>
           <CardContent class="flex flex-col gap-4">
@@ -397,6 +431,7 @@ function kodeStatus(st: string | null | undefined): string | null {
                   >
                     <th class="py-2 pr-3 whitespace-nowrap">No</th>
                     <th class="py-2 pr-3 whitespace-nowrap">Nama</th>
+                    <th class="py-2 pr-3 whitespace-nowrap">Modul</th>
                     <th class="py-2 pr-3 whitespace-nowrap">JK</th>
                     <th class="py-2 pr-3 whitespace-nowrap">Tgl Lahir</th>
                     <th class="py-2 pr-3 whitespace-nowrap">Umur (bln)</th>
@@ -423,6 +458,16 @@ function kodeStatus(st: string | null | undefined): string | null {
                   >
                     <td class="text-muted-foreground py-3 pr-3 whitespace-nowrap">{{ i + 1 }}</td>
                     <td class="py-3 pr-3 font-medium whitespace-nowrap">{{ b.nama }}</td>
+                    <td class="py-3 pr-3 whitespace-nowrap">
+                      <span
+                        :class="b.modul === 'Apras'
+                          ? 'bg-sky-100 text-sky-700'
+                          : 'bg-emerald-100 text-emerald-700'"
+                        class="rounded-full px-2 py-0.5 text-xs font-bold"
+                      >
+                        {{ b.modul }}
+                      </span>
+                    </td>
                     <td class="py-3 pr-3 whitespace-nowrap">{{ labelJk(b.jenis_kelamin) }}</td>
                     <td class="py-3 pr-3 whitespace-nowrap">{{ formatTanggal(b.tanggal_lahir) }}</td>
                     <td class="py-3 pr-3 whitespace-nowrap">{{ b.umur_bulan ?? '—' }}</td>

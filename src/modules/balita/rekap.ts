@@ -39,6 +39,7 @@ export interface RekapBulanan {
 }
 
 export interface BarisRekap {
+  modul: 'Balita' | 'Apras'
   nama: string
   jenis_kelamin: string | null
   tanggal_lahir: string
@@ -96,6 +97,78 @@ export function rekapPerBalita(kunjungan: Kunjungan[]): Map<number, Kunjungan> {
   return hasil
 }
 
+// ---- Gabungan lintas modul (v2.32.0): Balita + Apras dalam satu rekap ----
+// Kunci memakai prefiks modul ("balita:12" / "apras:3") agar id antar tabel
+// tidak saling bertabrakan. Kolom yang tidak dimiliki Apras diisi null dan
+// otomatis tidak menyumbang angka (aturan baku: kosong tak dihitung).
+
+export interface AnakGabungan {
+  /** Identitas unik anak lintas modul, cth "balita:12". */
+  kunci: string
+  tanggal_lahir: string
+}
+
+export interface KunjunganGabungan {
+  /** Identitas unik baris kunjungan lintas modul. */
+  kunci: string
+  /** Kunci identitas anak pemilik kunjungan. */
+  anakKunci: string
+  tanggal_kunjungan: string | null
+  ceklis_perkembangan: string | null
+  bb_naik_tidak: string | null
+  bb_menurut_umur: string | null
+  pbtb_menurut_umur: string | null
+  bb_menurut_pbtb: string | null
+  status_lingkar_kepala: string | null
+  status_lingkar_lengan: string | null
+  imunisasi: string | null
+  vitamin_a: string | null
+  asi_eksklusif: string | null
+  mp_asi: string | null
+  obat_cacing: string | null
+  edukasi: string | null
+}
+
+export function gabungAnakBalita(b: Pick<Balita, 'id' | 'tanggal_lahir'>): AnakGabungan {
+  return { kunci: `balita:${b.id}`, tanggal_lahir: b.tanggal_lahir }
+}
+
+export function gabungKunjunganBalita(k: Kunjungan): KunjunganGabungan {
+  return {
+    kunci: `balita:${k.id}`,
+    anakKunci: k.balita_id != null ? `balita:${k.balita_id}` : '',
+    tanggal_kunjungan: k.tanggal_kunjungan,
+    ceklis_perkembangan: k.ceklis_perkembangan,
+    bb_naik_tidak: k.bb_naik_tidak,
+    bb_menurut_umur: k.bb_menurut_umur,
+    pbtb_menurut_umur: k.pbtb_menurut_umur,
+    bb_menurut_pbtb: k.bb_menurut_pbtb,
+    status_lingkar_kepala: k.status_lingkar_kepala,
+    status_lingkar_lengan: k.status_lingkar_lengan,
+    imunisasi: k.imunisasi,
+    vitamin_a: k.vitamin_a,
+    asi_eksklusif: k.asi_eksklusif,
+    mp_asi: k.mp_asi,
+    obat_cacing: k.obat_cacing,
+    edukasi: k.edukasi,
+  }
+}
+
+// Satu suara per anak pada dataset gabungan (urut tanggal naik, tiebreak kunci).
+export function satuSuaraPerAnak(kunjungan: KunjunganGabungan[]): Map<string, KunjunganGabungan> {
+  const urut = [...kunjungan].sort((a, b) => {
+    const ta = a.tanggal_kunjungan ?? ''
+    const tb = b.tanggal_kunjungan ?? ''
+    if (ta !== tb) return ta < tb ? -1 : 1
+    return a.kunci < b.kunci ? -1 : 1
+  })
+  const hasil = new Map<string, KunjunganGabungan>()
+  for (const k of urut) {
+    if (k.anakKunci) hasil.set(k.anakKunci, k)
+  }
+  return hasil
+}
+
 // Sasaran: umur < 12 bulan = bayi; 12–60 bulan = balita; tanggal lahir tidak valid → balita (aman).
 export function klasifikasiSasaran(tanggalLahir: string, refTanggal: Date): 'bayi' | 'balita' {
   const lahir = parseTanggal(tanggalLahir)
@@ -141,30 +214,30 @@ function tanggalAkhirPeriode(periode: PeriodeRekap): Date {
 }
 
 export function hitungRekapBulanan(
-  kunjunganPeriode: Kunjungan[],
-  balita: Balita[],
+  kunjunganGabungan: KunjunganGabungan[],
+  anak: AnakGabungan[],
   periode: PeriodeRekap,
 ): RekapBulanan {
   const refTanggal = tanggalAkhirPeriode(periode)
-  const perBalita = rekapPerBalita(kunjunganPeriode)
-  const daftarKunjungan = [...perBalita.values()]
+  const suara = satuSuaraPerAnak(kunjunganGabungan)
+  const daftarKunjungan = [...suara.values()]
 
-  // Sasaran dihitung dari SEMUA balita terdata; kehadiran memakai satu suara per balita.
-  const sasaranBayi = balita.filter((b) => klasifikasiSasaran(b.tanggal_lahir, refTanggal) === 'bayi').length
-  const sasaranBalita = balita.length - sasaranBayi
-  const hadir = new Set(perBalita.keys())
+  // Sasaran dihitung dari SEMUA anak terdata (gabungan modul); kehadiran
+  // memakai satu suara per anak. Anak Apras (>60 bln) masuk keranjang Balita.
+  const sasaranBayi = anak.filter((a) => klasifikasiSasaran(a.tanggal_lahir, refTanggal) === 'bayi').length
+  const sasaranBalita = anak.length - sasaranBayi
   let bayiHadir = 0
   let balitaHadir = 0
-  for (const b of balita) {
-    if (!hadir.has(b.id)) continue
-    if (klasifikasiSasaran(b.tanggal_lahir, refTanggal) === 'bayi') bayiHadir += 1
+  for (const a of anak) {
+    if (!suara.has(a.kunci)) continue
+    if (klasifikasiSasaran(a.tanggal_lahir, refTanggal) === 'bayi') bayiHadir += 1
     else balitaHadir += 1
   }
 
-  // Dua kolom Ya/Tidak sekaligus atas kunjungan terakhir per balita.
+  // Dua kolom Ya/Tidak sekaligus atas kunjungan terakhir per anak.
   // Aturan (Awan): nilai terisi & bukan pola Ya → "Tidak"; kosong/tak diisi →
   // tidak dihitung di kedua kolom (tidak diasumsikan apa pun).
-  const hitungDua = (ambil: (k: Kunjungan) => string | null | undefined): [number, number] => {
+  const hitungDua = (ambil: (k: KunjunganGabungan) => string | null | undefined): [number, number] => {
     let ya = 0
     let tidak = 0
     for (const k of daftarKunjungan) {
@@ -179,7 +252,7 @@ export function hitungRekapBulanan(
   // Pasangan Normal/Tidak Normal memakai aturan yang sama: terisi & bukan label
   // normal → "Tidak Normal"; kosong (belum diukur/status tak bisa dihitung) →
   // tidak masuk hitungan.
-  const hitungNormal = (ambil: (k: Kunjungan) => string | null | undefined, labelNormal: string): [number, number] => {
+  const hitungNormal = (ambil: (k: KunjunganGabungan) => string | null | undefined, labelNormal: string): [number, number] => {
     let normal = 0
     let tidakNormal = 0
     for (const k of daftarKunjungan) {
@@ -241,7 +314,7 @@ export function hitungRekapBulanan(
   }
 }
 
-// Satu baris rekap: identitas balita + data kunjungan terakhir.
+// Satu baris rekap: identitas anak + data kunjungan terakhir.
 // umur_bulan memakai kolom kunjungan bila ada, fallback hitung dari tanggal lahir vs kunjungan.
 export function susunBarisRekap(balita: Balita, k: Kunjungan): BarisRekap {
   let umurBulan = k.umur_bulan
@@ -251,6 +324,7 @@ export function susunBarisRekap(balita: Balita, k: Kunjungan): BarisRekap {
     if (lahir && kunjungan) umurBulan = hitungUmurBulan(lahir, kunjungan)
   }
   return {
+    modul: 'Balita',
     nama: balita.nama,
     jenis_kelamin: balita.jenis_kelamin,
     tanggal_lahir: balita.tanggal_lahir,
@@ -268,5 +342,47 @@ export function susunBarisRekap(balita: Balita, k: Kunjungan): BarisRekap {
     z_bb_u: k.z_bb_u,
     z_tb_u: k.z_tb_u,
     z_bb_tb: k.z_bb_tb,
+  }
+}
+
+// Struktur identitas minimum anak Apras untuk baris rincian (tanpa impor lintas db).
+export interface AnakStruktur {
+  nama: string
+  jenis_kelamin: string | null
+  tanggal_lahir: string
+  dusun: string | null
+  posyandu: string | null
+}
+
+// Baris rincian utk anak Apras: tanpa status/z-score (referensi WHO hanya s.d. 60 bln).
+export function susunBarisApras(
+  anak: AnakStruktur,
+  k: { tanggal_kunjungan: string | null; umur_bulan: number | null; berat_badan: number | null; tinggi_badan: number | null },
+): BarisRekap {
+  let umurBulan = k.umur_bulan
+  if (umurBulan == null) {
+    const lahir = parseTanggal(anak.tanggal_lahir)
+    const kunjungan = parseTanggal(k.tanggal_kunjungan ?? '')
+    if (lahir && kunjungan) umurBulan = hitungUmurBulan(lahir, kunjungan)
+  }
+  return {
+    modul: 'Apras',
+    nama: anak.nama,
+    jenis_kelamin: anak.jenis_kelamin,
+    tanggal_lahir: anak.tanggal_lahir,
+    umur_bulan: umurBulan,
+    dusun: anak.dusun,
+    posyandu: anak.posyandu,
+    tanggal_kunjungan: k.tanggal_kunjungan,
+    berat_badan: k.berat_badan,
+    tinggi_badan: k.tinggi_badan,
+    bb_menurut_umur: null,
+    pbtb_menurut_umur: null,
+    bb_menurut_pbtb: null,
+    status_lingkar_kepala: null,
+    status_lingkar_lengan: null,
+    z_bb_u: null,
+    z_tb_u: null,
+    z_bb_tb: null,
   }
 }

@@ -16,6 +16,12 @@ vi.mock('@/modules/balita/db', () => ({
   listKunjunganPeriode: vi.fn().mockResolvedValue([]),
 }))
 
+// Rekap gabungan (v2.32.0): BalitaRekapView kini juga mengambil data Apras.
+vi.mock('@/modules/apras/db', () => ({
+  listApras: vi.fn().mockResolvedValue([]),
+  listKunjunganAprasPeriode: vi.fn().mockResolvedValue([]),
+}))
+
 // Tanpa Supabase saat test — seksi statistik landing memakai fallback tanpa fetch jaringan.
 vi.mock('@/supabase/client', () => ({
   supabase: null,

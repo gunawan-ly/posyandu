@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest'
+import type { Apras, KunjunganApras } from '../apras/db'
+import { gabungAnakApras, gabungKunjunganApras } from '../apras/rekap'
 import type { Balita, Kunjungan } from './db'
 import {
   filterKunjunganPeriode,
   filterKunjunganRentang,
+  gabungAnakBalita,
+  gabungKunjunganBalita,
   hitungRekapBulanan,
   klasifikasiSasaran,
   rekapPerBalita,
@@ -140,6 +144,11 @@ describe('klasifikasiSasaran', () => {
   })
 })
 
+// Helper rekap gabungan: bungkus daftar balita & kunjungan ke bentuk gabungan.
+function hitung(kList: Kunjungan[], bList: Balita[], periode: Parameters<typeof hitungRekapBulanan>[2]) {
+  return hitungRekapBulanan(kList.map(gabungKunjunganBalita), bList.map(gabungAnakBalita), periode)
+}
+
 describe('hitungRekapBulanan', () => {
   const balita = [
     buatBalita({ id: 1, nama: 'Ani', tanggal_lahir: '2025-06-15' }), // 8 bulan → bayi
@@ -206,7 +215,7 @@ describe('hitungRekapBulanan', () => {
     }),
   ]
 
-  const hasil = hitungRekapBulanan(kunjungan, balita, { bulan: 1, tahun: 2026 })
+  const hasil = hitung(kunjungan, balita, { bulan: 1, tahun: 2026 })
 
   it('menghitung sasaran & kehadiran (bayi dan balita)', () => {
     expect(hasil.sasaran_bayi).toBe(2)
@@ -236,7 +245,7 @@ describe('hitungRekapBulanan', () => {
       buatKunjungan({ id: 22, balita_id: 12, tanggal_kunjungan: '2026-02-06', bb_naik_tidak: 'Tidak Naik' }),
       buatKunjungan({ id: 23, balita_id: 13, tanggal_kunjungan: '2026-02-07', bb_naik_tidak: '' }),
     ]
-    const r = hitungRekapBulanan(kList, bList, { bulan: 1, tahun: 2026 })
+    const r = hitung(kList, bList, { bulan: 1, tahun: 2026 })
     expect(r.bb_naik).toBe(1)
     expect(r.bb_tidak_naik).toBe(1)
   })
@@ -247,7 +256,7 @@ describe('hitungRekapBulanan', () => {
       buatKunjungan({ id: 31, balita_id: 21, tanggal_kunjungan: '2026-02-05', bb_naik_tidak: 'Y' }),
       buatKunjungan({ id: 32, balita_id: 21, tanggal_kunjungan: '2026-02-20', bb_naik_tidak: 'T' }),
     ]
-    const r = hitungRekapBulanan(kList, bList, { bulan: 1, tahun: 2026 })
+    const r = hitung(kList, bList, { bulan: 1, tahun: 2026 })
     // Satu suara per balita: kunjungan terakhir (id 32, 'T') yang dipakai.
     expect(r.bb_naik).toBe(0)
     expect(r.bb_tidak_naik).toBe(1)
@@ -285,7 +294,7 @@ describe('hitungRekapBulanan', () => {
   })
 
   it('periode rentang menghasilkan sasaran & kehadiran yang sama', () => {
-    const hasilRentang = hitungRekapBulanan(kunjungan, balita, { awal: '2026-02-01', akhir: '2026-02-28' })
+    const hasilRentang = hitung(kunjungan, balita, { awal: '2026-02-01', akhir: '2026-02-28' })
     expect(hasilRentang.sasaran_bayi).toBe(2)
     expect(hasilRentang.sasaran_balita).toBe(3)
     expect(hasilRentang.bayi_hadir).toBe(1)
@@ -351,5 +360,103 @@ describe('susunBarisRekap', () => {
     const b = buatBalita({ id: 1, nama: 'Budi', tanggal_lahir: '' })
     const k = buatKunjungan({ id: 9, balita_id: 1, tanggal_kunjungan: '2026-02-15', umur_bulan: null })
     expect(susunBarisRekap(b, k).umur_bulan).toBeNull()
+  })
+
+  it('menandai modul Balita pada baris rincian balita', () => {
+    const b = buatBalita({ id: 1, nama: 'Budi', tanggal_lahir: '2024-06-10' })
+    const k = buatKunjungan({ id: 10, balita_id: 1, tanggal_kunjungan: '2026-02-15' })
+    expect(susunBarisRekap(b, k).modul).toBe('Balita')
+  })
+})
+
+// ---- Gabungan lintas modul: Apras masuk keranjang Balita (v2.32.0) ----
+
+function buatKunjunganApras(partial: Partial<KunjunganApras> & { id: number; apras_id: number | null }): KunjunganApras {
+  return {
+    nama_anak: null,
+    umur_bulan: null,
+    tanggal_kunjungan: null,
+    berat_badan: null,
+    tinggi_badan: null,
+    lingkar_kepala: null,
+    lingkar_lengan: null,
+    gejala_tbc: null,
+    obat_cacing: null,
+    edukasi: null,
+    dirujuk: null,
+    catatan: null,
+    dibuat_oleh: null,
+    created_at: '',
+    ...partial,
+  }
+}
+
+function buatApras(partial: Partial<Apras> & { id: number; nama: string; tanggal_lahir: string }): Apras {
+  return {
+    nik: null,
+    jenis_kelamin: null,
+    tempat_lahir: null,
+    anak_ke: null,
+    nama_orang_tua: null,
+    nik_orang_tua: null,
+    nomor_kk: null,
+    dusun: null,
+    alamat: null,
+    posyandu: null,
+    dibuat_oleh: null,
+    created_at: '',
+    ...partial,
+  }
+}
+
+describe('rekap gabungan Apras', () => {
+  it('anak apras (umur >60 bln) terhitung dalam sasaran & kehadiran Balita', () => {
+    // Lahir 2020-06-01 → ~68 bulan pada Feb 2026.
+    const anakApras = buatApras({ id: 1, nama: 'Raka', tanggal_lahir: '2020-06-01' })
+    const kunjunganApras = [buatKunjunganApras({ id: 1, apras_id: 1, tanggal_kunjungan: '2026-02-09' })]
+
+    const hasil = hitungRekapBulanan(
+      [gabungKunjunganApras(kunjunganApras[0])],
+      [gabungAnakApras(anakApras)],
+      { bulan: 1, tahun: 2026 },
+    )
+    expect(hasil.sasaran_balita).toBe(1)
+    expect(hasil.sasaran_bayi).toBe(0)
+    expect(hasil.balita_hadir).toBe(1)
+    expect(hasil.balita_tidak_hadir).toBe(0)
+  })
+
+  it('kunjungan apras hanya menyumbang indikator yang dimiliki (cacing & edukasi)', () => {
+    const anakApras = buatApras({ id: 1, nama: 'Raka', tanggal_lahir: '2020-06-01' })
+    const ks = [
+      buatKunjunganApras({ id: 1, apras_id: 1, tanggal_kunjungan: '2026-02-09', obat_cacing: 'Ya', edukasi: 'Ya' }),
+    ]
+    const hasil = hitungRekapBulanan(
+      ks.map(gabungKunjunganApras),
+      [gabungAnakApras(anakApras)],
+      { bulan: 1, tahun: 2026 },
+    )
+    expect(hasil.cacing_ya).toBe(1)
+    expect(hasil.edukasi_ya).toBe(1)
+    // Kolom yang tidak ada di apras tetap nol — kosong tak dihitung.
+    expect(hasil.imunisasi_ya).toBe(0)
+    expect(hasil.imunisasi_tidak).toBe(0)
+    expect(hasil.vitamin_ya).toBe(0)
+    expect(hasil.bb_naik).toBe(0)
+  })
+
+  it('id sama antar tabel tidak saling menimpa (kunci berprefiks modul)', () => {
+    // Balita id=1 dan Apras id=1 adalah dua anak berbeda.
+    const b = buatBalita({ id: 1, nama: 'Ani', tanggal_lahir: '2025-06-15' }) // bayi
+    const a = buatApras({ id: 1, nama: 'Raka', tanggal_lahir: '2020-06-01' }) // apras
+    const ks = [
+      ...[buatKunjungan({ id: 1, balita_id: 1, tanggal_kunjungan: '2026-02-05', obat_cacing: 'Ya' })].map(gabungKunjunganBalita),
+      ...[buatKunjunganApras({ id: 1, apras_id: 1, tanggal_kunjungan: '2026-02-06', obat_cacing: 'Ya' })].map(gabungKunjunganApras),
+    ]
+    const hasil = hitungRekapBulanan(ks, [gabungAnakBalita(b), gabungAnakApras(a)], { bulan: 1, tahun: 2026 })
+    // Kedua anak hadir masing-masing satu suara.
+    expect(hasil.bayi_hadir).toBe(1)
+    expect(hasil.balita_hadir).toBe(1)
+    expect(hasil.cacing_ya).toBe(2)
   })
 })

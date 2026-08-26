@@ -105,6 +105,7 @@ export function susunLembarRingkasan(rekap: RekapBulanan, labelPeriode: string):
 export const KEPALA_RINCIAN = [
   'No',
   'Nama',
+  'Modul',
   'Jenis Kelamin',
   'Tanggal Lahir',
   'Umur (bln)',
@@ -131,6 +132,7 @@ export function susunLembarRincian(baris: BarisRekap[]): (string | number | null
     lembar.push([
       i + 1,
       b.nama,
+      b.modul,
       b.jenis_kelamin,
       b.tanggal_lahir,
       b.umur_bulan,

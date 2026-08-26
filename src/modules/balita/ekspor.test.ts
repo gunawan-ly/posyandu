@@ -42,6 +42,7 @@ const rekap: RekapBulanan = {
 // Fixture BarisRekap: baris pertama lengkap, baris kedua banyak nilai null.
 const baris: BarisRekap[] = [
   {
+    modul: 'Balita',
     nama: 'Ani',
     jenis_kelamin: 'Perempuan',
     tanggal_lahir: '2025-06-15',
@@ -61,6 +62,7 @@ const baris: BarisRekap[] = [
     z_bb_tb: -0.1,
   },
   {
+    modul: 'Balita',
     nama: 'Budi',
     jenis_kelamin: 'Laki - Laki',
     tanggal_lahir: '2024-02-10',
@@ -130,6 +132,7 @@ describe('susunLembarRincian', () => {
     expect(lembar[0]).toEqual([
       'No',
       'Nama',
+      'Modul',
       'Jenis Kelamin',
       'Tanggal Lahir',
       'Umur (bln)',
@@ -151,7 +154,8 @@ describe('susunLembarRincian', () => {
     expect(lembar[1][1]).toBe('Ani')
     expect(lembar[1][0]).toBe(1)
     expect(lembar[2][0]).toBe(2)
-    expect(lembar[2][4]).toBeNull()
+    // Kolom bergeser +1 sejak v2.32.0 (kolom Modul setelah Nama).
+    expect(lembar[2][5]).toBeNull()
   })
 })
 

@@ -142,6 +142,20 @@ export async function listKunjunganApras(aprasId: number): Promise<KunjunganApra
   return (data ?? []) as KunjunganApras[]
 }
 
+// Rekap: kunjungan semua apras dalam rentang tanggal (inklusi batas, YYYY-MM-DD).
+export async function listKunjunganAprasPeriode(awal: string, akhir: string): Promise<KunjunganApras[]> {
+  const kl = wajibSupabase()
+  const { data, error } = await kl
+    .from('apras_kunjungan')
+    .select('*')
+    .gte('tanggal_kunjungan', awal)
+    .lte('tanggal_kunjungan', akhir)
+    .order('tanggal_kunjungan', { ascending: true })
+    .order('id', { ascending: true })
+  if (error) lemparGalat(error)
+  return (data ?? []) as KunjunganApras[]
+}
+
 // Susun isi baris kunjungan apras siap simpan — dipakai bersama tambah & ubah.
 function susunIsiKunjungan(apras: Apras, input: InputKunjunganApras) {
   const lahir = parseTanggal(apras.tanggal_lahir)
