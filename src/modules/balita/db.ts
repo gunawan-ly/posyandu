@@ -66,6 +66,8 @@ export interface Kunjungan {
   obat_cacing: string | null
   mt_pangan_lokal: string | null
   edukasi: string | null
+  sakit: string | null
+  dirujuk: string | null
   umur_bulan: number | null
   z_bb_u: number | null
   z_tb_u: number | null

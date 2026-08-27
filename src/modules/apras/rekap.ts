@@ -28,5 +28,8 @@ export function gabungKunjunganApras(k: KunjunganApras): KunjunganGabungan {
     mp_asi: null,
     obat_cacing: k.obat_cacing,
     edukasi: k.edukasi,
+    gejala_tbc: null,
+    sakit: null,
+    dirujuk: null,
   }
 }

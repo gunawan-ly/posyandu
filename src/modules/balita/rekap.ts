@@ -36,6 +36,10 @@ export interface RekapBulanan {
   cacing_tidak: number
   edukasi_ya: number
   edukasi_tidak: number
+  gejala_tbc_ya: number
+  sakit_ya: number
+  dirujuk_bayi: number
+  dirujuk_balita: number
 }
 
 export interface BarisRekap {
@@ -127,6 +131,9 @@ export interface KunjunganGabungan {
   mp_asi: string | null
   obat_cacing: string | null
   edukasi: string | null
+  gejala_tbc: string | null
+  sakit: string | null
+  dirujuk: string | null
 }
 
 export function gabungAnakBalita(b: Pick<Balita, 'id' | 'tanggal_lahir'>): AnakGabungan {
@@ -151,6 +158,9 @@ export function gabungKunjunganBalita(k: Kunjungan): KunjunganGabungan {
     mp_asi: k.mp_asi,
     obat_cacing: k.obat_cacing,
     edukasi: k.edukasi,
+    gejala_tbc: k.gejala_tbc,
+    sakit: k.sakit,
+    dirujuk: k.dirujuk,
   }
 }
 
@@ -221,6 +231,7 @@ export function hitungRekapBulanan(
   const refTanggal = tanggalAkhirPeriode(periode)
   const suara = satuSuaraPerAnak(kunjunganGabungan)
   const daftarKunjungan = [...suara.values()]
+  const anakMap = new Map(anak.map((a) => [a.kunci, a]))
 
   // Sasaran dihitung dari SEMUA anak terdata (gabungan modul); kehadiran
   // memakai satu suara per anak. Anak Apras (>60 bln) masuk keranjang Balita.
@@ -277,6 +288,19 @@ export function hitungRekapBulanan(
   const [mpasiYa, mpasiTidak] = hitungDua((k) => k.mp_asi)
   const [cacingYa, cacingTidak] = hitungDua((k) => k.obat_cacing)
   const [edukasiYa, edukasiTidak] = hitungDua((k) => k.edukasi)
+  const [gejalaTbcYa] = hitungDua((k) => k.gejala_tbc)
+  const [sakitYa] = hitungDua((k) => k.sakit)
+
+  // Dirujuk dihitung per usia: bayi (<12 bln) vs balita (≥12 bln).
+  let dirujukBayi = 0
+  let dirujukBalita = 0
+  for (const k of daftarKunjungan) {
+    const v = (k.dirujuk ?? '').trim()
+    if (!v || !fungsiAktif(v)) continue
+    const anak = anakMap.get(k.anakKunci)
+    if (anak && klasifikasiSasaran(anak.tanggal_lahir, refTanggal) === 'bayi') dirujukBayi += 1
+    else dirujukBalita += 1
+  }
 
   return {
     sasaran_bayi: sasaranBayi,
@@ -311,7 +335,22 @@ export function hitungRekapBulanan(
     cacing_tidak: cacingTidak,
     edukasi_ya: edukasiYa,
     edukasi_tidak: edukasiTidak,
+    gejala_tbc_ya: gejalaTbcYa,
+    sakit_ya: sakitYa,
+    dirujuk_bayi: dirujukBayi,
+    dirujuk_balita: dirujukBalita,
   }
+}
+
+// Rekap tahunan: hitung 12 bulan untuk satu tahun, return array 12 elemen.
+export function hitungRekapTahunan(
+  kunjunganGabungan: KunjunganGabungan[],
+  anak: AnakGabungan[],
+  tahun: number,
+): RekapBulanan[] {
+  return Array.from({ length: 12 }, (_, i) =>
+    hitungRekapBulanan(kunjunganGabungan, anak, { bulan: i, tahun }),
+  )
 }
 
 // Satu baris rekap: identitas anak + data kunjungan terakhir.

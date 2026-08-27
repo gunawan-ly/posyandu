@@ -38,6 +38,8 @@ function buatKunjungan(partial: Partial<Kunjungan> & { id: number; balita_id: nu
     obat_cacing: null,
     mt_pangan_lokal: null,
     edukasi: null,
+    sakit: null,
+    dirujuk: null,
     umur_bulan: null,
     z_bb_u: null,
     z_tb_u: null,

@@ -37,6 +37,10 @@ const rekap: RekapBulanan = {
   cacing_tidak: 0,
   edukasi_ya: 4,
   edukasi_tidak: 0,
+  gejala_tbc_ya: 1,
+  sakit_ya: 2,
+  dirujuk_bayi: 1,
+  dirujuk_balita: 1,
 }
 
 // Fixture BarisRekap: baris pertama lengkap, baris kedua banyak nilai null.
