@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import InputDusun from '@/components/InputDusun.vue'
+import InputSegmen from '@/components/InputSegmen.vue'
 import { Button } from '@/components/ui/button'
 import { ambilBumil, buatBumil, KATEGORI_BUMIL, ubahBumil, type Bumil } from '@/modules/bumil/db'
 import { parseTanggal } from '@/lib/umur'
@@ -194,23 +195,7 @@ const klsInput =
             <input id="fm-nama" v-model="nama" type="text" :class="klsInput" placeholder="cth: Wiwin Idrus" />
           </div>
 
-          <div>
-            <p class="mb-1.5 text-xs font-bold text-muted-foreground">Kategori *</p>
-            <div class="inline-flex w-full rounded-lg border border-emerald-200 bg-emerald-50 p-1" role="group" aria-label="Kategori">
-              <button
-                v-for="k in KATEGORI_BUMIL"
-                :key="k"
-                type="button"
-                :class="kategori === k
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'"
-                class="flex-1 rounded-md px-3 py-2 text-sm font-bold transition-colors"
-                @click="kategori = k"
-              >
-                {{ k }}
-              </button>
-            </div>
-          </div>
+          <InputSegmen v-model="kategori" :opsi="KATEGORI_BUMIL" label="Kategori" />
 
           <div class="grid gap-4 sm:grid-cols-2">
             <div>
