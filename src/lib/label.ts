@@ -42,5 +42,7 @@ export function formatTanggal(tgl: string | null): string {
 }
 
 export function labelJk(jk: string | null): string {
-  return jk === 'Perempuan' ? 'Perempuan' : jk === 'Laki - Laki' ? 'Laki-laki' : '—'
+  if (jk === 'Perempuan') return 'Perempuan'
+  if (jk === 'Laki-laki' || jk === 'Laki - Laki') return 'Laki-laki'
+  return '—'
 }
