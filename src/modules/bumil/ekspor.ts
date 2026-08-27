@@ -145,12 +145,18 @@ function susunMatriks(baris: BarisRekapBumil[], tahun: number): (string | number
 
   const isi = baris.map((b) => [
     `${NAMA_BULAN[b.bulan]} ${tahun}`,
-    ...GRUP_KOLOM.flatMap((g) => g.kolom.map((k) => k.ambil(b))),
+    ...GRUP_KOLOM.flatMap((g) => g.kolom.map((k) => {
+      const v = k.ambil(b)
+      return v === 0 ? '-' : v
+    })),
   ])
 
   const jumlah: (string | number)[] = [
     'JUMLAH',
-    ...GRUP_KOLOM.flatMap((g) => g.kolom.map((k) => totalKolom(baris, k.ambil))),
+    ...GRUP_KOLOM.flatMap((g) => g.kolom.map((k) => {
+      const v = totalKolom(baris, k.ambil)
+      return v === 0 ? '-' : v
+    })),
   ]
 
   return [kepalaGrup, kepalaKolom, ...isi, jumlah]
