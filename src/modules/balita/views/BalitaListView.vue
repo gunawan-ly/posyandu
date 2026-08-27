@@ -69,7 +69,7 @@ async function hapus(balita: Balita) {
           <RouterLink to="/balita/rekap">
             <Button variant="outline" size="lg">
               <FileText class="size-4" />
-              Rekap
+              Rekapitulasi
             </Button>
           </RouterLink>
           <Button v-if="isAdmin" size="lg" @click="modalTambah = true">

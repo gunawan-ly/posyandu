@@ -111,20 +111,16 @@ describe('GRUP_KOLOM', () => {
 describe('susunMatriks', () => {
   it('menghasilkan 14 baris: 2 header + 12 bulan + 1 JUMLAH', () => {
     const barisRekap = Array.from({ length: 12 }, () => rekap)
-    const matriks = susunMatriks(barisRekap, 2026)
+    const matriks = susunMatriks(barisRekap)
     expect(matriks).toHaveLength(15)
-    // Baris 0: header grup — kolom Bulan & Tahun
+    // Baris 0: header grup — kolom Bulan saja
     expect(matriks[0][0]).toBe('Bulan')
-    expect(matriks[0][1]).toBe('Tahun')
-    // Baris 1: header kolom — kolom Bulan & Tahun kosong
+    // Baris 1: header kolom — kolom Bulan kosong
     expect(matriks[1][0]).toBe('')
-    expect(matriks[1][1]).toBe('')
-    // Baris 2: Januari, 2026
+    // Baris 2: Januari
     expect(matriks[2][0]).toBe('Januari')
-    expect(matriks[2][1]).toBe(2026)
     // Baris 13: JUMLAH
     expect(matriks[14][0]).toBe('JUMLAH')
-    expect(matriks[14][1]).toBe('')
   })
 })
 
@@ -147,11 +143,11 @@ describe('susunLembarRincian', () => {
 describe('buatWorkbookRekap', () => {
   it('menghasilkan workbook dengan sheet Rekap 2026 (pertama) & Rincian', async () => {
     const wb = await buatWorkbookRekap([], [], 2026, baris)
-    expect(wb.SheetNames).toEqual(['Rekap 2026', 'Rincian'])
+    expect(wb.SheetNames).toEqual(['Rekapitulasi 2026', 'Rincian'])
     const buffer = XLSX.write(wb, { type: 'buffer' })
     const dibaca = XLSX.read(buffer)
-    expect(dibaca.SheetNames).toEqual(['Rekap 2026', 'Rincian'])
-    const rekapSheet = dibaca.Sheets['Rekap 2026']
+    expect(dibaca.SheetNames).toEqual(['Rekapitulasi 2026', 'Rincian'])
+    const rekapSheet = dibaca.Sheets['Rekapitulasi 2026']
     expect(rekapSheet['A1'].v).toBe('Bulan')
     const rincian = dibaca.Sheets['Rincian']
     expect(rincian['A1'].v).toBe('No')

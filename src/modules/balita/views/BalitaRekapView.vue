@@ -123,7 +123,7 @@ async function eksporExcel() {
   if (baris.value.length === 0) return
   const tahunNum = Number(tahun.value) || new Date().getFullYear()
   const wb = await buatWorkbookRekap([], [], tahunNum, baris.value)
-  unduhXlsx(wb, `rekap-balita-${tahunNum}.xlsx`)
+          unduhXlsx(wb, `rekapitulasi-balita-${tahunNum}.xlsx`)
 }
 
 function cetak() {
@@ -183,8 +183,8 @@ function jumlahGrup(): RekapBulanan {
 }
 
 const judulRekap = computed(() => {
-  if (tampilanMode.value === 'tubuhan') return `Rekap Tahunan Balita ${tahun.value}`
-  return `Rekap Bulanan Balita — ${NAMA_BULAN[Number(bulan.value)]} ${tahun.value}`
+  if (tampilanMode.value === 'tubuhan') return `Rekapitulasi Tahunan Balita ${tahun.value}`
+  return `Rekapitulasi Bulanan Balita — ${NAMA_BULAN[Number(bulan.value)]} ${tahun.value}`
 })
 </script>
 
@@ -199,7 +199,7 @@ const judulRekap = computed(() => {
           <h1 class="font-display mt-3 text-3xl leading-tight sm:text-4xl">{{ judulRekap }}</h1>
           <p class="text-muted-foreground mt-3 max-w-xl text-sm">
             Ringkasan kunjungan dan status gizi balita untuk laporan posyandu, lengkap dengan format
-            resmi Rekap Bulanan Posyandu dan ekspor Excel/CSV.
+            resmi Rekapitulasi Bulanan Posyandu dan ekspor Excel/CSV.
           </p>
         </div>
         <RouterLink to="/balita" class="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm font-medium">
@@ -216,14 +216,14 @@ const judulRekap = computed(() => {
               :variant="tampilanMode === 'tubuhan' ? 'default' : 'outline'"
               @click="tampilanMode = 'tubuhan'"
             >
-              Rekapan Tahunan
+              Rekapitulasi Tahunan
             </Button>
             <Button
               size="sm"
               :variant="tampilanMode === 'sebulan' ? 'default' : 'outline'"
               @click="tampilanMode = 'sebulan'"
             >
-              Rekapan Bulanan
+              Rekapitulasi Bulanan
             </Button>
           </div>
 
@@ -286,7 +286,7 @@ const judulRekap = computed(() => {
         <p class="font-display mt-4 text-lg">Belum ada kunjungan di periode ini</p>
         <p class="text-muted-foreground mt-1 max-w-sm text-sm">
           Tidak ada kunjungan balita tercatat untuk tahun {{ tahun }}. Ubah filter untuk melihat
-          rekap lain.
+          rekapitulasi lain.
         </p>
       </div>
 
@@ -297,7 +297,7 @@ const judulRekap = computed(() => {
 
         <Card>
           <CardHeader>
-            <CardTitle class="font-display text-lg font-normal">Format Resmi Rekap Bulanan Posyandu</CardTitle>
+            <CardTitle class="font-display text-lg font-normal">Format Resmi Rekapitulasi Bulanan Posyandu</CardTitle>
             <CardDescription>
               {{ tampilanMode === 'tubuhan' ? `Seluruh tahun ${tahun}` : `${NAMA_BULAN[Number(bulan)]} ${tahun}` }}
               — {{ jumlahAnak }} anak tercatat
@@ -327,7 +327,6 @@ const judulRekap = computed(() => {
                 <thead>
                   <tr class="border-border/60 bg-muted/40 border-b text-left text-xs font-bold tracking-wide uppercase">
                     <th rowspan="2" class="border-border/60 px-3 py-2 align-bottom sticky left-0 bg-background z-10">Bulan</th>
-                    <th rowspan="2" class="border-border/60 px-3 py-2 align-bottom sticky left-0 bg-background z-10 ml-[80px]">Tahun</th>
                     <template v-for="(g, gi) in GRUP_KOLOM" :key="g.grup">
                       <th
                         v-if="g.kolom.length > 1"
@@ -364,7 +363,6 @@ const judulRekap = computed(() => {
                     class="border-border/60 hover:bg-emerald-50/30 border-b transition-colors last:border-0"
                   >
                     <td class="sticky left-0 bg-background z-10 px-3 py-2 font-medium whitespace-nowrap">{{ NAMA_BULAN[rekapTahunan.indexOf(row)] }}</td>
-                    <td class="sticky left-0 bg-background z-10 px-3 py-2 whitespace-nowrap">{{ tahun }}</td>
                     <td
                       v-for="k in GRUP_KOLOM.flatMap((g) => g.kolom)"
                       :key="k.label"
@@ -377,7 +375,6 @@ const judulRekap = computed(() => {
                 <tfoot>
                   <tr class="bg-primary/10 border-border/60 border-t font-bold">
                     <td class="sticky left-0 bg-background z-10 px-3 py-2">JUMLAH</td>
-                    <td class="sticky left-0 bg-background z-10 px-3 py-2"></td>
                     <td
                       v-for="k in GRUP_KOLOM.flatMap((g) => g.kolom)"
                       :key="'jml-' + k.label"

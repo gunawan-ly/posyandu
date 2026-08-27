@@ -22,8 +22,8 @@ const TAUTAN = [
 ]
 
 const MODUL = [
-  { label: 'Balita', to: '/balita' },
   { label: 'Bumil', to: '/bumil' },
+  { label: 'Balita', to: '/balita' },
   { label: 'Apras', to: '/apras' },
   { label: 'Remaja', to: '/remaja' },
   { label: 'Dewasa & Lansia', to: '/lansia' },

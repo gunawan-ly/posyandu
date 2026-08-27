@@ -17,6 +17,14 @@ interface ModulLayanan {
 
 const LAYANAN: ModulLayanan[] = [
   {
+    kunci: 'bumil',
+    nama: 'Bumil',
+    deskripsi: 'Pemantauan ibu hamil: identitas, kunjungan, dan status kesehatan.',
+    ikon: HeartPulse,
+    aktif: true,
+    href: '/bumil',
+  },
+  {
     kunci: 'balita',
     nama: 'Balita',
     deskripsi: 'Identitas, pengukuran, kurva pertumbuhan, dan riwayat kunjungan balita 0–60 bulan.',
@@ -31,14 +39,6 @@ const LAYANAN: ModulLayanan[] = [
     ikon: UserRound,
     aktif: true,
     href: '/apras',
-  },
-  {
-    kunci: 'bumil',
-    nama: 'Bumil',
-    deskripsi: 'Pemantauan ibu hamil: identitas, kunjungan, dan status kesehatan.',
-    ikon: HeartPulse,
-    aktif: true,
-    href: '/bumil',
   },
   {
     kunci: 'remaja',
@@ -75,7 +75,7 @@ const LAYANAN: ModulLayanan[] = [
           Satu posyandu, lima sasaran kesehatan.
         </h2>
         <p class="text-muted-foreground mt-4 max-w-2xl text-sm leading-relaxed">
-          Balita, Apras, dan Bumil sudah aktif. Remaja, dewasa & lansia menyusul.
+          Bumil, Balita, dan Apras sudah aktif. Remaja, dewasa & lansia menyusul.
         </p>
       </Reveal>
 

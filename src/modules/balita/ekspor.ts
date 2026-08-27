@@ -142,23 +142,23 @@ export function totalKolom(baris: RekapBulanan[], ambil: (b: RekapBulanan) => nu
 
 // ---- Matriks untuk spreadsheet (AoA) ----
 
-export function susunMatriks(baris: RekapBulanan[], tahun: number): (string | number)[][] {
+export function susunMatriks(baris: RekapBulanan[]): (string | number)[][] {
   // Row 0: kepala grup (colspan)
-  const kepalaGrup: (string | number)[] = ['Bulan', 'Tahun']
+  const kepalaGrup: (string | number)[] = ['Bulan']
   for (const g of GRUP_KOLOM) {
     kepalaGrup.push(g.grup)
     for (let i = 1; i < g.kolom.length; i++) kepalaGrup.push('')
   }
 
   // Row 1: kepala kolom
-  const kepalaKolom: (string | number)[] = ['', '']
+  const kepalaKolom: (string | number)[] = ['']
   for (const g of GRUP_KOLOM) {
     for (const k of g.kolom) kepalaKolom.push(k.label)
   }
 
   // Rows 2–13: data per bulan
   const isi: (string | number)[][] = baris.map((b, i) => {
-    const barisData: (string | number)[] = [NAMA_BULAN[i], tahun]
+    const barisData: (string | number)[] = [NAMA_BULAN[i]]
     for (const g of GRUP_KOLOM) {
       for (const k of g.kolom) barisData.push(k.ambil(b))
     }
@@ -166,7 +166,7 @@ export function susunMatriks(baris: RekapBulanan[], tahun: number): (string | nu
   })
 
   // Row 14: JUMLAH
-  const jumlah: (string | number)[] = ['JUMLAH', '']
+  const jumlah: (string | number)[] = ['JUMLAH']
   for (const g of GRUP_KOLOM) {
     for (const k of g.kolom) jumlah.push(totalKolom(baris, k.ambil))
   }
@@ -180,10 +180,8 @@ export function susunMerge(): XLSX.Range[] {
   const merge: XLSX.Range[] = []
   // "Bulan" spans rows 0–1 (col 0)
   merge.push({ s: { r: 0, c: 0 }, e: { r: 1, c: 0 } })
-  // "Tahun" spans rows 0–1 (col 1)
-  merge.push({ s: { r: 0, c: 1 }, e: { r: 1, c: 1 } })
 
-  let col = 2
+  let col = 1
   for (const g of GRUP_KOLOM) {
     if (g.kolom.length > 1) {
       merge.push({ s: { r: 0, c: col }, e: { r: 0, c: col + g.kolom.length - 1 } })
@@ -206,11 +204,11 @@ export async function buatWorkbookRekap(
 
   // Sheet 1: Rekap Tahunan
   const barisRekap = hitungRekapTahunan(kunjunganGabungan, anak, tahun)
-  const matriks = susunMatriks(barisRekap, tahun)
+  const matriks = susunMatriks(barisRekap)
   const sheet = X.utils.aoa_to_sheet(matriks)
   sheet['!merges'] = susunMerge()
   sheet['!cols'] = [{ wch: 16 }, ...Array.from({ length: 37 }, () => ({ wch: 11 }))]
-  X.utils.book_append_sheet(wb, sheet, `Rekap ${tahun}`)
+  X.utils.book_append_sheet(wb, sheet, `Rekapitulasi ${tahun}`)
 
   // Sheet 2: Rincian Per Anak
   if (baris.length > 0) {
@@ -321,7 +319,7 @@ export const BARIS_RINGKASAN: BarisRingkasan[] = [
 
 export function susunLembarRingkasan(rekap: RekapBulanan, periodeLabel: string): (string | number)[][] {
   const baris: (string | number)[][] = [
-    ['REKAP BULANAN POSYANDU - BALITA', ''],
+    ['REKAPITULASI BULANAN POSYANDU - BALITA', ''],
     ['Periode', periodeLabel],
     [],
     ['Keterangan', 'Jumlah'],

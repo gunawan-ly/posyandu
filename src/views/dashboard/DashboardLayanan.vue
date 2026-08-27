@@ -24,6 +24,14 @@ interface ModulLayanan {
 
 const MODUL: ModulLayanan[] = [
   {
+    kunci: 'bumil',
+    nama: 'Bumil',
+    deskripsi: 'Pemantauan ibu hamil: identitas, kunjungan, dan status kesehatan.',
+    ikon: HeartPulse,
+    aktif: true,
+    href: '/bumil',
+  },
+  {
     kunci: 'balita',
     nama: 'Balita',
     deskripsi: 'Identitas, pengukuran, kurva pertumbuhan, dan riwayat kunjungan balita 0–60 bulan.',
@@ -38,14 +46,6 @@ const MODUL: ModulLayanan[] = [
     ikon: UserRound,
     aktif: true,
     href: '/apras',
-  },
-  {
-    kunci: 'bumil',
-    nama: 'Bumil',
-    deskripsi: 'Pemantauan ibu hamil: identitas, kunjungan, dan status kesehatan.',
-    ikon: HeartPulse,
-    aktif: true,
-    href: '/bumil',
   },
   {
     kunci: 'remaja',
@@ -76,7 +76,7 @@ const MODUL: ModulLayanan[] = [
           </h2>
         </div>
         <p class="text-muted-foreground max-w-sm text-sm">
-          Data balita, apras, dan ibu hamil tersedia; remaja, dewasa & lansia menyusul.
+          Data ibu hamil, balita, dan apras sudah aktif; remaja, dewasa & lansia menyusul.
         </p>
       </div>
 
@@ -120,14 +120,14 @@ const MODUL: ModulLayanan[] = [
                   to="/balita/rekap"
                   class="text-muted-foreground hover:text-primary inline-flex items-center text-sm font-medium underline-offset-4 hover:underline"
                 >
-                  Rekap
+                  Rekapitulasi
                 </RouterLink>
                 <RouterLink
                   v-if="m.kunci === 'bumil' && isAutentikasi"
                   to="/bumil/rekap"
                   class="text-muted-foreground hover:text-primary inline-flex items-center text-sm font-medium underline-offset-4 hover:underline"
                 >
-                  Rekap Tahunan
+                  Rekapitulasi
                 </RouterLink>
               </div>
             </CardContent>

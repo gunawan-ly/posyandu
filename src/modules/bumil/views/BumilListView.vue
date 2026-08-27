@@ -60,7 +60,7 @@ async function hapus(bumil: Bumil) {
           <Button variant="outline" size="lg" as-child>
             <RouterLink to="/bumil/rekap">
               <FileText class="size-4" />
-              Rekap Tahunan
+              Rekapitulasi
             </RouterLink>
           </Button>
           <Button v-if="isAdmin" size="lg" @click="modalTambah = true">

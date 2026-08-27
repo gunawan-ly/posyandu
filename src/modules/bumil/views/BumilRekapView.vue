@@ -59,7 +59,7 @@ async function muat() {
     const [identitas, kunjungan] = await Promise.all([listBumil(), listKunjunganPeriode(...rentangTahun(t))])
     baris.value = hitungRekapTahunan(identitas, kunjungan, t)
   } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Gagal memuat rekap bumil.'
+    error.value = e instanceof Error ? e.message : 'Gagal memuat rekapitulasi bumil.'
     baris.value = []
   } finally {
     loading.value = false
@@ -116,7 +116,7 @@ onBeforeUnmount(() => {
     <section class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6">
       <div class="no-print flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 class="font-display text-2xl font-normal sm:text-3xl">Rekap Tahunan Bumil &amp; Busui</h1>
+          <h1 class="font-display text-2xl font-normal sm:text-3xl">Rekapitulasi Tahunan Bumil &amp; Busui</h1>
           <p class="text-muted-foreground mt-1 text-sm">
             Format resmi posyandu — baris per bulan, kolom per indikator.
           </p>
@@ -141,14 +141,14 @@ onBeforeUnmount(() => {
               :variant="tampilanMode === 'tubuhan' ? 'default' : 'outline'"
               @click="tampilanMode = 'tubuhan'"
             >
-              Rekapan Tahunan
+              Rekapitulasi Tahunan
             </Button>
             <Button
               size="sm"
               :variant="tampilanMode === 'sebulan' ? 'default' : 'outline'"
               @click="tampilanMode = 'sebulan'"
             >
-              Rekapan Bulanan
+              Rekapitulasi Bulanan
             </Button>
           </div>
 
@@ -208,8 +208,8 @@ onBeforeUnmount(() => {
         <CardHeader>
           <CardTitle class="font-display text-lg font-normal">
             {{ tampilanMode === 'tubuhan'
-              ? `Rekap Tahunan Posyandu — Bumil &amp; Busui · ${tahun}`
-              : `Rekap Bulanan Posyandu — Bumil &amp; Busui — ${NAMA_BULAN[Number(bulan)]} ${tahun}` }}
+              ? `Rekapitulasi Tahunan Posyandu — Bumil &amp; Busui · ${tahun}`
+              : `Rekapitulasi Bulanan Posyandu — Bumil &amp; Busui — ${NAMA_BULAN[Number(bulan)]} ${tahun}` }}
           </CardTitle>
           <CardDescription>Angka agregat bulanan sepanjang tahun terpilih.</CardDescription>
         </CardHeader>

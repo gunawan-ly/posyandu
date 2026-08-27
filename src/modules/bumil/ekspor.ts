@@ -185,7 +185,7 @@ export async function buatWorkbookRekap(
   ws['!merges'] = susunMerge()
   ws['!cols'] = [{ wch: 16 }, ...Array(GRUP_KOLOM.reduce((n, g) => n + g.kolom.length, 0)).fill({ wch: 11 })]
   const wb = X.utils.book_new()
-  X.utils.book_append_sheet(wb, ws, `Rekap ${tahun}`)
+  X.utils.book_append_sheet(wb, ws, `Rekapitulasi ${tahun}`)
   return wb
 }
 
@@ -196,7 +196,7 @@ export async function unduhXlsx(
 ): Promise<void> {
   const X = await muatXlsx()
   const wb = await buatWorkbookRekap(identitas, kunjungan, tahun)
-  X.writeFile(wb, `rekap-bumil-${tahun}.xlsx`)
+  X.writeFile(wb, `rekapitulasi-bumil-${tahun}.xlsx`)
 }
 
 // Teks CSV (nilai dipisah titik koma agar rapi dibuka di Excel Indonesia).
