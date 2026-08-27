@@ -12,7 +12,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import FormModalApras from '@/modules/apras/views/FormModalApras.vue'
 import { listApras, hapusApras, type Apras } from '@/modules/apras/db'
 import { useDaftarModul } from '@/composables/useDaftarModul'
-import { formatUmur, labelJk } from '@/lib/label'
+import { formatTanggal, formatUmur, labelJk } from '@/lib/label'
 import { useAuth } from '@/supabase/useAuth'
 
 const { isAdmin } = useAuth()
@@ -40,7 +40,7 @@ async function hapus(anak: Apras) {
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col">
+  <div class="flex flex-col">
     <AppNavbar />
 
     <section class="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
@@ -238,7 +238,7 @@ async function hapus(anak: Apras) {
                   <td class="text-muted-foreground py-3 pr-3 whitespace-nowrap">{{ formatUmur(a.tanggal_lahir) }}</td>
                   <td class="py-3 pr-3 break-all whitespace-nowrap">{{ a.nik || '—' }}</td>
                   <td class="max-w-[140px] truncate py-3 pr-3 whitespace-nowrap" :title="a.tempat_lahir || ''">{{ a.tempat_lahir || '—' }}</td>
-                  <td class="text-muted-foreground py-3 pr-3 whitespace-nowrap">{{ a.tanggal_lahir }}</td>
+                  <td class="text-muted-foreground py-3 pr-3 whitespace-nowrap">{{ formatTanggal(a.tanggal_lahir) }}</td>
                   <td class="max-w-[160px] truncate py-3 pr-3 whitespace-nowrap" :title="a.nama_orang_tua || ''">{{ a.nama_orang_tua || '—' }}</td>
                   <td class="py-3 pr-3 break-all whitespace-nowrap">{{ a.nik_orang_tua || '—' }}</td>
                   <td class="py-3 pr-3 break-all whitespace-nowrap">{{ a.nomor_kk || '—' }}</td>

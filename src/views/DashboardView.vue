@@ -46,7 +46,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col">
+  <div class="flex flex-col">
     <AppNavbar />
 
     <!-- Latar gradasi lembut (blob) agar efek kartu kaca terlihat -->

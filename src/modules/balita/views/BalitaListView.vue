@@ -53,7 +53,7 @@ async function hapus(balita: Balita) {
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col">
+  <div class="flex flex-col">
     <AppNavbar />
 
     <section class="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
@@ -245,10 +245,9 @@ async function hapus(balita: Balita) {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(b, i) in daftar" :key="b.id" class="group border-border/60 hover:bg-emerald-50/40 relative border-b last:border-0">
+                <tr v-for="b in daftar" :key="b.id" class="group border-border/60 hover:bg-emerald-50/40 relative border-b last:border-0">
                   <td
-                    class="py-3 pr-3 font-medium whitespace-nowrap group-hover:bg-emerald-50/40 sticky left-0 z-10"
-                    :class="i % 2 === 0 ? 'bg-white' : 'bg-white'"
+                    class="bg-white py-3 pr-3 font-medium whitespace-nowrap group-hover:bg-emerald-50/40 sticky left-0 z-10"
                   >
                     <RouterLink :to="`/balita/${b.id}`" class="hover:text-primary font-bold">
                       {{ b.nama }}

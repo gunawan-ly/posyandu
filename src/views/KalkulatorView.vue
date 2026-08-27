@@ -177,7 +177,7 @@ const klsInputError = `${klsInput} border-red-300 focus-visible:border-red-400 f
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col">
+  <div class="flex flex-col">
     <AppNavbar />
 
     <section class="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:py-16">

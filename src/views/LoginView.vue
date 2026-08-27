@@ -53,7 +53,7 @@ const klsInput =
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col">
+  <div class="flex flex-col">
     <AppNavbar />
 
     <section class="mx-auto flex w-full max-w-md flex-col px-4 py-14 sm:px-6">

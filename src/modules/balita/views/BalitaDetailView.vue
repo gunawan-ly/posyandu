@@ -178,7 +178,7 @@ async function hapusBal() {
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col">
+  <div class="flex flex-col">
     <AppNavbar />
 
     <section class="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">

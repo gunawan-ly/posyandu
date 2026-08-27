@@ -105,7 +105,7 @@ const klsInput =
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col print-area">
+  <div class="flex flex-col print-area">
     <AppNavbar />
 
     <section class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6">
