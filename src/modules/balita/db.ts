@@ -109,6 +109,9 @@ export interface InputKunjungan {
   bb_naik_tidak?: string | null
   ceklis_perkembangan?: string | null
   gejala_tbc?: string | null
+  mt_pangan_lokal?: string | null
+  sakit?: string | null
+  dirujuk?: string | null
   edukasi?: string | null
 }
 
@@ -252,6 +255,9 @@ function susunIsiKunjungan(balita: Balita, input: InputKunjungan) {
     bb_naik_tidak: input.bb_naik_tidak ?? null,
     ceklis_perkembangan: input.ceklis_perkembangan ?? null,
     gejala_tbc: input.gejala_tbc ?? null,
+    mt_pangan_lokal: input.mt_pangan_lokal ?? null,
+    sakit: input.sakit ?? null,
+    dirujuk: input.dirujuk ?? null,
     edukasi: input.edukasi ?? null,
     umur_bulan: umurBulan,
     bb_menurut_umur: hasil ? labelStatus(hasil.status_bb_u) : null,

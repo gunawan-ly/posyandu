@@ -44,6 +44,9 @@ const mpAsi = ref(opsi(sunting?.mp_asi))
 const obatCacing = ref(opsi(sunting?.obat_cacing))
 const ceklisPerkembangan = ref(sunting?.ceklis_perkembangan ?? '')
 const gejalaTbc = ref(opsi(sunting?.gejala_tbc))
+const mtPanganLokal = ref(opsi(sunting?.mt_pangan_lokal))
+const sakit = ref(opsi(sunting?.sakit))
+const dirujuk = ref(opsi(sunting?.dirujuk))
 const edukasi = ref(sunting?.edukasi ?? '')
 const menyimpan = ref(false)
 const pesanSukses = ref('')
@@ -150,6 +153,9 @@ function kosongkanForm() {
   obatCacing.value = ''
   ceklisPerkembangan.value = ''
   gejalaTbc.value = ''
+  mtPanganLokal.value = ''
+  sakit.value = ''
+  dirujuk.value = ''
   edukasi.value = ''
 }
 
@@ -183,6 +189,9 @@ async function simpanKunjungan() {
     obat_cacing: obatCacing.value || null,
     ceklis_perkembangan: ceklisPerkembangan.value || null,
     gejala_tbc: gejalaTbc.value || null,
+    mt_pangan_lokal: mtPanganLokal.value || null,
+    sakit: sakit.value || null,
+    dirujuk: dirujuk.value || null,
     edukasi: edukasi.value || null,
   }
 
@@ -307,6 +316,9 @@ const klsInput =
             <InputSegmen v-model="mpAsi" label="MP-ASI" :opsi="OPSI_YA_TIDAK" />
             <InputSegmen v-model="obatCacing" label="Obat cacing" :opsi="OPSI_YA_TIDAK" />
             <InputSegmen v-model="gejalaTbc" label="Gejala TBC" :opsi="OPSI_YA_TIDAK" />
+            <InputSegmen v-model="mtPanganLokal" label="MT Pangan Lokal" :opsi="OPSI_YA_TIDAK" />
+            <InputSegmen v-model="sakit" label="Sakit" :opsi="OPSI_YA_TIDAK" />
+            <InputSegmen v-model="dirujuk" label="Dirujuk" :opsi="OPSI_YA_TIDAK" />
           </div>
           <div class="mt-3">
             <label for="edukasi" class="text-muted-foreground mb-1.5 block text-xs font-bold">Edukasi (opsional)</label>
