@@ -144,21 +144,21 @@ export function totalKolom(baris: RekapBulanan[], ambil: (b: RekapBulanan) => nu
 
 export function susunMatriks(baris: RekapBulanan[], tahun: number): (string | number)[][] {
   // Row 0: kepala grup (colspan)
-  const kepalaGrup: (string | number)[] = ['Bulan']
+  const kepalaGrup: (string | number)[] = ['Bulan', 'Tahun']
   for (const g of GRUP_KOLOM) {
     kepalaGrup.push(g.grup)
     for (let i = 1; i < g.kolom.length; i++) kepalaGrup.push('')
   }
 
   // Row 1: kepala kolom
-  const kepalaKolom: (string | number)[] = ['']
+  const kepalaKolom: (string | number)[] = ['', '']
   for (const g of GRUP_KOLOM) {
     for (const k of g.kolom) kepalaKolom.push(k.label)
   }
 
   // Rows 2–13: data per bulan
   const isi: (string | number)[][] = baris.map((b, i) => {
-    const barisData: (string | number)[] = [`${NAMA_BULAN[i]} ${tahun}`]
+    const barisData: (string | number)[] = [NAMA_BULAN[i], tahun]
     for (const g of GRUP_KOLOM) {
       for (const k of g.kolom) barisData.push(k.ambil(b))
     }
@@ -166,7 +166,7 @@ export function susunMatriks(baris: RekapBulanan[], tahun: number): (string | nu
   })
 
   // Row 14: JUMLAH
-  const jumlah: (string | number)[] = ['JUMLAH']
+  const jumlah: (string | number)[] = ['JUMLAH', '']
   for (const g of GRUP_KOLOM) {
     for (const k of g.kolom) jumlah.push(totalKolom(baris, k.ambil))
   }
@@ -180,8 +180,10 @@ export function susunMerge(): XLSX.Range[] {
   const merge: XLSX.Range[] = []
   // "Bulan" spans rows 0–1 (col 0)
   merge.push({ s: { r: 0, c: 0 }, e: { r: 1, c: 0 } })
+  // "Tahun" spans rows 0–1 (col 1)
+  merge.push({ s: { r: 0, c: 1 }, e: { r: 1, c: 1 } })
 
-  let col = 1
+  let col = 2
   for (const g of GRUP_KOLOM) {
     if (g.kolom.length > 1) {
       merge.push({ s: { r: 0, c: col }, e: { r: 0, c: col + g.kolom.length - 1 } })

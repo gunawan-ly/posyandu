@@ -30,6 +30,7 @@ function kun(overrides: Partial<KunjunganRekap>): KunjunganRekap {
 
 const ID_HAMIL = { id: 1, kategori: 'Hamil', created_at: '2025-12-01T00:00:00Z' }
 const ID_MENYUSUI = { id: 2, kategori: 'Menyusui', created_at: '2026-03-10T00:00:00Z' }
+const ID_NIFAS = { id: 3, kategori: 'Nifas', created_at: '2026-05-01T00:00:00Z' }
 
 describe('hitungRekapTahunan', () => {
   it('sasaran dihitung sejak terdaftar; belum terdaftar = 0', () => {
@@ -127,5 +128,18 @@ describe('hitungRekapTahunan', () => {
     const ks = [kun({ tanggal_kunjungan: '2025-06-01', dapat_tablet_ttd: 'Ya' })]
     const hasil = hitungRekapTahunan([ID_HAMIL], ks, 2026)
     expect(hasil.every((b) => b.ttdDapat === 0)).toBe(true)
+  })
+
+  it('kategori Nifas diperlakukan sama seperti Menyusui', () => {
+    const ks = [
+      kun({ bumil_id: 3, tanggal_kunjungan: '2026-05-10', vitamin_a: 'Ya', dirujuk: 'Ya' }),
+    ]
+    const hasil = hitungRekapTahunan([ID_NIFAS], ks, 2026)
+    // Nifas terdaftar Mei 2026 → sasaranMenyusui mulai Mei
+    expect(hasil[4].sasaranMenyusui).toBe(1)
+    expect(hasil[3].sasaranMenyusui).toBe(0)
+    // Vitamin A nifas & rujuk masuk kolom Menyusui
+    expect(hasil[4].vitAYa).toBe(1)
+    expect(hasil[4].rujukMenyusui).toBe(1)
   })
 })

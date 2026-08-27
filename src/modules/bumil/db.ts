@@ -8,7 +8,7 @@ import { parseTanggal } from '@/lib/umur'
 // kurva KIA) disimpan sebagai pilihan manual dari daftar label standar.
 
 // Opsi label standar untuk field kunjungan.
-export const KATEGORI_BUMIL = ['Hamil', 'Menyusui'] as const
+export const KATEGORI_BUMIL = ['Hamil', 'Menyusui', 'Nifas'] as const
 
 export const OPSI_BB_KURVA = ['Sesuai', 'Tidak Sesuai'] as const
 export const OPSI_LILA = ['Hijau', 'Merah'] as const

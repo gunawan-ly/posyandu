@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { CalendarDays, Check, Copy, FileSpreadsheet, Printer } from '@lucide/vue'
+import { ArrowLeft, CalendarDays, Check, Copy, FileSpreadsheet, Printer } from '@lucide/vue'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { RouterLink } from 'vue-router'
 import AppFooter from '@/components/AppFooter.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
 import Skeleton from '@/components/Skeleton.vue'
@@ -52,9 +53,7 @@ let timerTersalin: ReturnType<typeof setTimeout> | undefined
 
 const daftarTahun = computed(() => {
   const thn = new Date().getFullYear()
-  const hasil: string[] = []
-  for (let t = 2020; t <= thn; t += 1) hasil.push(String(t))
-  return hasil
+  return ['2026', ...Array.from({ length: Math.max(0, thn - 2026) }, (_, i) => String(2027 + i))]
 })
 
 const rekapFiltered = computed<RekapBulanan[]>(() => {
@@ -169,7 +168,18 @@ function kodeStatus(st: string | null | undefined): string | null {
 
 function nilaiTabel(baris: RekapBulanan, ambil: (b: RekapBulanan) => number): string {
   const v = ambil(baris)
-  return v === 0 ? '' : String(v)
+  return v === 0 ? '—' : String(v)
+}
+
+function jumlahGrup(): RekapBulanan {
+  const acc = {} as RekapBulanan
+  const a = acc as unknown as Record<string, number>
+  for (const b of rekapFiltered.value) {
+    for (const key of Object.keys(b)) {
+      a[key] = (a[key] ?? 0) + ((b as unknown as Record<string, number>)[key] ?? 0)
+    }
+  }
+  return acc
 }
 
 const judulRekap = computed(() => {
@@ -182,14 +192,20 @@ const judulRekap = computed(() => {
   <div class="flex flex-col">
     <AppNavbar />
 
-    <section class="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
-      <div class="no-print">
-        <p class="text-primary text-xs font-bold tracking-widest uppercase">Data posyandu</p>
-        <h1 class="font-display mt-3 text-3xl leading-tight sm:text-4xl">{{ judulRekap }}</h1>
-        <p class="text-muted-foreground mt-3 max-w-xl text-sm">
-          Ringkasan kunjungan dan status gizi balita untuk laporan posyandu, lengkap dengan format
-          resmi Rekap Bulanan Posyandu dan ekspor Excel/CSV.
-        </p>
+    <section class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6">
+      <div class="no-print flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p class="text-primary text-xs font-bold tracking-widest uppercase">Data posyandu</p>
+          <h1 class="font-display mt-3 text-3xl leading-tight sm:text-4xl">{{ judulRekap }}</h1>
+          <p class="text-muted-foreground mt-3 max-w-xl text-sm">
+            Ringkasan kunjungan dan status gizi balita untuk laporan posyandu, lengkap dengan format
+            resmi Rekap Bulanan Posyandu dan ekspor Excel/CSV.
+          </p>
+        </div>
+        <RouterLink to="/balita" class="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm font-medium">
+          <ArrowLeft class="size-4" />
+          Kembali ke daftar
+        </RouterLink>
       </div>
 
       <Card class="no-print mt-8">
@@ -307,26 +323,34 @@ const judulRekap = computed(() => {
           </CardContent>
           <CardContent>
             <div class="overflow-x-auto">
-              <table class="w-full text-sm">
+              <table class="w-full min-w-[1700px] border-collapse text-sm">
                 <thead>
-                  <tr class="border-border/60 border-b text-xs font-bold tracking-wide uppercase">
-                    <th
-                      v-for="(g, iGrup) in GRUP_KOLOM"
-                      :key="'gh-' + iGrup"
-                      :colspan="g.kolom.length"
-                      class="bg-background py-2 px-3 text-left"
-                      :class="{ 'text-center': g.kolom.length === 1 }"
-                    >
-                      {{ g.grup }}
-                    </th>
-                  </tr>
-                  <tr class="text-muted-foreground border-border/60 border-b text-xs font-bold">
-                    <template v-for="(g, iGrup) in GRUP_KOLOM" :key="'kh-' + iGrup">
+                  <tr class="border-border/60 bg-muted/40 border-b text-left text-xs font-bold tracking-wide uppercase">
+                    <th rowspan="2" class="border-border/60 px-3 py-2 align-bottom sticky left-0 bg-background z-10">Bulan</th>
+                    <th rowspan="2" class="border-border/60 px-3 py-2 align-bottom sticky left-0 bg-background z-10 ml-[80px]">Tahun</th>
+                    <template v-for="(g, gi) in GRUP_KOLOM" :key="g.grup">
                       <th
-                        v-for="(k, iKol) in g.kolom"
-                        :key="'k-' + iGrup + '-' + iKol"
-                        class="py-2 px-3 whitespace-nowrap"
-                        :class="iGrup === 0 ? 'text-left sticky left-0 bg-background z-10' : 'text-center'"
+                        v-if="g.kolom.length > 1"
+                        :colspan="g.kolom.length"
+                        :class="['border-border/60 border-l px-3 py-2 text-center', gi % 2 ? 'bg-muted/20' : '']"
+                      >
+                        {{ g.grup }}
+                      </th>
+                      <th
+                        v-else
+                        rowspan="2"
+                        :class="['border-border/60 border-l px-3 py-2 align-bottom', gi % 2 ? 'bg-muted/20' : '']"
+                      >
+                        {{ g.grup }}<span class="text-muted-foreground block normal-case">{{ g.kolom[0].label }}</span>
+                      </th>
+                    </template>
+                  </tr>
+                  <tr class="border-border/60 bg-muted/40 border-b text-left text-xs uppercase">
+                    <template v-for="g in GRUP_KOLOM" :key="'sub-' + g.grup">
+                      <th
+                        v-for="k in g.kolom.length > 1 ? g.kolom : []"
+                        :key="g.grup + k.label"
+                        class="border-border/60 border-l px-3 py-1.5 whitespace-nowrap text-center"
                       >
                         {{ k.label }}
                       </th>
@@ -337,41 +361,32 @@ const judulRekap = computed(() => {
                   <tr
                     v-for="(row, ri) in rekapFiltered"
                     :key="ri"
-                    class="border-border/60 border-b last:border-0"
+                    class="border-border/60 hover:bg-emerald-50/30 border-b transition-colors last:border-0"
                   >
-                    <template v-for="(g, iGrup) in GRUP_KOLOM" :key="'gd-' + iGrup">
-                      <td
-                        v-for="(k, iKol) in g.kolom"
-                        :key="'d-' + iGrup + '-' + iKol"
-                        class="py-2.5 px-3 font-medium tabular-nums whitespace-nowrap"
-                        :class="iGrup === 0
-                          ? 'text-left sticky left-0 bg-background z-10'
-                          : 'text-center'"
-                      >
-                        {{ nilaiTabel(row, k.ambil) || '—' }}
-                      </td>
-                    </template>
-                  </tr>
-                  <tr class="border-border/60 border-t-2 font-bold">
-                    <template v-for="(g, iGrup) in GRUP_KOLOM" :key="'gt-' + iGrup">
-                      <td
-                        v-for="(k, iKol) in g.kolom"
-                        :key="'t-' + iGrup + '-' + iKol"
-                        class="py-2.5 px-3 tabular-nums whitespace-nowrap"
-                        :class="iGrup === 0
-                          ? 'text-left sticky left-0 bg-background z-10'
-                          : 'text-center'"
-                      >
-                        {{ k.ambil(rekapFiltered.reduce((acc, b) => {
-                          for (const key of Object.keys(b) as (keyof RekapBulanan)[]) {
-                            (acc as any)[key] = ((acc as any)[key] ?? 0) + ((b as any)[key] ?? 0)
-                          }
-                          return acc
-                        }, {} as RekapBulanan)) }}
-                      </td>
-                    </template>
+                    <td class="sticky left-0 bg-background z-10 px-3 py-2 font-medium whitespace-nowrap">{{ NAMA_BULAN[rekapTahunan.indexOf(row)] }}</td>
+                    <td class="sticky left-0 bg-background z-10 px-3 py-2 whitespace-nowrap">{{ tahun }}</td>
+                    <td
+                      v-for="k in GRUP_KOLOM.flatMap((g) => g.kolom)"
+                      :key="k.label"
+                      class="tabular-nums px-3 py-2 text-center"
+                    >
+                      {{ nilaiTabel(row, k.ambil) }}
+                    </td>
                   </tr>
                 </tbody>
+                <tfoot>
+                  <tr class="bg-primary/10 border-border/60 border-t font-bold">
+                    <td class="sticky left-0 bg-background z-10 px-3 py-2">JUMLAH</td>
+                    <td class="sticky left-0 bg-background z-10 px-3 py-2"></td>
+                    <td
+                      v-for="k in GRUP_KOLOM.flatMap((g) => g.kolom)"
+                      :key="'jml-' + k.label"
+                      class="tabular-nums px-3 py-2 text-center"
+                    >
+                      {{ k.ambil(jumlahGrup()) || '—' }}
+                    </td>
+                  </tr>
+                </tfoot>
               </table>
             </div>
           </CardContent>

@@ -16,8 +16,8 @@ import {
 } from './db'
 
 describe('konstanta opsi modul bumil', () => {
-  it('KATEGORI_BUMIL berisi Hamil dan Menyusui', () => {
-    expect(KATEGORI_BUMIL).toEqual(['Hamil', 'Menyusui'])
+  it('KATEGORI_BUMIL berisi Hamil, Menyusui, dan Nifas', () => {
+    expect(KATEGORI_BUMIL).toEqual(['Hamil', 'Menyusui', 'Nifas'])
   })
 
   it('OPSI_BB_KURVA berisi nilai kurva BB KIA', () => {

@@ -113,14 +113,18 @@ describe('susunMatriks', () => {
     const barisRekap = Array.from({ length: 12 }, () => rekap)
     const matriks = susunMatriks(barisRekap, 2026)
     expect(matriks).toHaveLength(15)
-    // Baris 0: header grup
+    // Baris 0: header grup — kolom Bulan & Tahun
     expect(matriks[0][0]).toBe('Bulan')
-    // Baris 1: header kolom
+    expect(matriks[0][1]).toBe('Tahun')
+    // Baris 1: header kolom — kolom Bulan & Tahun kosong
     expect(matriks[1][0]).toBe('')
-    // Baris 2: Januari 2026
-    expect(matriks[2][0]).toBe('Januari 2026')
+    expect(matriks[1][1]).toBe('')
+    // Baris 2: Januari, 2026
+    expect(matriks[2][0]).toBe('Januari')
+    expect(matriks[2][1]).toBe(2026)
     // Baris 13: JUMLAH
     expect(matriks[14][0]).toBe('JUMLAH')
+    expect(matriks[14][1]).toBe('')
   })
 })
 

@@ -99,7 +99,7 @@ function adalahTahun(tanggal: string | null, tahun: number): boolean {
 }
 
 function kategoriMenyusui(kategori: string | null): boolean {
-  return kategori === 'Menyusui'
+  return kategori === 'Menyusui' || kategori === 'Nifas'
 }
 
 function barisKosong(bulan: number): BarisRekapBumil {

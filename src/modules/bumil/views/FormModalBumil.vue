@@ -107,7 +107,7 @@ async function simpan() {
     return
   }
   if (!kategori.value) {
-    pesanError.value = 'Pilih kategori (Hamil atau Menyusui).'
+    pesanError.value = 'Pilih kategori (Hamil, Menyusui, atau Nifas).'
     return
   }
   if (tanggalLahir.value) {

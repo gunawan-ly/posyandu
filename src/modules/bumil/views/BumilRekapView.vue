@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 import { listBumil, listKunjunganPeriode } from '@/modules/bumil/db'
 import {
   GRUP_KOLOM,
@@ -24,18 +25,24 @@ import { hitungRekapTahunan, totalKolom, type BarisRekapBumil } from '@/modules/
 
 const sekarang = new Date()
 const tahun = ref(String(sekarang.getFullYear()))
+const bulan = ref(String(sekarang.getMonth()))
+const tampilanMode = ref<'tubuhan' | 'sebulan'>('tubuhan')
 
 const loading = ref(false)
 const error = ref('')
 const baris = ref<BarisRekapBumil[]>([])
+
+const rekapFiltered = computed(() => {
+  if (tampilanMode.value === 'tubuhan') return baris.value
+  const idx = Number(bulan.value)
+  return baris.value.length > 0 ? [baris.value[idx]] : []
+})
 const tersalin = ref(false)
 let timerTersalin: ReturnType<typeof setTimeout> | undefined
 
 const daftarTahun = computed(() => {
   const thn = new Date().getFullYear()
-  const hasil: string[] = []
-  for (let t = 2020; t <= thn; t += 1) hasil.push(String(t))
-  return hasil
+  return ['2026', ...Array.from({ length: Math.max(0, thn - 2026) }, (_, i) => String(2027 + i))]
 })
 
 // Rentang tanggal satu tahun untuk pengambilan kunjungan.
@@ -59,7 +66,7 @@ async function muat() {
   }
 }
 
-watch(tahun, () => void muat(), { immediate: true })
+watch([tahun, tampilanMode, bulan], () => void muat(), { immediate: true })
 
 async function eksporExcel() {
   if (baris.value.length === 0) return
@@ -100,8 +107,6 @@ onBeforeUnmount(() => {
   if (timerTersalin) clearTimeout(timerTersalin)
 })
 
-const klsInput =
-  'border-input bg-background h-12 md:h-10 w-full min-w-0 rounded-md border px-3 py-2 text-base shadow-sm outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-3 disabled:pointer-events-none disabled:opacity-50 md:text-sm'
 </script>
 
 <template>
@@ -129,32 +134,64 @@ const klsInput =
 
       <!-- Filter & aksi -->
       <Card v-if="!loading" class="no-print mt-6">
-        <CardContent class="flex flex-wrap items-end gap-3 px-6 py-4">
-          <div class="w-36">
-            <label for="rk-tahun" class="text-muted-foreground mb-1.5 block text-xs font-bold">Tahun</label>
-            <Select v-model="tahun">
-              <SelectTrigger id="rk-tahun" :class="klsInput">
-                <SelectValue placeholder="Pilih tahun" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem v-for="t in daftarTahun" :key="t" :value="t">{{ t }}</SelectItem>
-              </SelectContent>
-            </Select>
+        <CardContent class="flex flex-col gap-4">
+          <div class="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              :variant="tampilanMode === 'tubuhan' ? 'default' : 'outline'"
+              @click="tampilanMode = 'tubuhan'"
+            >
+              Rekapan Tahunan
+            </Button>
+            <Button
+              size="sm"
+              :variant="tampilanMode === 'sebulan' ? 'default' : 'outline'"
+              @click="tampilanMode = 'sebulan'"
+            >
+              Rekapan Bulanan
+            </Button>
           </div>
-          <div class="flex flex-wrap gap-2 sm:ml-auto">
-            <Button variant="outline" :disabled="baris.length === 0" @click="salinCsv">
-              <Check v-if="tersalin" class="size-4 text-emerald-600" />
-              <Copy v-else class="size-4" />
-              {{ tersalin ? 'Tersalin!' : 'Salin CSV' }}
-            </Button>
-            <Button variant="outline" :disabled="baris.length === 0" @click="cetak">
-              <Printer class="size-4" />
-              Cetak/PDF
-            </Button>
-            <Button :disabled="baris.length === 0" @click="eksporExcel">
-              <FileSpreadsheet class="size-4" />
-              Ekspor Excel
-            </Button>
+
+          <div class="flex flex-wrap items-end gap-4">
+            <div class="flex flex-col gap-1.5">
+              <Label for="rk-tahun">Tahun</Label>
+              <Select v-model="tahun">
+                <SelectTrigger id="rk-tahun" class="w-28">
+                  <SelectValue placeholder="Pilih tahun" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="t in daftarTahun" :key="t" :value="t">{{ t }}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div v-if="tampilanMode === 'sebulan'" class="flex flex-col gap-1.5">
+              <Label for="rk-bulan">Bulan</Label>
+              <Select v-model="bulan">
+                <SelectTrigger id="rk-bulan" class="w-44">
+                  <SelectValue placeholder="Pilih bulan" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="(nama, i) in NAMA_BULAN" :key="i" :value="String(i)">
+                    {{ nama }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div class="flex flex-wrap gap-2 sm:ml-auto">
+              <Button variant="outline" :disabled="baris.length === 0" @click="salinCsv">
+                <Check v-if="tersalin" class="size-4 text-emerald-600" />
+                <Copy v-else class="size-4" />
+                {{ tersalin ? 'Tersalin!' : 'Salin CSV' }}
+              </Button>
+              <Button variant="outline" :disabled="baris.length === 0" @click="cetak">
+                <Printer class="size-4" />
+                Cetak/PDF
+              </Button>
+              <Button :disabled="baris.length === 0" @click="eksporExcel">
+                <FileSpreadsheet class="size-4" />
+                Ekspor Excel
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -170,7 +207,9 @@ const klsInput =
       <Card v-else-if="baris.length > 0" class="mt-6">
         <CardHeader>
           <CardTitle class="font-display text-lg font-normal">
-            Rekap Tahunan Posyandu — Bumil (Ibu Hamil) &amp; Busui (Ibu Menyusui) · {{ tahun }}
+            {{ tampilanMode === 'tubuhan'
+              ? `Rekap Tahunan Posyandu — Bumil &amp; Busui · ${tahun}`
+              : `Rekap Bulanan Posyandu — Bumil &amp; Busui — ${NAMA_BULAN[Number(bulan)]} ${tahun}` }}
           </CardTitle>
           <CardDescription>Angka agregat bulanan sepanjang tahun terpilih.</CardDescription>
         </CardHeader>
@@ -211,7 +250,7 @@ const klsInput =
               </thead>
               <tbody>
                 <tr
-                  v-for="b in baris"
+                  v-for="b in rekapFiltered"
                   :key="b.bulan"
                   class="border-border/60 hover:bg-emerald-50/30 border-b transition-colors last:border-0"
                 >
@@ -233,7 +272,7 @@ const klsInput =
                     :key="'jml-' + k.label"
                     class="tabular-nums px-3 py-2 text-center"
                   >
-                    {{ totalKolom(baris, k.ambil) || '—' }}
+                    {{ totalKolom(rekapFiltered, k.ambil) || '—' }}
                   </td>
                 </tr>
               </tfoot>
