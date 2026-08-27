@@ -37,6 +37,7 @@ export interface RekapBulanan {
   edukasi_ya: number
   edukasi_tidak: number
   gejala_tbc_ya: number
+  mt_pangan_lokal_ya: number
   sakit_ya: number
   dirujuk_bayi: number
   dirujuk_balita: number
@@ -336,6 +337,7 @@ export function hitungRekapBulanan(
     edukasi_ya: edukasiYa,
     edukasi_tidak: edukasiTidak,
     gejala_tbc_ya: gejalaTbcYa,
+    mt_pangan_lokal_ya: 0,
     sakit_ya: sakitYa,
     dirujuk_bayi: dirujukBayi,
     dirujuk_balita: dirujukBalita,

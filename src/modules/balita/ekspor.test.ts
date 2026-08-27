@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import * as XLSX from 'xlsx'
-import type { BarisRekap, PeriodeRekap, RekapBulanan } from './rekap'
-import { buatWorkbookRekap, labelPeriode, susunLembarRingkasan, susunLembarRincian, teksCsvRekap } from './ekspor'
+import type { BarisRekap, RekapBulanan } from './rekap'
+import { buatWorkbookRekap, labelPeriodeTahunan, susunLembarRincian, susunMatriks, teksCsvRincian, totalKolom, GRUP_KOLOM } from './ekspor'
 
 // Fixture RekapBulanan lengkap (beberapa angka non-zero).
 const rekap: RekapBulanan = {
@@ -38,6 +38,7 @@ const rekap: RekapBulanan = {
   edukasi_ya: 4,
   edukasi_tidak: 0,
   gejala_tbc_ya: 1,
+  mt_pangan_lokal_ya: 0,
   sakit_ya: 2,
   dirujuk_bayi: 1,
   dirujuk_balita: 1,
@@ -87,46 +88,39 @@ const baris: BarisRekap[] = [
   },
 ]
 
-describe('labelPeriode', () => {
-  it('bulan+tahun → nama bulan Indonesia UPPERCASE + tahun', () => {
-    const periode: PeriodeRekap = { bulan: 7, tahun: 2026 }
-    expect(labelPeriode(periode)).toBe('AGUSTUS 2026')
-  })
-
-  it('rentang tanggal → format dd/mm/yyyy dipisah " - "', () => {
-    const periode: PeriodeRekap = { awal: '2026-08-01', akhir: '2026-08-31' }
-    expect(labelPeriode(periode)).toBe('01/08/2026 - 31/08/2026')
-  })
-
-  it('rentang tanggal tidak valid → " - "', () => {
-    expect(labelPeriode({ awal: 'bukan-tanggal', akhir: '2026-08-31' })).toBe(' - ')
-    expect(labelPeriode({ awal: '', akhir: '' })).toBe(' - ')
+describe('labelPeriodeTahunan', () => {
+  it('tahun → "TAHUN 2026"', () => {
+    expect(labelPeriodeTahunan(2026)).toBe('TAHUN 2026')
   })
 })
 
-describe('susunLembarRingkasan', () => {
-  it('memuat judul, baris Periode, dan pasangan Keterangan/Jumlah sesuai format', () => {
-    const lembar = susunLembarRingkasan(rekap, 'AGUSTUS 2026')
-    expect(lembar[0]).toEqual(['REKAP BULANAN POSYANDU - BALITA', ''])
-    expect(lembar[1]).toEqual(['Periode', 'AGUSTUS 2026'])
-    expect(lembar[3]).toEqual(['Keterangan', 'Jumlah'])
+describe('totalKolom', () => {
+  it('menjumlahkan semua nilai dari RekapBulanan[]', () => {
+    const barisRekap = [rekap]
+    expect(totalKolom(barisRekap, (r) => r.sasaran_bayi)).toBe(5)
+    expect(totalKolom(barisRekap, (r) => r.balita_hadir)).toBe(10)
   })
+})
 
-  it('menyisipkan Balita Datang/Tidak Datang tepat setelah Bayi Tidak Datang', () => {
-    const lembar = susunLembarRingkasan(rekap, 'AGUSTUS 2026')
-    const iBayiTidak = lembar.findIndex((r) => r[0] === 'Bayi Tidak Datang (Tidak Hadir)')
-    expect(iBayiTidak).toBeGreaterThan(-1)
-    expect(lembar[iBayiTidak + 1]).toEqual(['Balita Datang (Hadir)', 10])
-    expect(lembar[iBayiTidak + 2]).toEqual(['Balita Tidak Datang (Tidak Hadir)', 2])
+describe('GRUP_KOLOM', () => {
+  it('memiliki tepat 14 grup', () => {
+    expect(GRUP_KOLOM).toHaveLength(14)
   })
+})
 
-  it('memuat tiap baris keterangan beserta jumlahnya (mis. Jumlah Sasaran - Bayi)', () => {
-    const lembar = susunLembarRingkasan(rekap, 'AGUSTUS 2026')
-    const barisBayi = lembar.find((r) => r[0] === 'Jumlah Sasaran - Bayi')
-    expect(barisBayi).toBeDefined()
-    expect(barisBayi?.[1]).toBe(5)
-    const barisEdukasi = lembar.find((r) => r[0] === 'Edukasi - Ya')
-    expect(barisEdukasi?.[1]).toBe(4)
+describe('susunMatriks', () => {
+  it('menghasilkan 14 baris: 2 header + 12 bulan + 1 JUMLAH', () => {
+    const barisRekap = Array.from({ length: 12 }, () => rekap)
+    const matriks = susunMatriks(barisRekap, 2026)
+    expect(matriks).toHaveLength(15)
+    // Baris 0: header grup
+    expect(matriks[0][0]).toBe('Bulan')
+    // Baris 1: header kolom
+    expect(matriks[1][0]).toBe('')
+    // Baris 2: Januari 2026
+    expect(matriks[2][0]).toBe('Januari 2026')
+    // Baris 13: JUMLAH
+    expect(matriks[14][0]).toBe('JUMLAH')
   })
 })
 
@@ -134,62 +128,39 @@ describe('susunLembarRincian', () => {
   it('memuat header kolom lalu satu baris per BarisRekap', () => {
     const lembar = susunLembarRincian(baris)
     expect(lembar[0]).toEqual([
-      'No',
-      'Nama',
-      'Modul',
-      'Jenis Kelamin',
-      'Tanggal Lahir',
-      'Umur (bln)',
-      'Dusun',
-      'Posyandu',
-      'Tanggal Kunjungan',
-      'BB (kg)',
-      'TB (cm)',
-      'BB/U',
-      'TB/U',
-      'BB/TB',
-      'LiKA',
-      'LiLA',
-      'z-BB/U',
-      'z-TB/U',
-      'z-BB/TB',
+      'No', 'Nama', 'Modul', 'Jenis Kelamin', 'Tanggal Lahir', 'Umur (bln)',
+      'Dusun', 'Posyandu', 'Tanggal Kunjungan', 'BB (kg)', 'TB (cm)',
+      'BB/U', 'TB/U', 'BB/TB', 'LiKA', 'LiLA', 'z-BB/U', 'z-TB/U', 'z-BB/TB',
     ])
     expect(lembar).toHaveLength(3)
     expect(lembar[1][1]).toBe('Ani')
     expect(lembar[1][0]).toBe(1)
     expect(lembar[2][0]).toBe(2)
-    // Kolom bergeser +1 sejak v2.32.0 (kolom Modul setelah Nama).
     expect(lembar[2][5]).toBeNull()
   })
 })
 
 describe('buatWorkbookRekap', () => {
-  it('menghasilkan workbook dengan sheet Ringkasan (pertama) & Rincian', async () => {
-    const wb = await buatWorkbookRekap(rekap, baris, 'AGUSTUS 2026')
-    expect(wb.SheetNames).toEqual(['Ringkasan', 'Rincian'])
+  it('menghasilkan workbook dengan sheet Rekap 2026 (pertama) & Rincian', async () => {
+    const wb = await buatWorkbookRekap([], [], 2026, baris)
+    expect(wb.SheetNames).toEqual(['Rekap 2026', 'Rincian'])
     const buffer = XLSX.write(wb, { type: 'buffer' })
     const dibaca = XLSX.read(buffer)
-    expect(dibaca.SheetNames).toEqual(['Ringkasan', 'Rincian'])
-    const ringkasan = dibaca.Sheets['Ringkasan']
-    expect(ringkasan['A1'].v).toBe('REKAP BULANAN POSYANDU - BALITA')
-    expect(ringkasan['A2'].v).toBe('Periode')
-    expect(ringkasan['B2'].v).toBe('AGUSTUS 2026')
-    expect(ringkasan['A4'].v).toBe('Keterangan')
-    expect(ringkasan['A5'].v).toBe('Jumlah Sasaran - Bayi')
-    expect(ringkasan['B5'].v).toBe(5)
+    expect(dibaca.SheetNames).toEqual(['Rekap 2026', 'Rincian'])
+    const rekapSheet = dibaca.Sheets['Rekap 2026']
+    expect(rekapSheet['A1'].v).toBe('Bulan')
     const rincian = dibaca.Sheets['Rincian']
     expect(rincian['A1'].v).toBe('No')
     expect(rincian['B2'].v).toBe('Ani')
   })
 })
 
-describe('teksCsvRekap', () => {
+describe('teksCsvRincian', () => {
   it('berisi header "Nama" dan nama balita; nilai null menjadi string kosong', async () => {
-    const csv = await teksCsvRekap(baris)
+    const csv = await teksCsvRincian(baris)
     expect(csv).toContain('Nama')
     expect(csv).toContain('Ani')
     expect(csv).toContain('Budi')
-    // Baris Budi (No 2) punya umur_bulan null → kolomnya kosong (dua pemisah beruntun).
     expect(csv).toContain('2,Budi')
     expect(csv).toContain('2024-02-10,,,')
   })

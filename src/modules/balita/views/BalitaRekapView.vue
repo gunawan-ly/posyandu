@@ -159,7 +159,8 @@ watch(
 
 async function eksporExcel() {
   if (!rekap.value || baris.value.length === 0) return
-  const wb = await buatWorkbookRekap(rekap.value, baris.value, label.value)
+  const tahunNum = Number(tahun.value) || new Date().getFullYear()
+  const wb = await buatWorkbookRekap([], [], tahunNum, baris.value)
   const slug = label.value.toLowerCase().replace(/[^a-z0-9]+/g, '-')
   unduhXlsx(wb, `rekap-balita-${slug}.xlsx`)
 }
