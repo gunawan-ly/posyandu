@@ -143,30 +143,30 @@ PB/TB > 0; data tidak valid → tidak diklasifikasi (error).
 ## Kolaborasi Tim
 
 - **Awan** — Founder & pemilik produk: penentu arah, keputusan akhir, dan pemilik visi.
-- **Alpha** — CEO (asisten Hermes / agent orchestrator): memimpin eksekusi, menyusun rencana,
-  menjalankan OpenCode CLI sebagai pekerja coding, memverifikasi hasil (build/test), dan
-  melaporkan ke Awan.
-- **OpenCode CLI** — pekerja coding otonom (model bawaan, saat ini `big-pickle`):
-  dikendalikan Alpha lewat `opencode run` (one-shot) atau sesi interaktif; bekerja di dalam
-  repo ini dan patuh pada AGENTS.md.
-- Alur kerja: Awan memberi misi → Alpha menyusun rencana & mengeksekusi (mendelegasikan tugas
-  coding ke OpenCode bila perlu) → hasil diverifikasi → dilaporkan ke Awan.
+- **OpenCode CLI** — Software Engineer otonom (model bawaan, saat ini `big-pickle`):
+  bekerja langsung dengan Awan di dalam repo ini dan patuh pada AGENTS.md; bertugas meneliti,
+  merencanakan, mengimplementasikan, memverifikasi (build/test/lint), dan melaporkan hasil
+  ke Awan.
+- Alur kerja: Awan memberi misi → OpenCode riset & mematangkan spesifikasi kerja (tujuan,
+  cakupan perubahan, file/komponen terpengaruh, kriteria penerimaan, catatan risiko) →
+  implementasi → verifikasi (vue-tsc + vite build, vitest, eslint) → laporan hasil + risiko
+  tersisa ke Awan → Awan memutuskan langkah berikutnya.
 - Bahasa tim: **Indonesia** di semua komunikasi, kode, komentar, dan commit.
 - Setiap perubahan perilaku aplikasi: perbarui PRD.md dan AGENTS.md agar tetap sinkron dengan
   kode, lalu commit dengan konvensi `(Update vX.Y.Z) Deskripsi`.
-- Kontrol versi: **commit** dilakukan mandiri oleh Zero (konvensi `(Update vX.Y.Z)`); **push**
-  ke remote hanya dilakukan atas instruksi eksplisit dari Awan.
+- Kontrol versi: **commit** dibuat oleh OpenCode saat diminta Awan (konvensi
+  `(Update vX.Y.Z)`); **push** ke remote hanya dilakukan atas instruksi eksplisit dari Awan.
 
 ### Alur Pengembangan Fitur
 
 1. **Awan** memberikan ide/misi dalam bahasa bebas (mentah, belum tentu terstruktur).
-2. **Alpha** mematangkan ide tersebut menjadi spesifikasi kerja: tujuan, cakupan perubahan,
-   file/komponen yang terpengaruh, kriteria penerimaan, dan catatan risiko — lalu menyampaikan
-   spesifikasi ini ke OpenCode CLI.
-3. **OpenCode CLI** mengimplementasikan sesuai spesifikasi (one-shot `opencode run '...'` untuk
-   tugas terbatas, atau sesi interaktif untuk tugas panjang), patuh pada AGENTS.md & PRD.md.
-4. **Alpha** memverifikasi hasil: `npm run build` (vue-tsc + vite), `npm test` (vitest), review
-   diff, dan memastikan PRD.md/AGENTS.md disinkronkan dengan perubahan perilaku.
+2. **OpenCode** mematangkan ide tersebut menjadi spesifikasi kerja: tujuan, cakupan perubahan,
+   file/komponen yang terpengaruh, kriteria penerimaan, dan catatan risiko — mengonfirmasi
+   ambiguitas ke Awan sebelum mulai bila perlu.
+3. **OpenCode** mengimplementasikan sesuai spesifikasi, patuh pada AGENTS.md & PRD.md.
+4. **OpenCode** memverifikasi hasil: `npm run build` (vue-tsc + vite), `npm test` (vitest),
+   `npm run lint` (eslint), review diff, dan memastikan PRD.md/AGENTS.md disinkronkan dengan
+   perubahan perilaku.
 5. **Awan** menerima laporan hasil + risiko tersisa (jika ada) dan memutuskan langkah berikutnya.
 
 ## graphify
