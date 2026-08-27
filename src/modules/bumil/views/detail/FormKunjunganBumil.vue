@@ -7,6 +7,7 @@ import InputSegmen from '@/components/InputSegmen.vue'
 import { adalahGalatJaringan } from '@/lib/galat'
 import { tambahKeAntre } from '@/lib/offlineAntre'
 import {
+  KATEGORI_BUMIL,
   OPSI_BB_KURVA,
   OPSI_LILA,
   OPSI_TD_KURVA,
@@ -30,6 +31,9 @@ const emit = defineEmits<{ tersimpan: [] }>()
 const sunting = props.edit ?? null
 
 const tglKunjungan = ref(sunting?.tanggal_kunjungan || new Date().toISOString().slice(0, 10))
+// Kategori kunjungan: default dari status saat ini di identitas (bisa diubah
+// per kunjungan agar rekap historis akurat). Wajib diisi saat simpan.
+const kategoriKunjungan = ref(sunting?.kategori ?? props.bumil.kategori ?? '')
 const usiaKehamilan = ref<string>(sunting?.usia_kehamilan_minggu != null ? String(sunting.usia_kehamilan_minggu) : '')
 const beratBadan = ref<string>(sunting?.berat_badan != null ? String(sunting.berat_badan) : '')
 const bbKurvaKia = ref(sunting?.bb_sesuai_kurva_kia ?? '')
@@ -57,7 +61,9 @@ const pesanForm = ref('')
 const modeUbah = computed(() => props.edit != null)
 
 // Field hanya relevan untuk ibu hamil; untuk menyusui disembunyikan/dikosongkan.
-const sedangHamil = computed(() => props.bumil.kategori === 'Hamil')
+// Kategori diambil dari KUNJUNGAN yang sedang diisi (bukan identitas) agar
+// rekap historis akurat — satu ibu bisa berpindah kategori lintas kunjungan.
+const sedangHamil = computed(() => kategoriKunjungan.value === 'Hamil')
 
 function kosongkanForm() {
   usiaKehamilan.value = ''
@@ -92,9 +98,14 @@ async function simpanKunjungan() {
     pesanForm.value = 'Berat badan wajib diisi (kg).'
     return
   }
+  if (!kategoriKunjungan.value) {
+    pesanForm.value = 'Pilih kategori (Hamil, Menyusui, atau Nifas).'
+    return
+  }
 
   const isi = {
     tanggal_kunjungan: tglKunjungan.value,
+    kategori: kategoriKunjungan.value,
     usia_kehamilan_minggu: sedangHamil.value && usiaKehamilan.value ? Number(usiaKehamilan.value) : null,
     berat_badan: bb,
     bb_sesuai_kurva_kia: sedangHamil.value ? (bbKurvaKia.value || null) : null,
@@ -159,6 +170,7 @@ const klsInput =
     </CardHeader>
     <CardContent class="flex flex-col gap-4">
       <form class="space-y-4" @submit.prevent="simpanKunjungan">
+        <InputSegmen v-model="kategoriKunjungan" :opsi="KATEGORI_BUMIL" label="Kategori (Hamil / Nifas / Menyusui)" />
         <div>
           <label for="tgl-kunjungan" class="text-muted-foreground mb-1.5 block text-xs font-bold">Tanggal kunjungan</label>
           <input id="tgl-kunjungan" v-model="tglKunjungan" type="date" class="w-full [color-scheme:light]" :class="klsInput" />

@@ -133,6 +133,7 @@ function lihatKunjungan(k: KunjunganBumil) {
   detailJudul.value = `Kunjungan ${formatTanggal(k.tanggal_kunjungan)}`
   detailBaris.value = [
     ['Tanggal', formatTanggal(k.tanggal_kunjungan)],
+    ['Kategori', k.kategori ?? null],
     ['Usia kehamilan', k.usia_kehamilan_minggu != null ? `${k.usia_kehamilan_minggu} minggu` : null],
     ['Berat badan', k.berat_badan != null ? `${k.berat_badan} kg` : null],
     ['BB sesuai kurva KIA', k.bb_sesuai_kurva_kia],

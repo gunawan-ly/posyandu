@@ -9,18 +9,17 @@
 // - Bergejala TBC = memenuhi minimal 2 dari 3 gejala skrining (batuk
 //   terus-menerus, demam >2 minggu, BB tidak naik 2 bulan); kontak TBC
 //   bukan gejala sehingga tidak dihitung.
-// - Pengelompokan Hamil vs Nifas/Menyusui memakai kategori ibu saat ini
-//   pada identitas (aproksimasi: kategori historis tidak disimpan per
-//   kunjungan).
-
-export interface IdentitasRekap {
-  id: number
-  kategori: string | null
-  created_at: string
-}
+// - Kategori (Hamil vs Nifas/Menyusui) diambil dari KUNJUNGAN — sumber
+//   kebenaran historis. Identitas memiliki kategori "saat ini" untuk tampilan
+//   & statistik publik, tapi TIDAK dipakai rekap. Per bulan, kategori ibu
+//   ditentukan dari kunjungan terakhir ibu tsb pada/atau sebelum akhir bulan.
+// - Sasaran per bulan = ibu yang sudah punya kunjungan pada/atau sebelum
+//   akhir bulan tsb (belum pernah kunjungan = belum masuk sasaran, mulai
+//   dihitung sejak bulan kunjungan pertamanya).
 
 export interface KunjunganRekap {
   bumil_id: number | null
+  kategori: string | null
   tanggal_kunjungan: string | null
   berat_badan: number | null
   bb_sesuai_kurva_kia: string | null
@@ -137,23 +136,53 @@ function barisKosong(bulan: number): BarisRekapBumil {
 }
 
 // Hitung rekap tahunan lengkap: 12 baris (Jan–Des) untuk tahun tertentu.
+// Sumber kategori & sasaran sepenuhnya dari KUNJUNGAN (bukan identitas).
 export function hitungRekapTahunan(
-  identitas: IdentitasRekap[],
   kunjungan: KunjunganRekap[],
   tahun: number,
 ): BarisRekapBumil[] {
   const baris = Array.from({ length: 12 }, (_, i) => barisKosong(i))
+  const akhirBulan = Array.from({ length: 12 }, (_, b) => new Date(tahun, b + 1, 0, 23, 59, 59).getTime())
 
-  // Sasaran per bulan: ibu dalam kategori yang sudah terdaftar sampai akhir
-  // bulan tersebut (created_at <= akhir bulan).
-  for (const ibu of identitas) {
-    const daftar = new Date(ibu.created_at)
-    if (Number.isNaN(daftar.getTime())) continue
-    if (daftar.getFullYear() > tahun) continue
-    const mulai = daftar.getFullYear() === tahun ? daftar.getMonth() : 0
-    const menyusui = kategoriMenyusui(ibu.kategori)
-    for (let b = mulai; b < 12; b++) {
-      if (menyusui) baris[b].sasaranMenyusui++
+  // Kunci ibu: urutkan kunjungan per bumil_id secara kronologis agar mudah
+  // menentukan kunjungan terakhir sebelum/termasuk sebuah bulan.
+  const perIbu = new Map<number, KunjunganRekap[]>()
+  for (const k of kunjungan) {
+    if (k.bumil_id == null) continue
+    if (!adalahTahun(k.tanggal_kunjungan, tahun)) continue
+    let daftar = perIbu.get(k.bumil_id)
+    if (!daftar) {
+      daftar = []
+      perIbu.set(k.bumil_id, daftar)
+    }
+    daftar.push(k)
+  }
+  for (const daftar of perIbu.values()) {
+    daftar.sort((a, b) => (a.tanggal_kunjungan ?? '').localeCompare(b.tanggal_kunjungan ?? ''))
+  }
+
+  // Fungsi kategori ibu pada bulan b: dari kunjungan terakhir <= akhir bulan b.
+  // Ibu tanpa kunjungan pada/atau sebelum bulan b → null (bukan sasaran saat itu).
+  function kategoriPadaBulan(id: number, b: number): string | null {
+    const daftar = perIbu.get(id)
+    if (!daftar || daftar.length === 0) return null
+    let hasil: string | null = null
+    for (const k of daftar) {
+      const t = new Date(k.tanggal_kunjungan ?? '').getTime()
+      if (Number.isNaN(t)) continue
+      if (t <= akhirBulan[b]) hasil = k.kategori ?? null
+      else break
+    }
+    return hasil
+  }
+
+  // Sasaran per bulan: ibu yang punya kunjungan sampai akhir bulan, dikelompokkan
+  // per kategori sesuai kunjungan terakhirnya hingga bulan tsb.
+  for (const b of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) {
+    for (const id of perIbu.keys()) {
+      const kategori = kategoriPadaBulan(id, b)
+      if (kategori == null) continue
+      if (kategoriMenyusui(kategori)) baris[b].sasaranMenyusui++
       else baris[b].sasaranHamil++
     }
   }
@@ -166,8 +195,7 @@ export function hitungRekapTahunan(
     const b = bulanDari(k.tanggal_kunjungan)
     if (b < 0 || b > 11) continue
 
-    const ibu = identitas.find((i) => i.id === k.bumil_id)
-    const menyusui = kategoriMenyusui(ibu?.kategori ?? null)
+    const menyusui = kategoriMenyusui(k.kategori ?? null)
     if (k.bumil_id != null) {
       ;(menyusui ? datangSet[b].menyusui : datangSet[b].hamil).add(k.bumil_id)
     }
@@ -208,7 +236,7 @@ export function hitungRekapTahunan(
     if (k.kb_pasca_persalinan === 'Ya') baris[b].kbYa++
     else if (k.kb_pasca_persalinan === 'Tidak') baris[b].kbTidak++
 
-    // Edukasi & rujukan (rujuk dibagi kategori ibu)
+    // Edukasi & rujukan (rujuk dibagi kategori kunjungan tsb)
     if (k.dapat_edukasi === 'Ya') baris[b].edukasi++
     if (k.dirujuk === 'Ya') {
       if (menyusui) baris[b].rujukMenyusui++

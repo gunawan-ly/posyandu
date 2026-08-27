@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { listBumil, listKunjunganPeriode } from '@/modules/bumil/db'
+import { listKunjunganPeriode } from '@/modules/bumil/db'
 import {
   GRUP_KOLOM,
   NAMA_BULAN,
@@ -56,8 +56,8 @@ async function muat() {
   loading.value = true
   error.value = ''
   try {
-    const [identitas, kunjungan] = await Promise.all([listBumil(), listKunjunganPeriode(...rentangTahun(t))])
-    baris.value = hitungRekapTahunan(identitas, kunjungan, t)
+    const kunjungan = await listKunjunganPeriode(...rentangTahun(t))
+    baris.value = hitungRekapTahunan(kunjungan, t)
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Gagal memuat rekapitulasi bumil.'
     baris.value = []
@@ -71,11 +71,8 @@ watch([tahun, tampilanMode, bulan], () => void muat(), { immediate: true })
 async function eksporExcel() {
   if (baris.value.length === 0) return
   try {
-    const [identitas, kunjungan] = await Promise.all([
-      listBumil(),
-      listKunjunganPeriode(...rentangTahun(Number(tahun.value))),
-    ])
-    await unduhXlsx(identitas, kunjungan, Number(tahun.value))
+    const kunjungan = await listKunjunganPeriode(...rentangTahun(Number(tahun.value)))
+    await unduhXlsx(kunjungan, Number(tahun.value))
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Gagal mengekspor Excel.'
   }
@@ -84,11 +81,8 @@ async function eksporExcel() {
 async function salinCsv() {
   if (baris.value.length === 0) return
   try {
-    const [identitas, kunjungan] = await Promise.all([
-      listBumil(),
-      listKunjunganPeriode(...rentangTahun(Number(tahun.value))),
-    ])
-    await navigator.clipboard.writeText(await teksCsvRekap(identitas, kunjungan, Number(tahun.value)))
+    const kunjungan = await listKunjunganPeriode(...rentangTahun(Number(tahun.value)))
+    await navigator.clipboard.writeText(await teksCsvRekap(kunjungan, Number(tahun.value)))
     tersalin.value = true
     if (timerTersalin) clearTimeout(timerTersalin)
     timerTersalin = setTimeout(() => {

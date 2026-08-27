@@ -42,6 +42,7 @@ function formatAngka(n: number | null | undefined): string {
           <thead>
             <tr class="text-muted-foreground border-border/60 border-b text-left text-xs font-bold tracking-wide uppercase">
               <th class="py-2 pr-3 whitespace-nowrap">Tanggal</th>
+              <th class="py-2 pr-3">Kategori</th>
               <th class="py-2 pr-3">Usia kehamilan</th>
               <th class="py-2 pr-3">BB (kg)</th>
               <th class="py-2 pr-3">BB sesuai kurva KIA</th>
@@ -71,6 +72,7 @@ function formatAngka(n: number | null | undefined): string {
               @click="emit('lihat', k)"
             >
               <td class="py-3 pr-3 font-medium whitespace-nowrap">{{ formatTanggal(k.tanggal_kunjungan) }}</td>
+              <td class="py-3 pr-3 whitespace-nowrap">{{ k.kategori ?? '—' }}</td>
               <td class="py-3 pr-3 text-muted-foreground whitespace-nowrap">{{ formatAngka(k.usia_kehamilan_minggu) }} minggu</td>
               <td class="py-3 pr-3 whitespace-nowrap">{{ formatAngka(k.berat_badan) }}</td>
               <td class="py-3 pr-3 whitespace-nowrap">{{ k.bb_sesuai_kurva_kia ?? '—' }}</td>

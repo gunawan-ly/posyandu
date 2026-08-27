@@ -5,7 +5,7 @@
 // halaman rekap — hanya diunduh saat pengguna benar-benar mengekspor.
 import type * as XLSX from 'xlsx'
 import type { BarisRekapBumil } from './rekap'
-import { hitungRekapTahunan, totalKolom, type IdentitasRekap } from './rekap'
+import { hitungRekapTahunan, totalKolom } from './rekap'
 
 function muatXlsx(): Promise<typeof XLSX> {
   return import('xlsx')
@@ -175,12 +175,11 @@ function susunMerge(): XLSX.Range[] {
 }
 
 export async function buatWorkbookRekap(
-  identitas: IdentitasRekap[],
-  kunjungan: Parameters<typeof hitungRekapTahunan>[1],
+  kunjungan: Parameters<typeof hitungRekapTahunan>[0],
   tahun: number,
 ): Promise<XLSX.WorkBook> {
   const X = await muatXlsx()
-  const baris = hitungRekapTahunan(identitas, kunjungan, tahun)
+  const baris = hitungRekapTahunan(kunjungan, tahun)
   const ws = X.utils.aoa_to_sheet(susunMatriks(baris, tahun))
   ws['!merges'] = susunMerge()
   ws['!cols'] = [{ wch: 16 }, ...Array(GRUP_KOLOM.reduce((n, g) => n + g.kolom.length, 0)).fill({ wch: 11 })]
@@ -190,22 +189,20 @@ export async function buatWorkbookRekap(
 }
 
 export async function unduhXlsx(
-  identitas: IdentitasRekap[],
-  kunjungan: Parameters<typeof hitungRekapTahunan>[1],
+  kunjungan: Parameters<typeof hitungRekapTahunan>[0],
   tahun: number,
 ): Promise<void> {
   const X = await muatXlsx()
-  const wb = await buatWorkbookRekap(identitas, kunjungan, tahun)
+  const wb = await buatWorkbookRekap(kunjungan, tahun)
   X.writeFile(wb, `rekapitulasi-bumil-${tahun}.xlsx`)
 }
 
 // Teks CSV (nilai dipisah titik koma agar rapi dibuka di Excel Indonesia).
 export async function teksCsvRekap(
-  identitas: IdentitasRekap[],
-  kunjungan: Parameters<typeof hitungRekapTahunan>[1],
+  kunjungan: Parameters<typeof hitungRekapTahunan>[0],
   tahun: number,
 ): Promise<string> {
-  const baris = hitungRekapTahunan(identitas, kunjungan, tahun)
+  const baris = hitungRekapTahunan(kunjungan, tahun)
   const matriks = susunMatriks(baris, tahun)
   return matriks.map((barisData) => barisData.join(';')).join('\n')
 }

@@ -42,6 +42,7 @@ export interface KunjunganBumil {
   id: number
   bumil_id: number | null
   nama: string | null
+  kategori: string | null
   tanggal_kunjungan: string | null
   usia_kehamilan_minggu: number | null
   berat_badan: number | null
@@ -86,6 +87,7 @@ export interface InputBumil {
 
 export interface InputKunjunganBumil {
   tanggal_kunjungan: string
+  kategori: string
   usia_kehamilan_minggu?: number | null
   berat_badan?: number | null
   bb_sesuai_kurva_kia?: string | null
@@ -198,6 +200,7 @@ function susunIsiKunjungan(bumil: Bumil, input: InputKunjunganBumil) {
     bumil_id: bumil.id,
     nama: bumil.nama,
     tanggal_kunjungan: input.tanggal_kunjungan,
+    kategori: input.kategori ?? null,
     usia_kehamilan_minggu: input.usia_kehamilan_minggu ?? null,
     berat_badan: input.berat_badan ?? null,
     bb_sesuai_kurva_kia: input.bb_sesuai_kurva_kia ?? null,
