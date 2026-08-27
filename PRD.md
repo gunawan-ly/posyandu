@@ -53,6 +53,8 @@ menambah/mengubah/menghapus data; **user biasa** (kader terautentikasi) read-onl
 - ✅ Dashboard hub publik + home kader: hero sambutan beda utk anon vs kader (anon: CTA login/kalkulator tanpa data perorangan; kader: badge Admin + Tambah Balita), statistik bulan berjalan (`statistik_publik()`), seksi **"Balita yang perlu perhatian"** (kunjungan terakhir berstatus Kurang/Sangat Kurang/Pendek/Sangat Pendek/Gizi Buruk/Gizi Kurang via RPC `kunjungan_terakhir()`, anon diblokir), dan menu navigasi modul (Balita, Apras, & Bumil aktif; Dewasa & Lansia "Segera").
 - ✅ Landing page sistem informasi posyandu digital: hero keseluruhan posyandu + motto "Sehat & mandiri untuk semua", seksi **statistik bulan berjalan** (fungsi `statistik_publik()` — COUNT agregat balita/bumil/kunjungan bulan ini + persentase cakupan; hanya angka, privasi aman), seksi layanan 4 sasaran, kalkulator kilat interaktif, cara pakai, tentang standar WHO & privasi.
 - ✅ Peran admin vs user biasa: hanya admin (tabel `user_peran`) yang bisa tulis/edit/hapus (RLS `is_admin()` + gating UI); user biasa read-only. Pendaftaran baru diarahkan ke URL produksi via `emailRedirectTo` (`VITE_APP_URL`).
+- ✅ **PWA instalabel + antrean offline** pencatatan kunjungan (Balita/Bumil/Apras): FIFO di `localStorage`, sync otomatis saat online (`lib/offlineAntre.ts` + banner `AntreBanner.vue`). **Limitasi (sengaja):** hanya *tambah* kunjungan yang antri — *edit/hapus* kunjungan wajib online untuk mencegah konflik versi; perluasan antrean operasi direncanakan di fase lanjutan.
+- ✅ Kerangka modul **Remaja** (`7–18 th`) & **Dewasa/Lansia**: rute `/remaja*` & `/lansia*` sudah terdaftar di router dengan guard `requiresAuth` (tambah butuh `requiresAdmin`); detail/perbarui dialihkan ke daftar; halaman memakai `PlaceholderModul.vue`. Struktur `db.ts`/`views/` disiapkan menyalin shape modul aktif — aktivasi pencatatan penuh menyusul.
 
 ### Fase 2 — Analisis
 - Statistik & rekap: jumlah balita, distribusi status gizi, cakupan kunjungan (hub dashboard sudah ada sebagai navigasi).
@@ -135,7 +137,8 @@ di kolom `berat_badan`/`tinggi_badan`/`lingkar_*`, hasil di kolom `bb_menurut_um
 toleransi z ±0.005) + test `src/lib/status.test.ts` & `src/modules/bumil/bumil.test.ts` (pemetaan kode↔label
 status & opsi kunjungan bumil) + smoke test render komponen; boundary klasifikasi BB/TB (6 kategori) &
 indikator lain diuji eksplisit (z = ±3.01/±3.00/±2.99/…, data tidak lengkap, umur 0). Baseline saat ini
-**91 test hijau**. Lint wajib bersih via `npm run lint` (ESLint flat config: typescript-eslint +
+**136 test hijau** (11 file test; 1 kasus bersyarat bergantung ketersediaan `localStorage` di-skip). Lint
+wajib bersih via `npm run lint` (ESLint flat config: typescript-eslint +
 eslint-plugin-vue; komponen vendor shadcn-vue diberi pengecualian baku).
 
 ## 6. Model Data
@@ -194,7 +197,7 @@ yang sudah berisi data eksisting (bukan dibuat baru). Semua relasi & audit bersi
 ## 10. Roadmap & Prioritas
 
 1. **Fondasi (selesai):** SPA Vite + Vue 3, kalkulator client-side (TS, valid vs fixture Python), landing + kalkulator, shadcn-vue, deploy Vercel.
-2. **Fase 1 (MVP, berjalan):** schema Supabase diadaptasi dari data eksisting + Auth/RLS ketat + CRUD balita & kunjungan (aktif); form kunjungan lengkap + dashboard hub publik (selesai); peran admin (admin tulis, user biasa read-only) + redirect konfirmasi email produksi (selesai); **struktur per-modul** (`src/modules/balita/`, `src/modules/bumil/`) sebagai fondasi multi-posyandu (selesai); **landing page sistem informasi posyandu + statistik bulan berjalan + font formal IBM Plex Sans** (selesai); **dashboard redesign: hub publik + home kader + seksi "Balita yang perlu perhatian"** (selesai); **modul Bumil UI + data** (daftar/form/detail + kunjungan antenatal, status manual, RLS ketat, FK `bumil_id`) (selesai); **kerangka modul Apras** (routing + placeholder + kartu nav aktif; struktur tabel & rekap gabungan Bayi/Balita/Apras menyusul) (v2.15.0).
+2. **Fase 1 (MVP, berjalan):** schema Supabase diadaptasi dari data eksisting + Auth/RLS ketat + CRUD balita & kunjungan (aktif); form kunjungan lengkap + dashboard hub publik (selesai); peran admin (admin tulis, user biasa read-only) + redirect konfirmasi email produksi (selesai); **struktur per-modul** (`src/modules/balita/`, `src/modules/bumil/`) sebagai fondasi multi-posyandu (selesai); **landing page sistem informasi posyandu + statistik bulan berjalan + font formal IBM Plex Sans** (selesai); **dashboard redesign: hub publik + home kader + seksi "Balita yang perlu perhatian"** (selesai); **modul Bumil UI + data** (daftar/form/detail + kunjungan antenatal, status manual, RLS ketat, FK `bumil_id`) (selesai); **kerangka modul Apras** (routing + placeholder + kartu nav aktif; struktur tabel & rekap gabungan Bayi/Balita/Apras menyusul) (v2.15.0); **kerangka modul Remaja & Dewasa/Lansia** (rute placeholder terdaftar — pencatatan penuh menyusul).
 3. **Fase 2:** dashboard, grafik tumbuh kembang, pemantauan stunting, laporan & ekspor.
 4. **Fase 3:** jadwal & pengingat, peran lanjutan, perluasan multi-posyandu.
 

@@ -4698,7 +4698,7 @@
       "node_kind": "heading",
       "norm_label": "10. roadmap & prioritas",
       "source_file": "PRD.md",
-      "source_location": "L194"
+      "source_location": "L197"
     },
     {
       "id": "prd_11_risiko_asumsi",
@@ -4710,7 +4710,7 @@
       "node_kind": "heading",
       "norm_label": "11. risiko & asumsi",
       "source_file": "PRD.md",
-      "source_location": "L201"
+      "source_location": "L204"
     },
     {
       "id": "prd_12_pertanyaan_terbuka",
@@ -4722,7 +4722,7 @@
       "node_kind": "heading",
       "norm_label": "12. pertanyaan terbuka",
       "source_file": "PRD.md",
-      "source_location": "L209"
+      "source_location": "L212"
     },
     {
       "id": "prd_1_ringkasan_produk",
@@ -4794,7 +4794,7 @@
       "node_kind": "heading",
       "norm_label": "6. model data",
       "source_file": "PRD.md",
-      "source_location": "L141"
+      "source_location": "L144"
     },
     {
       "id": "prd_7_teknologi",
@@ -4806,7 +4806,7 @@
       "node_kind": "heading",
       "norm_label": "7. teknologi",
       "source_file": "PRD.md",
-      "source_location": "L170"
+      "source_location": "L173"
     },
     {
       "id": "prd_8_non_fungsional",
@@ -4818,7 +4818,7 @@
       "node_kind": "heading",
       "norm_label": "8. non-fungsional",
       "source_file": "PRD.md",
-      "source_location": "L178"
+      "source_location": "L181"
     },
     {
       "id": "prd_9_metrik_keberhasilan",
@@ -4830,7 +4830,7 @@
       "node_kind": "heading",
       "norm_label": "9. metrik keberhasilan",
       "source_file": "PRD.md",
-      "source_location": "L187"
+      "source_location": "L190"
     },
     {
       "id": "prd_fase_1_mvp_pencatatan",
@@ -4854,7 +4854,7 @@
       "node_kind": "heading",
       "norm_label": "fase 2 \u2014 analisis",
       "source_file": "PRD.md",
-      "source_location": "L57"
+      "source_location": "L59"
     },
     {
       "id": "prd_fase_3_operasional_lanjutan",
@@ -4866,7 +4866,7 @@
       "node_kind": "heading",
       "norm_label": "fase 3 \u2014 operasional & lanjutan",
       "source_file": "PRD.md",
-      "source_location": "L63"
+      "source_location": "L65"
     },
     {
       "id": "prd_modul_antropometri_klasifikasi_status_gizi_anak_who",
@@ -4878,7 +4878,7 @@
       "node_kind": "heading",
       "norm_label": "modul antropometri \u2014 klasifikasi status gizi anak (who)",
       "source_file": "PRD.md",
-      "source_location": "L68"
+      "source_location": "L70"
     },
     {
       "id": "prd_prd_sistem_informasi_posyandu_wapalo",
@@ -5773,7 +5773,7 @@
       "node_kind": "heading",
       "norm_label": "alur pengembangan fitur",
       "source_file": "AGENTS.md",
-      "source_location": "L160"
+      "source_location": "L162"
     },
     {
       "id": "agents_data_klasifikasi_status",
@@ -5785,7 +5785,7 @@
       "node_kind": "heading",
       "norm_label": "data & klasifikasi status",
       "source_file": "AGENTS.md",
-      "source_location": "L79"
+      "source_location": "L80"
     },
     {
       "id": "agents_graphify",
@@ -5797,7 +5797,7 @@
       "node_kind": "heading",
       "norm_label": "graphify",
       "source_file": "AGENTS.md",
-      "source_location": "L172"
+      "source_location": "L174"
     },
     {
       "id": "agents_kolaborasi_tim",
@@ -5809,7 +5809,7 @@
       "node_kind": "heading",
       "norm_label": "kolaborasi tim",
       "source_file": "AGENTS.md",
-      "source_location": "L143"
+      "source_location": "L145"
     },
     {
       "id": "agents_konvensi",
@@ -5821,7 +5821,7 @@
       "node_kind": "heading",
       "norm_label": "konvensi",
       "source_file": "AGENTS.md",
-      "source_location": "L112"
+      "source_location": "L113"
     },
     {
       "id": "agents_konvensi_git_perawatan_repo",
@@ -5833,7 +5833,7 @@
       "node_kind": "heading",
       "norm_label": "konvensi git & perawatan repo",
       "source_file": "AGENTS.md",
-      "source_location": "L122"
+      "source_location": "L123"
     },
     {
       "id": "agents_masalah_dikenal_catatan",
@@ -5845,7 +5845,7 @@
       "node_kind": "heading",
       "norm_label": "masalah dikenal / catatan",
       "source_file": "AGENTS.md",
-      "source_location": "L129"
+      "source_location": "L130"
     },
     {
       "id": "agents_modul_antropometri_standar_who",
@@ -5857,7 +5857,7 @@
       "node_kind": "heading",
       "norm_label": "modul antropometri (standar who)",
       "source_file": "AGENTS.md",
-      "source_location": "L92"
+      "source_location": "L93"
     },
     {
       "id": "agents_project_overview",
@@ -18118,7 +18118,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L112",
+      "source_location": "L113",
       "weight": 1.0
     },
     {
@@ -18129,18 +18129,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L122",
-      "weight": 1.0
-    },
-    {
-      "source": "agents_agents_md",
-      "target": "agents_masalah_dikenal_catatan",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "AGENTS.md",
-      "source_location": "L129",
+      "source_location": "L123",
       "weight": 1.0
     },
     {
@@ -18156,13 +18145,24 @@
     },
     {
       "source": "agents_agents_md",
+      "target": "agents_masalah_dikenal_catatan",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "AGENTS.md",
+      "source_location": "L130",
+      "weight": 1.0
+    },
+    {
+      "source": "agents_agents_md",
       "target": "agents_kolaborasi_tim",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L143",
+      "source_location": "L145",
       "weight": 1.0
     },
     {
@@ -18173,7 +18173,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L172",
+      "source_location": "L174",
       "weight": 1.0
     },
     {
@@ -18217,7 +18217,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L79",
+      "source_location": "L80",
       "weight": 1.0
     },
     {
@@ -18228,7 +18228,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L92",
+      "source_location": "L93",
       "weight": 1.0
     },
     {
@@ -18239,7 +18239,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L160",
+      "source_location": "L162",
       "weight": 1.0
     },
     {
@@ -19581,7 +19581,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "PRD.md",
-      "source_location": "L57",
+      "source_location": "L59",
       "weight": 1.0
     },
     {
@@ -19592,7 +19592,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "PRD.md",
-      "source_location": "L63",
+      "source_location": "L65",
       "weight": 1.0
     },
     {
@@ -19603,7 +19603,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "PRD.md",
-      "source_location": "L68",
+      "source_location": "L70",
       "weight": 1.0
     },
     {
@@ -19614,7 +19614,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "PRD.md",
-      "source_location": "L141",
+      "source_location": "L144",
       "weight": 1.0
     },
     {
@@ -19636,7 +19636,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "PRD.md",
-      "source_location": "L170",
+      "source_location": "L173",
       "weight": 1.0
     },
     {
@@ -19647,7 +19647,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "PRD.md",
-      "source_location": "L178",
+      "source_location": "L181",
       "weight": 1.0
     },
     {
@@ -19658,7 +19658,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "PRD.md",
-      "source_location": "L187",
+      "source_location": "L190",
       "weight": 1.0
     },
     {
@@ -19669,7 +19669,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "PRD.md",
-      "source_location": "L194",
+      "source_location": "L197",
       "weight": 1.0
     },
     {
@@ -19680,7 +19680,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "PRD.md",
-      "source_location": "L201",
+      "source_location": "L204",
       "weight": 1.0
     },
     {
@@ -19691,7 +19691,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "PRD.md",
-      "source_location": "L209",
+      "source_location": "L212",
       "weight": 1.0
     },
     {
@@ -29166,5 +29166,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "099001b151d62a269dc5084ddd7d5332fa8e3cbf"
+  "built_at_commit": "a4e22a4a94b63a5cb4ef30fbc3b30b65df3e5dc7"
 }

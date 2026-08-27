@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm run dev        # dev server (port 5173, strictPort)
 npm run build      # vue-tsc typecheck + vite build → dist/
-npm test           # vitest run (baseline ~91 tes hijau)
+npm test           # vitest run (baseline 136 tes hijau + 1 skips bersyarat)
 npm run lint       # eslint — wajib bersih sebelum commit
 ```
 
@@ -34,7 +34,7 @@ Alur data: `views` → `src/modules/<modul>/db.ts` (service CRUD) → Supabase.
 
 ### Struktur per-modul
 
-Tiap modul punya shape sama: `src/modules/<modul>/{views/, db.ts, routes.ts}`. Modul aktif: `balita` & `bumil`; modul `apras` baru **kerangka** (routing + halaman placeholder; struktur tabel menyusul). Modul lain (dewasa & lansia) menyalin shape ini dan didaftarkan lewat spread `...<modul>Routes` di `src/router/index.ts` — **jangan** menaruh service/views modul baru di `src/views/` atau file `db.ts` app-level.
+Tiap modul punya shape sama: `src/modules/<modul>/{views/, db.ts, routes.ts}`. Modul aktif penuh: `balita`, `bumil`, & `apras`; modul `remaja` (7–18 th) & `lansia` (dewasa/lansia) masih **placeholder** (rute `/remaja*` & `/lansia*` terdaftar di router — list memakai `PlaceholderModul.vue`, detail/edit redirect ke daftar; struktur tabel pencatatan menyusul). Modul baru menyalin shape ini dan didaftarkan lewat spread `...<modul>Routes` di `src/router/index.ts` — **jangan** menaruh service/views modul baru di `src/views/` atau file `db.ts` app-level.
 
 Router: guard `requiresAuth` / `requiresAdmin` via route meta di `beforeEach`; lazy-load semua rute; fallback `*` → `/`.
 
@@ -56,7 +56,7 @@ Logika murni (tanpa Supabase, diuji unit): `src/modules/balita/rekap.ts` + `eksp
 
 ### Auth & peran
 
-`src/supabase/useAuth.ts` (composable session/masuk/keluar); peran admin via `rpc('is_admin')` + tabel `user_peran`. Anon hanya bisa landing, kalkulator & `/dashboard` (hub publik); `/balita*`, `/bumil*` butuh login; hanya admin bisa tulis/edit/hapus (RLS + gating UI). **Pendaftaran mandiri sudah dihapus** — akun dibuat pengelola langsung di database.
+`src/supabase/useAuth.ts` (composable session/masuk/keluar); peran admin via `rpc('is_admin')` + tabel `user_peran`. Anon hanya bisa landing, kalkulator & `/dashboard` (hub publik); `/balita*`, `/bumil*`, `/apras*`, `/remaja*`, `/lansia*` butuh login; hanya admin bisa tulis/edit/hapus (RLS + gating UI). **Pendaftaran mandiri sudah dihapus** — akun dibuat pengelola langsung di database.
 
 Env: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_APP_URL` (templat `.env.example`; `.env` gitignored). Klien Supabase aktif hanya bila env terisi (`wajibSupabase()` di `src/supabase/client.ts`).
 
