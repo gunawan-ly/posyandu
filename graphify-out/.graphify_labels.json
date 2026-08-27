@@ -101,5 +101,6 @@
   "99": "src/modules/remaja/views/RemajaListView.vue",
   "100": "DashboardPrivasi.vue",
   "101": "vue-router",
-  "102": "xlsx"
+  "102": "xlsx",
+  "103": "Posyandu Wapalo"
 }
