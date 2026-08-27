@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FileText, Pencil, Plus, Search, Trash2, UserRound, Users, X } from '@lucide/vue'
+import { Baby, FileText, Pencil, Plus, Search, Trash2, UserRound, X } from '@lucide/vue'
 import { ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
@@ -144,7 +144,7 @@ async function hapus(balita: Balita) {
         <div
           class="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-emerald-200 bg-white/50 px-8 py-14 text-center"
         >
-          <Users class="text-emerald-300 size-10" />
+          <Baby class="text-emerald-300 size-10" />
           <p class="font-display mt-4 text-lg">
             {{ cari ? 'Tidak ada balita ditemukan' : 'Belum ada data balita' }}
           </p>

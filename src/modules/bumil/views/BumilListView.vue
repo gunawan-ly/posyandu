@@ -51,7 +51,7 @@ async function hapus(bumil: Bumil) {
       <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p class="text-primary text-xs font-bold tracking-widest uppercase">Data posyandu</p>
-          <h1 class="font-display mt-3 text-3xl leading-tight sm:text-4xl">Ibu hamil & menyusui</h1>
+          <h1 class="font-display mt-3 text-3xl leading-tight sm:text-4xl">Daftar ibu hamil & menyusui</h1>
           <p class="text-muted-foreground mt-3 max-w-xl text-sm">
             Kelola identitas ibu hamil dan catat kunjungan antenatal setiap bulan.
           </p>
