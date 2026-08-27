@@ -199,7 +199,7 @@ describe('render komponen utama', () => {
 
   it('BalitaRekapView ter-render tanpa error dan menampilkan state kosong', async () => {
     const wrapper = mount(BalitaRekapView, OPSI_MOUNT)
-    expect(wrapper.text()).toContain('Rekap Bulanan Balita')
+    expect(wrapper.text()).toContain('Rekap Tahunan Balita')
     await flushPromises()
     expect(wrapper.text()).toContain('Belum ada kunjungan di periode ini')
   })

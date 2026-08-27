@@ -7,7 +7,6 @@ import Skeleton from '@/components/Skeleton.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -22,9 +21,8 @@ import { listApras, listKunjunganAprasPeriode } from '@/modules/apras/db'
 import { gabungAnakApras, gabungKunjunganApras } from '@/modules/apras/rekap'
 import { listBalita, listKunjunganPeriode } from '@/modules/balita/db'
 import {
-  BARIS_RINGKASAN,
   buatWorkbookRekap,
-  labelPeriode,
+  GRUP_KOLOM,
   NAMA_BULAN,
   teksCsvRekap,
   unduhXlsx,
@@ -32,28 +30,23 @@ import {
 import {
   gabungAnakBalita,
   gabungKunjunganBalita,
-  hitungRekapBulanan,
+  hitungRekapTahunan,
   rekapPerBalita,
   susunBarisApras,
   susunBarisRekap,
   type BarisRekap,
-  type PeriodeRekap,
   type RekapBulanan,
 } from '@/modules/balita/rekap'
 
-const mode = ref<'bulanan' | 'rentang'>('bulanan')
-
 const sekarang = new Date()
-const bulan = ref(String(sekarang.getMonth()))
 const tahun = ref(String(sekarang.getFullYear()))
-const tglDari = ref(formatISO(new Date(sekarang.getFullYear(), sekarang.getMonth(), 1)))
-const tglSampai = ref(formatISO(new Date(sekarang.getFullYear(), sekarang.getMonth() + 1, 0)))
+const bulan = ref(String(sekarang.getMonth()))
+const tampilanMode = ref<'tubuhan' | 'sebulan'>('tubuhan')
 
 const loading = ref(false)
 const error = ref('')
-const rekap = ref<RekapBulanan | null>(null)
+const rekapTahunan = ref<RekapBulanan[]>([])
 const baris = ref<BarisRekap[]>([])
-const label = ref('')
 const tersalin = ref(false)
 let timerTersalin: ReturnType<typeof setTimeout> | undefined
 
@@ -64,52 +57,29 @@ const daftarTahun = computed(() => {
   return hasil
 })
 
-const pesanRentang = computed(() => {
-  if (mode.value !== 'rentang') return ''
-  if (!tglDari.value || !tglSampai.value) return ''
-  return tglSampai.value < tglDari.value ? 'Tanggal "Sampai" tidak boleh sebelum tanggal "Dari".' : ''
+const rekapFiltered = computed<RekapBulanan[]>(() => {
+  if (tampilanMode.value === 'tubuhan') return rekapTahunan.value
+  const idx = Number(bulan.value)
+  return rekapTahunan.value.length > 0 ? [rekapTahunan.value[idx]] : []
 })
 
-function formatISO(tgl: Date): string {
-  const mm = String(tgl.getMonth() + 1).padStart(2, '0')
-  const dd = String(tgl.getDate()).padStart(2, '0')
-  return `${tgl.getFullYear()}-${mm}-${dd}`
-}
-
-function awalISO(p: PeriodeRekap): string {
-  if ('bulan' in p) return `${p.tahun}-${String(p.bulan + 1).padStart(2, '0')}-01`
-  return p.awal
-}
-
-function akhirISO(p: PeriodeRekap): string {
-  if ('bulan' in p) return formatISO(new Date(p.tahun, p.bulan + 1, 0))
-  return p.akhir
-}
-
-function periodeAktif(): PeriodeRekap | null {
-  if (mode.value === 'bulanan') {
-    return { bulan: Number(bulan.value), tahun: Number(tahun.value) }
-  }
-  if (!tglDari.value || !tglSampai.value) return null
-  if (tglSampai.value < tglDari.value) return null
-  return { awal: tglDari.value, akhir: tglSampai.value }
-}
+const jumlahAnak = computed(() => baris.value.length)
 
 async function muat() {
-  const p = periodeAktif()
-  if (!p) return
   loading.value = true
   error.value = ''
   try {
+    const tahunNum = Number(tahun.value) || new Date().getFullYear()
+    const periodeAwal = `${tahunNum}-01-01`
+    const periodeAkhir = `${tahunNum}-12-31`
+
     const [semuaBalita, kunjunganBalita, semuaApras, kunjunganApras] = await Promise.all([
       listBalita(),
-      listKunjunganPeriode(awalISO(p), akhirISO(p)),
+      listKunjunganPeriode(periodeAwal, periodeAkhir),
       listApras(),
-      listKunjunganAprasPeriode(awalISO(p), akhirISO(p)),
+      listKunjunganAprasPeriode(periodeAwal, periodeAkhir),
     ])
 
-    // Gabungan Balita + Apras: angka ringkasan dilebur (apras masuk keranjang
-    // Balita berdasarkan umur), satu suara per anak lintas modul.
     const anakGabungan = [
       ...semuaBalita.map(gabungAnakBalita),
       ...semuaApras.map(gabungAnakApras),
@@ -118,9 +88,9 @@ async function muat() {
       ...kunjunganBalita.map(gabungKunjunganBalita),
       ...kunjunganApras.map(gabungKunjunganApras),
     ]
-    rekap.value = hitungRekapBulanan(kunjunganGabungan, anakGabungan, p)
 
-    // Rincian per anak: kedua modul dengan penanda kolom Modul.
+    rekapTahunan.value = hitungRekapTahunan(kunjunganGabungan, anakGabungan, tahunNum)
+
     const perBalita = rekapPerBalita(kunjunganBalita)
     const barisBalita = semuaBalita
       .filter((b) => perBalita.has(b.id))
@@ -139,30 +109,22 @@ async function muat() {
       .map((a) => susunBarisApras(a, perApras.get(a.id)!))
 
     baris.value = [...barisBalita, ...barisApras].sort((x, y) => x.nama.localeCompare(y.nama))
-    label.value = labelPeriode(p)
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Gagal memuat rekap balita.'
-    rekap.value = null
+    rekapTahunan.value = []
     baris.value = []
   } finally {
     loading.value = false
   }
 }
 
-watch(
-  [mode, bulan, tahun, tglDari, tglSampai],
-  () => {
-    void muat()
-  },
-  { immediate: true },
-)
+watch([tahun, tampilanMode, bulan], () => { void muat() }, { immediate: true })
 
 async function eksporExcel() {
-  if (!rekap.value || baris.value.length === 0) return
+  if (baris.value.length === 0) return
   const tahunNum = Number(tahun.value) || new Date().getFullYear()
   const wb = await buatWorkbookRekap([], [], tahunNum, baris.value)
-  const slug = label.value.toLowerCase().replace(/[^a-z0-9]+/g, '-')
-  unduhXlsx(wb, `rekap-balita-${slug}.xlsx`)
+  unduhXlsx(wb, `rekap-balita-${tahunNum}.xlsx`)
 }
 
 function cetak() {
@@ -175,9 +137,7 @@ async function salinCsv() {
     await navigator.clipboard.writeText(await teksCsvRekap(baris.value))
     tersalin.value = true
     if (timerTersalin) clearTimeout(timerTersalin)
-    timerTersalin = setTimeout(() => {
-      tersalin.value = false
-    }, 2000)
+    timerTersalin = setTimeout(() => { tersalin.value = false }, 2000)
   } catch {
     tersalin.value = false
   }
@@ -206,6 +166,16 @@ function kodeStatus(st: string | null | undefined): string | null {
   const kode = kodeDariLabel(st)
   return kode === '_' ? null : kode
 }
+
+function nilaiTabel(baris: RekapBulanan, ambil: (b: RekapBulanan) => number): string {
+  const v = ambil(baris)
+  return v === 0 ? '' : String(v)
+}
+
+const judulRekap = computed(() => {
+  if (tampilanMode.value === 'tubuhan') return `Rekap Tahunan Balita ${tahun.value}`
+  return `Rekap Bulanan Balita — ${NAMA_BULAN[Number(bulan.value)]} ${tahun.value}`
+})
 </script>
 
 <template>
@@ -215,7 +185,7 @@ function kodeStatus(st: string | null | undefined): string | null {
     <section class="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
       <div class="no-print">
         <p class="text-primary text-xs font-bold tracking-widest uppercase">Data posyandu</p>
-        <h1 class="font-display mt-3 text-3xl leading-tight sm:text-4xl">Rekap Bulanan Balita</h1>
+        <h1 class="font-display mt-3 text-3xl leading-tight sm:text-4xl">{{ judulRekap }}</h1>
         <p class="text-muted-foreground mt-3 max-w-xl text-sm">
           Ringkasan kunjungan dan status gizi balita untuk laporan posyandu, lengkap dengan format
           resmi Rekap Bulanan Posyandu dan ekspor Excel/CSV.
@@ -227,34 +197,21 @@ function kodeStatus(st: string | null | undefined): string | null {
           <div class="flex flex-wrap gap-2">
             <Button
               size="sm"
-              :variant="mode === 'bulanan' ? 'default' : 'outline'"
-              @click="mode = 'bulanan'"
+              :variant="tampilanMode === 'tubuhan' ? 'default' : 'outline'"
+              @click="tampilanMode = 'tubuhan'"
             >
-              Bulanan
+              Rekapan Tahunan
             </Button>
             <Button
               size="sm"
-              :variant="mode === 'rentang' ? 'default' : 'outline'"
-              @click="mode = 'rentang'"
+              :variant="tampilanMode === 'sebulan' ? 'default' : 'outline'"
+              @click="tampilanMode = 'sebulan'"
             >
-              Rentang
+              Rekapan Bulanan
             </Button>
           </div>
 
-          <div v-if="mode === 'bulanan'" class="flex flex-wrap items-end gap-4">
-            <div class="flex flex-col gap-1.5">
-              <Label for="rekap-bulan">Bulan</Label>
-              <Select v-model="bulan">
-                <SelectTrigger id="rekap-bulan" class="w-44">
-                  <SelectValue placeholder="Pilih bulan" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem v-for="(nama, i) in NAMA_BULAN" :key="i" :value="String(i)">
-                    {{ nama }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div class="flex flex-wrap items-end gap-4">
             <div class="flex flex-col gap-1.5">
               <Label for="rekap-tahun">Tahun</Label>
               <Select v-model="tahun">
@@ -268,50 +225,30 @@ function kodeStatus(st: string | null | undefined): string | null {
                 </SelectContent>
               </Select>
             </div>
-          </div>
-
-          <div v-else class="flex flex-wrap items-end gap-4">
-            <div class="flex flex-col gap-1.5">
-              <Label for="rekap-dari">Dari</Label>
-              <Input id="rekap-dari" v-model="tglDari" type="date" class="w-48" />
+            <div v-if="tampilanMode === 'sebulan'" class="flex flex-col gap-1.5">
+              <Label for="rekap-bulan">Bulan</Label>
+              <Select v-model="bulan">
+                <SelectTrigger id="rekap-bulan" class="w-44">
+                  <SelectValue placeholder="Pilih bulan" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="(nama, i) in NAMA_BULAN" :key="i" :value="String(i)">
+                    {{ nama }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div class="flex flex-col gap-1.5">
-              <Label for="rekap-sampai">Sampai</Label>
-              <Input id="rekap-sampai" v-model="tglSampai" type="date" class="w-48" />
-            </div>
-            <p v-if="pesanRentang" class="text-sm font-medium text-red-600" role="alert">
-              {{ pesanRentang }}
-            </p>
           </div>
         </CardContent>
       </Card>
 
       <div v-if="loading" class="mt-8" role="status" aria-label="Memuat…">
-        <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <Card v-for="i in 4" :key="i">
-            <CardContent class="flex flex-col gap-2 py-5">
-              <Skeleton class="h-8 w-16" />
-              <Skeleton class="h-3 w-32" />
-            </CardContent>
-          </Card>
-        </div>
-
         <Card class="mt-6">
           <CardHeader>
             <Skeleton class="h-5 w-48" />
-            <Skeleton class="h-3 w-32" />
           </CardHeader>
           <CardContent class="flex flex-col gap-2">
-            <Skeleton v-for="i in 8" :key="i" class="h-6 w-full" />
-          </CardContent>
-        </Card>
-
-        <Card class="mt-6">
-          <CardHeader>
-            <Skeleton class="h-5 w-40" />
-          </CardHeader>
-          <CardContent class="flex flex-col gap-2">
-            <Skeleton v-for="i in 5" :key="i" class="h-6 w-full" />
+            <Skeleton v-for="i in 12" :key="i" class="h-6 w-full" />
           </CardContent>
         </Card>
       </div>
@@ -326,88 +263,32 @@ function kodeStatus(st: string | null | undefined): string | null {
       </div>
 
       <div
-        v-else-if="rekap && baris.length === 0"
+        v-else-if="baris.length === 0"
         class="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-emerald-200 bg-white/50 px-8 py-14 text-center"
       >
         <CalendarDays class="text-emerald-300 size-10" />
         <p class="font-display mt-4 text-lg">Belum ada kunjungan di periode ini</p>
         <p class="text-muted-foreground mt-1 max-w-sm text-sm">
-          Tidak ada kunjungan balita tercatat untuk periode {{ label }}. Ubah filter untuk melihat
+          Tidak ada kunjungan balita tercatat untuk tahun {{ tahun }}. Ubah filter untuk melihat
           rekap lain.
         </p>
       </div>
 
-      <div v-else-if="rekap && baris.length > 0" class="print-area mt-8">
+      <div v-else class="print-area mt-8">
         <div class="print-only mb-6">
-          <h1 class="font-display text-xl font-bold">Posyandu Wapalo — Rekap Bulanan Balita</h1>
-          <p class="text-sm">Periode {{ label }}</p>
+          <h1 class="font-display text-xl font-bold">Posyandu Wapalo — {{ judulRekap }}</h1>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <Card>
-            <CardContent class="flex flex-col gap-1 py-5">
-              <p class="font-display text-3xl font-bold tabular-nums">{{ rekap.sasaran_bayi }}</p>
-              <p class="text-muted-foreground text-xs font-medium uppercase">Jumlah Sasaran Bayi</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent class="flex flex-col gap-1 py-5">
-              <p class="font-display text-3xl font-bold tabular-nums">{{ rekap.sasaran_balita }}</p>
-              <p class="text-muted-foreground text-xs font-medium uppercase">Jumlah Sasaran Balita</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent class="flex flex-col gap-1 py-5">
-              <p class="font-display text-3xl font-bold tabular-nums">{{ rekap.bayi_hadir }}</p>
-              <p class="text-muted-foreground text-xs font-medium uppercase">Bayi Datang (Hadir)</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent class="flex flex-col gap-1 py-5">
-              <p class="font-display text-3xl font-bold tabular-nums">{{ rekap.bayi_tidak_hadir }}</p>
-              <p class="text-muted-foreground text-xs font-medium uppercase">
-                Bayi Tidak Datang (Tidak Hadir)
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card class="mt-6">
+        <Card>
           <CardHeader>
-            <CardTitle class="font-display text-lg font-normal">Rekap Bulanan (Format Resmi)</CardTitle>
-            <CardDescription>Periode {{ label }}</CardDescription>
+            <CardTitle class="font-display text-lg font-normal">Format Resmi Rekap Bulanan Posyandu</CardTitle>
+            <CardDescription>
+              {{ tampilanMode === 'tubuhan' ? `Seluruh tahun ${tahun}` : `${NAMA_BULAN[Number(bulan)]} ${tahun}` }}
+              — {{ jumlahAnak }} anak tercatat
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <table class="w-full text-sm">
-                <thead>
-                  <tr
-                    class="text-muted-foreground border-border/60 border-b text-left text-xs font-bold tracking-wide uppercase"
-                  >
-                    <th class="py-2 pr-3">Keterangan</th>
-                    <th class="py-2 pr-3 text-right">Jumlah</th>
-                  </tr>
-                </thead>
-            <tbody>
-              <tr
-                v-for="b in BARIS_RINGKASAN"
-                :key="b.label"
-                class="border-border/60 border-b last:border-0"
-              >
-                <td class="py-2.5 pr-3">{{ b.label }}</td>
-                <td class="py-2.5 pr-3 text-right font-medium tabular-nums">{{ b.ambil(rekap) }}</td>
-              </tr>
-            </tbody>
-          </table>
-          </CardContent>
-        </Card>
-
-        <Card class="mt-6">
-          <CardHeader>
-            <CardTitle class="font-display text-lg font-normal">Rincian Per Anak</CardTitle>
-            <CardDescription>{{ baris.length }} balita hadir pada periode {{ label }}</CardDescription>
-          </CardHeader>
-          <CardContent class="flex flex-col gap-4">
-            <div class="no-print flex flex-wrap items-center gap-2">
+          <CardContent class="flex flex-col gap-4 no-print">
+            <div class="flex flex-wrap items-center gap-2">
               <Button size="sm" @click="eksporExcel">
                 <FileSpreadsheet class="size-4" />
                 Ekspor Excel
@@ -423,7 +304,85 @@ function kodeStatus(st: string | null | undefined): string | null {
               </Button>
               <span class="sr-only" role="status" aria-live="polite">{{ tersalin ? 'Tersalin' : '' }}</span>
             </div>
+          </CardContent>
+          <CardContent>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="border-border/60 border-b text-xs font-bold tracking-wide uppercase">
+                    <th
+                      v-for="(g, iGrup) in GRUP_KOLOM"
+                      :key="'gh-' + iGrup"
+                      :colspan="g.kolom.length"
+                      class="bg-background py-2 px-3 text-left"
+                      :class="{ 'text-center': g.kolom.length === 1 }"
+                    >
+                      {{ g.grup }}
+                    </th>
+                  </tr>
+                  <tr class="text-muted-foreground border-border/60 border-b text-xs font-bold">
+                    <template v-for="(g, iGrup) in GRUP_KOLOM" :key="'kh-' + iGrup">
+                      <th
+                        v-for="(k, iKol) in g.kolom"
+                        :key="'k-' + iGrup + '-' + iKol"
+                        class="py-2 px-3 whitespace-nowrap"
+                        :class="iGrup === 0 ? 'text-left sticky left-0 bg-background z-10' : 'text-center'"
+                      >
+                        {{ k.label }}
+                      </th>
+                    </template>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(row, ri) in rekapFiltered"
+                    :key="ri"
+                    class="border-border/60 border-b last:border-0"
+                  >
+                    <template v-for="(g, iGrup) in GRUP_KOLOM" :key="'gd-' + iGrup">
+                      <td
+                        v-for="(k, iKol) in g.kolom"
+                        :key="'d-' + iGrup + '-' + iKol"
+                        class="py-2.5 px-3 font-medium tabular-nums whitespace-nowrap"
+                        :class="iGrup === 0
+                          ? 'text-left sticky left-0 bg-background z-10'
+                          : 'text-center'"
+                      >
+                        {{ nilaiTabel(row, k.ambil) || '—' }}
+                      </td>
+                    </template>
+                  </tr>
+                  <tr class="border-border/60 border-t-2 font-bold">
+                    <template v-for="(g, iGrup) in GRUP_KOLOM" :key="'gt-' + iGrup">
+                      <td
+                        v-for="(k, iKol) in g.kolom"
+                        :key="'t-' + iGrup + '-' + iKol"
+                        class="py-2.5 px-3 tabular-nums whitespace-nowrap"
+                        :class="iGrup === 0
+                          ? 'text-left sticky left-0 bg-background z-10'
+                          : 'text-center'"
+                      >
+                        {{ k.ambil(rekapFiltered.reduce((acc, b) => {
+                          for (const key of Object.keys(b) as (keyof RekapBulanan)[]) {
+                            (acc as any)[key] = ((acc as any)[key] ?? 0) + ((b as any)[key] ?? 0)
+                          }
+                          return acc
+                        }, {} as RekapBulanan)) }}
+                      </td>
+                    </template>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
 
+        <Card class="mt-6">
+          <CardHeader>
+            <CardTitle class="font-display text-lg font-normal">Rincian Per Anak</CardTitle>
+            <CardDescription>{{ jumlahAnak }} anak hadir pada tahun {{ tahun }}</CardDescription>
+          </CardHeader>
+          <CardContent>
             <div class="overflow-x-auto">
               <table class="w-full min-w-[1500px] text-sm">
                 <thead>
