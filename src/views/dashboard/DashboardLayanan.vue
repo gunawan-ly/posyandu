@@ -76,7 +76,7 @@ const MODUL: ModulLayanan[] = [
           </h2>
         </div>
         <p class="text-muted-foreground max-w-sm text-sm">
-          Data balita tersedia; layanan lain menyusul dalam satu sistem.
+          Data balita, apras, dan ibu hamil tersedia; remaja, dewasa & lansia menyusul.
         </p>
       </div>
 
@@ -121,6 +121,13 @@ const MODUL: ModulLayanan[] = [
                   class="text-muted-foreground hover:text-primary inline-flex items-center text-sm font-medium underline-offset-4 hover:underline"
                 >
                   Rekap
+                </RouterLink>
+                <RouterLink
+                  v-if="m.kunci === 'bumil' && isAutentikasi"
+                  to="/bumil/rekap"
+                  class="text-muted-foreground hover:text-primary inline-flex items-center text-sm font-medium underline-offset-4 hover:underline"
+                >
+                  Rekap Tahunan
                 </RouterLink>
               </div>
             </CardContent>
