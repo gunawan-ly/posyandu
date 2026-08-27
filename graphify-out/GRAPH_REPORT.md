@@ -1,16 +1,16 @@
 # Graph Report - posyandu  (2026-08-27)
 
 ## Corpus Check
-- 199 files · ~87,486 words
+- 202 files · ~88,882 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1221 nodes · 1356 edges · 103 communities (80 shown, 23 thin omitted)
+- 1229 nodes · 1377 edges · 103 communities (80 shown, 23 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 16 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `a4e22a4a`
+- Built from commit: `1ab352da`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -119,13 +119,13 @@
 ## Surprising Connections (you probably didn't know these)
 - `KolomRekap` --references--> `RekapBulanan`  [EXTRACTED]
   src/modules/balita/ekspor.ts → src/modules/balita/rekap.ts
+- `buatWorkbookRekap()` --calls--> `hitungRekapTahunan()`  [EXTRACTED]
+  src/modules/balita/ekspor.ts → src/modules/balita/rekap.ts
 - `BarisRingkasan` --references--> `RekapBulanan`  [EXTRACTED]
   src/modules/balita/ekspor.ts → src/modules/balita/rekap.ts
 - `hitung()` --indirect_call--> `gabungAnakBalita()`  [INFERRED]
   src/modules/balita/rekap.test.ts → src/modules/balita/rekap.ts
 - `hitung()` --indirect_call--> `gabungKunjunganBalita()`  [INFERRED]
-  src/modules/balita/rekap.test.ts → src/modules/balita/rekap.ts
-- `hitung()` --calls--> `hitungRekapBulanan()`  [EXTRACTED]
   src/modules/balita/rekap.test.ts → src/modules/balita/rekap.ts
 
 ## Import Cycles
@@ -175,7 +175,7 @@ Nodes (38): asiEksklusif, bbNaik, bbNaikManual, beratBadan, ceklisPerkembangan, 
 
 ### Community 10 - "balita/db.ts"
 Cohesion: 0.11
-Nodes (12): balitaPerluPerhatian(), InputBalita, InputKunjungan, KODE_BULAN, kodeBulan(), Kunjungan, kunjunganTerakhir, peringkatStatus() (+4 more)
+Nodes (16): Balita, balitaPerluPerhatian(), InputBalita, InputKunjungan, KODE_BULAN, kodeBulan(), Kunjungan, kunjunganTerakhir (+8 more)
 
 ### Community 11 - "src/views/LoginView.vue"
 Cohesion: 0.22
@@ -324,8 +324,8 @@ Cohesion: 0.08
 Nodes (22): apras, detailBaris, detailJudul, detailOpen, dlgHapus, editOpen, formatTanggal(), hapusDariTabel() (+14 more)
 
 ### Community 61 - "balita/ekspor.ts"
-Cohesion: 0.13
-Nodes (24): BARIS_RINGKASAN, BarisRingkasan, buatWorkbookRekap(), formatTanggalLokal(), GRUP_KOLOM, GrupKolomRekap, KEPALA_RINCIAN, KolomRekap (+16 more)
+Cohesion: 0.12
+Nodes (25): BARIS_RINGKASAN, BarisRingkasan, buatWorkbookRekap(), formatTanggalLokal(), GRUP_KOLOM, GrupKolomRekap, KEPALA_RINCIAN, KolomRekap (+17 more)
 
 ### Community 62 - "FormModalBalita.vue"
 Cohesion: 0.09
@@ -352,20 +352,20 @@ Cohesion: 0.11
 Nodes (19): beratBadan, catatan, dirujuk, edukasi, emit, gejalaTbc, kosongkanForm(), lingkarKepala (+11 more)
 
 ### Community 68 - "balita/rekap.test.ts"
-Cohesion: 0.16
-Nodes (11): Apras, KunjunganApras, gabungAnakApras(), gabungKunjunganApras(), filterKunjunganPeriode(), filterKunjunganRentang(), gabungAnakBalita(), gabungKunjunganBalita() (+3 more)
+Cohesion: 0.17
+Nodes (10): KunjunganApras, gabungAnakApras(), gabungKunjunganApras(), filterKunjunganPeriode(), filterKunjunganRentang(), gabungAnakBalita(), gabungKunjunganBalita(), rekapPerBalita() (+2 more)
 
 ### Community 69 - "src/modules/bumil/views/BumilRekapView.vue"
 Cohesion: 0.15
 Nodes (14): baris, bulan, daftarTahun, eksporExcel(), error, loading, muat(), rekapFiltered (+6 more)
 
 ### Community 70 - "apras/db.ts"
-Cohesion: 0.16
-Nodes (5): InputApras, InputKunjunganApras, susunIsiKunjungan(), tambahKunjunganApras(), ubahKunjunganApras()
+Cohesion: 0.15
+Nodes (6): Apras, InputApras, InputKunjunganApras, susunIsiKunjungan(), tambahKunjunganApras(), ubahKunjunganApras()
 
 ### Community 71 - "balita/rekap.ts"
-Cohesion: 0.21
-Nodes (12): Balita, AnakGabungan, AnakStruktur, fungsiAktif(), hitungBbNaik(), hitungRekapBulanan(), klasifikasiSasaran(), KunjunganGabungan (+4 more)
+Cohesion: 0.27
+Nodes (10): AnakStruktur, fungsiAktif(), hitungBbNaik(), hitungRekapBulanan(), hitungRekapTahunan(), klasifikasiSasaran(), normalTidakNormal(), PeriodeRekap (+2 more)
 
 ### Community 72 - "Arsitektur"
 Cohesion: 0.18
@@ -411,7 +411,7 @@ Cohesion: 0.50
 Nodes (3): { isAutentikasi }, MODUL, ModulLayanan
 
 ## Knowledge Gaps
-- **661 isolated node(s):** `$schema`, `.opencode/plugins/graphify.js`, `name`, `private`, `version` (+656 more)
+- **657 isolated node(s):** `$schema`, `.opencode/plugins/graphify.js`, `name`, `private`, `version` (+652 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **23 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -421,7 +421,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `devDependencies` connect `devDependencies` to `dependencies`?**
   _High betweenness centrality (0.002) - this node is a cross-community bridge._
 - **What connects `$schema`, `.opencode/plugins/graphify.js`, `name` to the rest of the system?**
-  _661 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _657 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `src/modules/balita/views/BalitaDetailView.vue` be split into smaller, more focused modules?**
   _Cohesion score 0.05832147937411095 - nodes in this community are weakly interconnected._
 - **Should `select/index.ts` be split into smaller, more focused modules?**

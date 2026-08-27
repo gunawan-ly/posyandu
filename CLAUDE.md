@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm run dev        # dev server (port 5173, strictPort)
 npm run build      # vue-tsc typecheck + vite build → dist/
-npm test           # vitest run (baseline 136 tes hijau + 1 skips bersyarat)
+npm test           # vitest run (baseline 161 tes hijau + 1 skips bersyarat)
 npm run lint       # eslint — wajib bersih sebelum commit
 ```
 

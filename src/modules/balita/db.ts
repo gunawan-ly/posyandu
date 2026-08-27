@@ -212,7 +212,7 @@ export async function listBalitaById(ids: number[]): Promise<Balita[]> {
 // Susun isi baris kunjungan siap simpan: validasi tanggal, hitung umur
 // kalender + status z-score WHO (BB/U, TB/U, BB/TB) & LiKA/LiLA.
 // Dipakai bersama oleh tambahKunjungan & ubahKunjungan agar alur sama.
-function susunIsiKunjungan(balita: Balita, input: InputKunjungan) {
+export function susunIsiKunjungan(balita: Balita, input: InputKunjungan) {
   const lahir = parseTanggal(balita.tanggal_lahir)
   const kunjungan = parseTanggal(input.tanggal_kunjungan)
   if (!kunjungan) throw new Error('Tanggal kunjungan tidak valid.')

@@ -19,7 +19,7 @@ konvensi keras) — jagalah tetap sinkron dengan file ini.
 - Backend: Supabase (PostgreSQL + Auth/RLS) — fase data, lihat PRD; `@supabase/supabase-js` sudah terpasang
 - PWA: `vite-plugin-pwa` (autoUpdate) sejak v2.27.0 — app shell ter-precache (bisa dibuka offline); **API Supabase tidak pernah di-cache**; ikon PNG di `public/pwa-*.png` + `maskable-icon-512x512.png`
 - Deploy: **GitHub Pages** aktif (lihat workflow + rincian di bawah); **Vercel** target final (SPA rewrite di `vercel.json` sudah siap)
-- Test: Vitest (unit kalkulator/status/bumil/kbm/galat/offlineAntre + smoke test render komponen)
+- Test: Vitest (unit kalkulator/status/bumil/kbm/galat/offlineAntre/lapisan `db.ts` + rekap + smoke test render komponen)
 - Lint: ESLint 9 flat config (`eslint.config.ts`) + typescript-eslint 8 + eslint-plugin-vue 10 — `npm run lint`
 
 ## Setup & Perintah
@@ -27,7 +27,7 @@ konvensi keras) — jagalah tetap sinkron dengan file ini.
 - `npm run dev`                        # dev server (port 5173)
 - `npm run build`                      # vue-tsc typecheck + vite build → `dist/`
 - `npm run preview`                    # preview hasil build
-- `npm test`                           # vitest run (kalkulator + status/bumil + rekap + offline + render; baseline 136 hijau + 1 skips bersyarat)
+- `npm test`                           # vitest run (kalkulator + status/bumil + rekap + db lapisan data + offline + render; baseline 161 hijau + 1 skips bersyarat)
 - `npm run lint`                       # eslint . (wajib bersih sebelum commit)
 - Uji kalkulator cepat: `npx vitest run src/lib/kalkulator`
 - `npx supabase link --project-ref <ref>` # tautkan repo ke proyek Supabase

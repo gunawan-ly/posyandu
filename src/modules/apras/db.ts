@@ -157,7 +157,7 @@ export async function listKunjunganAprasPeriode(awal: string, akhir: string): Pr
 }
 
 // Susun isi baris kunjungan apras siap simpan — dipakai bersama tambah & ubah.
-function susunIsiKunjungan(apras: Apras, input: InputKunjunganApras) {
+export function susunIsiKunjungan(apras: Apras, input: InputKunjunganApras) {
   const lahir = parseTanggal(apras.tanggal_lahir)
   const kunjungan = parseTanggal(input.tanggal_kunjungan)
   if (!kunjungan) throw new Error('Tanggal kunjungan tidak valid.')

@@ -192,7 +192,7 @@ export async function listKunjunganPeriode(awal: string, akhir: string): Promise
 }
 
 // Susun isi baris kunjungan bumil siap simpan — dipakai bersama tambah & ubah.
-function susunIsiKunjungan(bumil: Bumil, input: InputKunjunganBumil) {
+export function susunIsiKunjungan(bumil: Bumil, input: InputKunjunganBumil) {
   const kunjungan = parseTanggal(input.tanggal_kunjungan)
   if (!kunjungan) throw new Error('Tanggal kunjungan tidak valid.')
 
