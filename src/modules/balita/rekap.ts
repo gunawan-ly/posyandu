@@ -230,7 +230,24 @@ export function hitungRekapBulanan(
   periode: PeriodeRekap,
 ): RekapBulanan {
   const refTanggal = tanggalAkhirPeriode(periode)
-  const suara = satuSuaraPerAnak(kunjunganGabungan)
+
+  // Filter kunjungan sesuai periode SEBELUM deduplikasi agar "satu suara per anak"
+  // hanya berlaku dalam satu bulan (bukan seluruh tahun). Tanpa filter ini,
+  // anak yang kunjungan terakhirnya di bulan X akan dihitung "hadir" di SEMUA bulan.
+  const KunjunganPeriodeFilter = (k: KunjunganGabungan): boolean => {
+    const tgl = parseTanggal(k.tanggal_kunjungan ?? '')
+    if (!tgl) return false
+    if ('bulan' in periode) {
+      return tgl.getFullYear() === periode.tahun && tgl.getMonth() === periode.bulan
+    }
+    const awal = parseTanggal(periode.awal)
+    const akhir = parseTanggal(periode.akhir)
+    if (!awal || !akhir) return false
+    return tgl.getTime() >= awal.getTime() && tgl.getTime() <= akhir.getTime()
+  }
+  const kunjunganPeriode = kunjunganGabungan.filter(KunjunganPeriodeFilter)
+
+  const suara = satuSuaraPerAnak(kunjunganPeriode)
   const daftarKunjungan = [...suara.values()]
   const anakMap = new Map(anak.map((a) => [a.kunci, a]))
 

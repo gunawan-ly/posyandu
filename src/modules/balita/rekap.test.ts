@@ -304,6 +304,65 @@ describe('hitungRekapBulanan', () => {
     expect(hasilRentang.balita_hadir).toBe(2)
     expect(hasilRentang.balita_tidak_hadir).toBe(1)
   })
+
+  it('kunjungan hanya dihitung pada bulan yang tepat (tidak bocor ke bulan lain)', () => {
+    // Ani (bayi) kunjungan di Januari saja; Budi (balita) kunjungan di Februari saja.
+    const bList = [
+      buatBalita({ id: 10, nama: 'Ani', tanggal_lahir: '2025-07-10' }),  // bayi
+      buatBalita({ id: 11, nama: 'Budi', tanggal_lahir: '2024-02-10' }), // balita
+    ]
+    const kList = [
+      buatKunjungan({ id: 100, balita_id: 10, tanggal_kunjungan: '2026-01-15', imunisasi: 'Ya' }),
+      buatKunjungan({ id: 101, balita_id: 11, tanggal_kunjungan: '2026-02-10', imunisasi: 'Ya' }),
+    ]
+
+    // Januari: hanya Ani hadir
+    const jan = hitung(kList, bList, { bulan: 0, tahun: 2026 })
+    expect(jan.bayi_hadir).toBe(1)
+    expect(jan.balita_hadir).toBe(0)
+    expect(jan.bayi_tidak_hadir).toBe(0) // Ani (satu-satunya bayi) hadir di Jan
+    expect(jan.balita_tidak_hadir).toBe(1) // Budi tidak hadir di Jan
+    expect(jan.imunisasi_ya).toBe(1) // hanya Ani
+
+    // Februari: hanya Budi hadir
+    const feb = hitung(kList, bList, { bulan: 1, tahun: 2026 })
+    expect(feb.bayi_hadir).toBe(0) // Ani tidak kunjungan di Feb
+    expect(feb.balita_hadir).toBe(1)
+    expect(feb.bayi_tidak_hadir).toBe(1) // Ani (bayi) tidak hadir di Feb
+    expect(feb.balita_tidak_hadir).toBe(0) // Budi hadir
+    expect(feb.imunisasi_ya).toBe(1) // hanya Budi
+
+    // Maret: tidak ada kunjungan sama sekali
+    const mar = hitung(kList, bList, { bulan: 2, tahun: 2026 })
+    expect(mar.bayi_hadir).toBe(0)
+    expect(mar.balita_hadir).toBe(0)
+    expect(mar.bayi_tidak_hadir).toBe(1)
+    expect(mar.balita_tidak_hadir).toBe(1)
+    expect(mar.imunisasi_ya).toBe(0)
+  })
+
+  it('anak dengan kunjungan di dua bulan berbeda dihitung hadir di kedua bulan', () => {
+    const bList = [
+      buatBalita({ id: 20, nama: 'Citra', tanggal_lahir: '2024-06-10' }), // balita
+    ]
+    const kList = [
+      buatKunjungan({ id: 200, balita_id: 20, tanggal_kunjungan: '2026-03-05', imunisasi: 'Ya' }),
+      buatKunjungan({ id: 201, balita_id: 20, tanggal_kunjungan: '2026-05-10', imunisasi: 'Ya' }),
+    ]
+
+    const mar = hitung(kList, bList, { bulan: 2, tahun: 2026 })
+    expect(mar.balita_hadir).toBe(1)
+    expect(mar.imunisasi_ya).toBe(1)
+
+    const mei = hitung(kList, bList, { bulan: 4, tahun: 2026 })
+    expect(mei.balita_hadir).toBe(1)
+    expect(mei.imunisasi_ya).toBe(1)
+
+    // April: tidak ada kunjungan
+    const apr = hitung(kList, bList, { bulan: 3, tahun: 2026 })
+    expect(apr.balita_hadir).toBe(0)
+    expect(apr.imunisasi_ya).toBe(0)
+  })
 })
 
 describe('susunBarisRekap', () => {
