@@ -179,7 +179,7 @@ const klsInput =
             <table class="w-full min-w-[1700px] border-collapse text-sm">
               <thead>
                 <tr class="border-border/60 bg-muted/40 border-b text-left text-xs font-bold tracking-wide uppercase">
-                  <th rowspan="2" class="border-border/60 px-3 py-2 align-bottom">Bulan</th>
+                  <th rowspan="2" class="border-border/60 px-3 py-2 align-bottom sticky left-0 bg-background z-10">Bulan</th>
                   <template v-for="(g, gi) in GRUP_KOLOM" :key="g.grup">
                     <th
                       v-if="g.kolom.length > 1"
@@ -215,26 +215,25 @@ const klsInput =
                   :key="b.bulan"
                   class="border-border/60 hover:bg-emerald-50/30 border-b transition-colors last:border-0"
                 >
-                  <td class="px-3 py-2 font-medium whitespace-nowrap">{{ NAMA_BULAN[b.bulan] }}</td>
+                  <td class="sticky left-0 bg-background z-10 px-3 py-2 font-medium whitespace-nowrap">{{ NAMA_BULAN[b.bulan] }}</td>
                   <td
                     v-for="k in GRUP_KOLOM.flatMap((g) => g.kolom)"
                     :key="k.label"
-                    class="tabular-nums"
-                    :class="k.ambil(b) > 0 ? 'px-3 py-2' : 'text-muted-foreground px-3 py-2'"
+                    class="tabular-nums px-3 py-2 text-center"
                   >
-                    {{ k.ambil(b) }}
+                    {{ k.ambil(b) === 0 ? '—' : k.ambil(b) }}
                   </td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr class="bg-primary/10 border-border/60 border-t font-bold">
-                  <td class="px-3 py-2">JUMLAH</td>
+                  <td class="sticky left-0 bg-background z-10 px-3 py-2">JUMLAH</td>
                   <td
                     v-for="k in GRUP_KOLOM.flatMap((g) => g.kolom)"
                     :key="'jml-' + k.label"
-                    class="tabular-nums px-3 py-2"
+                    class="tabular-nums px-3 py-2 text-center"
                   >
-                    {{ totalKolom(baris, k.ambil) }}
+                    {{ totalKolom(baris, k.ambil) || '—' }}
                   </td>
                 </tr>
               </tfoot>
