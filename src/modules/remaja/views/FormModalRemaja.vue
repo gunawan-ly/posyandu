@@ -9,7 +9,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import InputDusun from '@/components/InputDusun.vue'
-import InputPosyandu from '@/components/InputPosyandu.vue'
 import InputSegmen from '@/components/InputSegmen.vue'
 import { Button } from '@/components/ui/button'
 import { ambilRemaja, buatRemaja, ubahRemaja, type Remaja } from '@/modules/remaja/db'
@@ -35,7 +34,6 @@ const nikOrangTua = ref('')
 const nomorKk = ref('')
 const dusun = ref('')
 const alamat = ref('')
-const posyandu = ref('')
 const namaSekolah = ref('')
 
 const sibuk = ref(false)
@@ -74,7 +72,6 @@ function bersihkanForm() {
   nomorKk.value = ''
   dusun.value = ''
   alamat.value = ''
-  posyandu.value = ''
   namaSekolah.value = ''
   pesanError.value = ''
 }
@@ -90,7 +87,6 @@ function isiForm(b: Remaja) {
   nomorKk.value = b.nomor_kk ?? ''
   dusun.value = b.dusun ?? ''
   alamat.value = b.alamat ?? ''
-  posyandu.value = b.posyandu ?? ''
   namaSekolah.value = b.nama_sekolah ?? ''
 }
 
@@ -126,7 +122,6 @@ async function simpan() {
     nomor_kk: nomorKk.value.trim() || null,
     dusun: dusun.value.trim() || null,
     alamat: alamat.value.trim() || null,
-    posyandu: posyandu.value.trim() || null,
     nama_sekolah: namaSekolah.value.trim() || null,
   }
 
@@ -218,8 +213,6 @@ const klsInput =
           </div>
 
           <InputDusun v-model="dusun" />
-
-          <InputPosyandu v-model="posyandu" />
 
           <div>
             <label for="fm-alamat" class="text-muted-foreground mb-1.5 block text-xs font-bold">Alamat</label>

@@ -24,7 +24,6 @@ export interface Remaja {
   nomor_kk: string | null
   dusun: string | null
   alamat: string | null
-  posyandu: string | null
   nama_sekolah: string | null
   dibuat_oleh: string | null
   created_at: string
@@ -42,7 +41,6 @@ export interface InputRemaja {
   nomor_kk?: string | null
   dusun?: string | null
   alamat?: string | null
-  posyandu?: string | null
   nama_sekolah?: string | null
 }
 

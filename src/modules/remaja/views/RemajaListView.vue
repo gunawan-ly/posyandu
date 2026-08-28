@@ -233,7 +233,6 @@ async function hapus(anak: Remaja) {
                   <th class="py-2 pr-3">Sekolah</th>
                   <th class="py-2 pr-3">Dusun</th>
                   <th class="py-2 pr-3">Alamat</th>
-                  <th class="py-2 pr-3">Posyandu</th>
                   <th class="sticky left-0 z-10 py-2"></th>
                 </tr>
               </thead>
@@ -259,7 +258,6 @@ async function hapus(anak: Remaja) {
                   <td class="max-w-[140px] truncate py-3 pr-3 whitespace-nowrap" :title="r.nama_sekolah || ''">{{ r.nama_sekolah || '—' }}</td>
                   <td class="py-3 pr-3 whitespace-nowrap">{{ r.dusun || '—' }}</td>
                   <td class="max-w-[220px] truncate py-3 pr-3 whitespace-nowrap" :title="r.alamat || ''">{{ r.alamat || '—' }}</td>
-                  <td class="py-3 pr-3 whitespace-nowrap">{{ r.posyandu || '—' }}</td>
                   <td class="py-3 text-right whitespace-nowrap">
                     <div class="flex items-center justify-end gap-1">
                       <RouterLink :to="`/remaja/${r.id}`">

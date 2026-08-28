@@ -174,10 +174,6 @@ async function hapusAnak() {
                 <p class="text-muted-foreground text-xs font-bold uppercase">Dusun</p>
                 <p class="mt-0.5">{{ remaja.dusun || '—' }}</p>
               </div>
-              <div>
-                <p class="text-muted-foreground text-xs font-bold uppercase">Posyandu</p>
-                <p class="mt-0.5">{{ remaja.posyandu || '—' }}</p>
-              </div>
               <div class="col-span-2">
                 <p class="text-muted-foreground text-xs font-bold uppercase">Alamat</p>
                 <p class="mt-0.5">{{ remaja.alamat || '—' }}</p>
