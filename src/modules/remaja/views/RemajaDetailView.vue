@@ -225,6 +225,11 @@ async function hapusRemajaData() {
       </div>
 
       <template v-else-if="remaja">
+        <RouterLink to="/remaja" class="text-muted-foreground hover:text-foreground mb-6 inline-flex items-center gap-1.5 text-sm font-medium">
+          <ArrowLeft class="size-4" />
+          Kembali ke daftar
+        </RouterLink>
+
         <div class="flex flex-wrap items-start justify-between gap-4">
           <div class="flex items-center gap-3">
             <span class="bg-primary/10 text-primary grid size-12 place-items-center rounded-xl">
@@ -321,11 +326,6 @@ async function hapusRemajaData() {
             <FormKunjunganRemaja :remaja="remaja" :is-admin="isAdmin" @tersimpan="muatUlangRiwayat" />
           </div>
         </div>
-
-        <RouterLink to="/remaja" class="text-muted-foreground hover:text-foreground mt-8 inline-flex items-center gap-1.5 text-sm font-medium">
-          <ArrowLeft class="size-4" />
-          Kembali ke daftar
-        </RouterLink>
       </template>
 
       <p
