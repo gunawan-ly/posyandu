@@ -315,70 +315,85 @@ async function hapusBumilData() {
                 <CardTitle class="font-display text-lg font-normal">Identitas</CardTitle>
               </CardHeader>
               <CardContent class="flex flex-col gap-3">
-                <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-                  <div>
-                    <p class="text-muted-foreground text-xs font-bold uppercase">Nama</p>
-                    <p class="mt-0.5">{{ bumil.nama || '—' }}</p>
+                <div>
+                  <p class="text-primary text-xs font-bold tracking-widest uppercase">Data Ibu</p>
+                  <div class="grid grid-cols-2 gap-x-4 gap-y-3 pt-3 text-sm">
+                    <div>
+                      <p class="text-muted-foreground text-xs font-bold uppercase">Nama</p>
+                      <p class="mt-0.5">{{ bumil.nama || '—' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-muted-foreground text-xs font-bold uppercase">NIK</p>
+                      <p class="mt-0.5 break-all">{{ bumil.nik || '—' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-muted-foreground text-xs font-bold uppercase">No. KK</p>
+                      <p class="mt-0.5 break-all">{{ bumil.nomor_kk || '—' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-muted-foreground text-xs font-bold uppercase">Tanggal lahir</p>
+                      <p class="mt-0.5">{{ bumil.tanggal_lahir ? formatTanggal(bumil.tanggal_lahir) : '—' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-muted-foreground text-xs font-bold uppercase">Umur</p>
+                      <p class="mt-0.5">{{ bumil.umur || '—' }} th</p>
+                    </div>
+                    <div>
+                      <p class="text-muted-foreground text-xs font-bold uppercase">Suami</p>
+                      <p class="mt-0.5">{{ bumil.nama_suami || '—' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-muted-foreground text-xs font-bold uppercase">Kategori</p>
+                      <p class="mt-0.5">{{ bumil.kategori || '—' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-muted-foreground text-xs font-bold uppercase">Dusun</p>
+                      <p class="mt-0.5">{{ bumil.dusun || '—' }}</p>
+                    </div>
+                    <div class="col-span-2">
+                      <p class="text-muted-foreground text-xs font-bold uppercase">Alamat</p>
+                      <p class="mt-0.5">{{ bumil.alamat || '—' }}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p class="text-muted-foreground text-xs font-bold uppercase">Nama anak</p>
-                    <p class="mt-0.5">{{ bumil.nama_anak || '—' }}</p>
+                </div>
+
+                <div class="border-border/60 border-t pt-4">
+                  <p class="text-primary text-xs font-bold tracking-widest uppercase">Kehamilan &amp; Persalinan</p>
+                  <div class="grid grid-cols-2 gap-x-4 gap-y-3 pt-3 text-sm">
+                    <div>
+                      <p class="text-muted-foreground text-xs font-bold uppercase">Hamil anak ke</p>
+                      <p class="mt-0.5">{{ bumil.hamil_anak_ke || '—' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-muted-foreground text-xs font-bold uppercase">Anak ke</p>
+                      <p class="mt-0.5">{{ bumil.anak_ke || '—' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-muted-foreground text-xs font-bold uppercase">Jarak anak sebelumnya</p>
+                      <p class="mt-0.5">{{ bumil.jarak_dengan_anak_sebelumnya || '—' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-muted-foreground text-xs font-bold uppercase">Tanggal bersalin</p>
+                      <p class="mt-0.5">{{ bumil.tanggal_bersalin ? formatTanggal(bumil.tanggal_bersalin) : '—' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-muted-foreground text-xs font-bold uppercase">Tempat bersalin</p>
+                      <p class="mt-0.5">{{ bumil.tempat_bersalin || '—' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-muted-foreground text-xs font-bold uppercase">Cara persalinan</p>
+                      <p class="mt-0.5">{{ bumil.cara_persalin || '—' }}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p class="text-muted-foreground text-xs font-bold uppercase">NIK</p>
-                    <p class="mt-0.5 break-all">{{ bumil.nik || '—' }}</p>
-                  </div>
-                  <div>
-                    <p class="text-muted-foreground text-xs font-bold uppercase">Kategori</p>
-                    <p class="mt-0.5">{{ bumil.kategori || '—' }}</p>
-                  </div>
-                  <div>
-                    <p class="text-muted-foreground text-xs font-bold uppercase">No. KK</p>
-                    <p class="mt-0.5 break-all">{{ bumil.nomor_kk || '—' }}</p>
-                  </div>
-                  <div>
-                    <p class="text-muted-foreground text-xs font-bold uppercase">Tanggal lahir</p>
-                    <p class="mt-0.5">{{ bumil.tanggal_lahir ? formatTanggal(bumil.tanggal_lahir) : '—' }}</p>
-                  </div>
-                  <div>
-                    <p class="text-muted-foreground text-xs font-bold uppercase">Umur</p>
-                    <p class="mt-0.5">{{ bumil.umur || '—' }} th</p>
-                  </div>
-                  <div>
-                    <p class="text-muted-foreground text-xs font-bold uppercase">Suami</p>
-                    <p class="mt-0.5">{{ bumil.nama_suami || '—' }}</p>
-                  </div>
-                  <div>
-                    <p class="text-muted-foreground text-xs font-bold uppercase">Hamil anak ke</p>
-                    <p class="mt-0.5">{{ bumil.hamil_anak_ke || '—' }}</p>
-                  </div>
-                  <div>
-                    <p class="text-muted-foreground text-xs font-bold uppercase">Anak ke</p>
-                    <p class="mt-0.5">{{ bumil.anak_ke || '—' }}</p>
-                  </div>
-                  <div>
-                    <p class="text-muted-foreground text-xs font-bold uppercase">Jarak anak sebelumnya</p>
-                    <p class="mt-0.5">{{ bumil.jarak_dengan_anak_sebelumnya || '—' }}</p>
-                  </div>
-                  <div>
-                    <p class="text-muted-foreground text-xs font-bold uppercase">Dusun</p>
-                    <p class="mt-0.5">{{ bumil.dusun || '—' }}</p>
-                  </div>
-                  <div>
-                    <p class="text-muted-foreground text-xs font-bold uppercase">Tanggal bersalin</p>
-                    <p class="mt-0.5">{{ bumil.tanggal_bersalin ? formatTanggal(bumil.tanggal_bersalin) : '—' }}</p>
-                  </div>
-                  <div>
-                    <p class="text-muted-foreground text-xs font-bold uppercase">Tempat bersalin</p>
-                    <p class="mt-0.5">{{ bumil.tempat_bersalin || '—' }}</p>
-                  </div>
-                  <div>
-                    <p class="text-muted-foreground text-xs font-bold uppercase">Cara persalinan</p>
-                    <p class="mt-0.5">{{ bumil.cara_persalin || '—' }}</p>
-                  </div>
-                  <div class="col-span-2">
-                    <p class="text-muted-foreground text-xs font-bold uppercase">Alamat</p>
-                    <p class="mt-0.5">{{ bumil.alamat || '—' }}</p>
+                </div>
+
+                <div class="border-border/60 border-t pt-4">
+                  <p class="text-primary text-xs font-bold tracking-widest uppercase">Data Menyusui</p>
+                  <div class="grid grid-cols-2 gap-x-4 gap-y-3 pt-3 text-sm">
+                    <div>
+                      <p class="text-muted-foreground text-xs font-bold uppercase">Nama anak</p>
+                      <p class="mt-0.5">{{ bumil.nama_anak || '—' }}</p>
+                    </div>
                   </div>
                 </div>
               </CardContent>
