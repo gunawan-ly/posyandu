@@ -15,6 +15,11 @@ import {
   tambahKunjunganApras,
   type InputKunjunganApras,
 } from '@/modules/apras/db'
+import {
+  ambilRemaja,
+  tambahKunjunganRemaja,
+  type InputKunjunganRemaja,
+} from '@/modules/remaja/db'
 
 // Antrean offline untuk pencatatan kunjungan saat sinyal hilang:
 // - Form menyimpan INPUT MENTAH ke localStorage (bukan hasil hitung) agar
@@ -23,7 +28,7 @@ import {
 // - Item dengan galat non-jaringan ditandai `gagal` dan tetap di antre
 //   supaya kader bisa memeriksanya; galat jaringan menghentikan sync.
 
-export type ModulAntre = 'balita' | 'bumil' | 'apras'
+export type ModulAntre = 'balita' | 'bumil' | 'apras' | 'remaja'
 
 export interface AntreKunjungan {
   uid: string
@@ -142,10 +147,14 @@ async function kirimSatu(item: AntreKunjungan): Promise<void> {
     const b = await ambilBumil(item.identitasId)
     if (!b) throw new Error(`Data ibu hamil "${item.nama}" tidak ditemukan lagi.`)
     await tambahKunjunganBumil(b, item.isi as unknown as InputKunjunganBumil)
-  } else {
+  } else if (item.modul === 'apras') {
     const a = await ambilApras(item.identitasId)
     if (!a) throw new Error(`Data apras "${item.nama}" tidak ditemukan lagi.`)
     await tambahKunjunganApras(a, item.isi as unknown as InputKunjunganApras)
+  } else {
+    const r = await ambilRemaja(item.identitasId)
+    if (!r) throw new Error(`Data remaja "${item.nama}" tidak ditemukan lagi.`)
+    await tambahKunjunganRemaja(r, item.isi as unknown as InputKunjunganRemaja)
   }
 }
 

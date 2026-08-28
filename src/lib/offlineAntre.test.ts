@@ -2,15 +2,25 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { buangDariAntre, buangSemuaGagal, setDaring, sinkronkan, tambahKeAntre, useOfflineAntre } from './offlineAntre'
 
-const { ambilBalita, tambahKunjungan, ambilBumil, tambahKunjunganBumil, ambilApras, tambahKunjunganApras } =
-  vi.hoisted(() => ({
-    ambilBalita: vi.fn(),
-    tambahKunjungan: vi.fn(),
-    ambilBumil: vi.fn(),
-    tambahKunjunganBumil: vi.fn(),
-    ambilApras: vi.fn(),
-    tambahKunjunganApras: vi.fn(),
-  }))
+const {
+  ambilBalita,
+  tambahKunjungan,
+  ambilBumil,
+  tambahKunjunganBumil,
+  ambilApras,
+  tambahKunjunganApras,
+  ambilRemaja,
+  tambahKunjunganRemaja,
+} = vi.hoisted(() => ({
+  ambilBalita: vi.fn(),
+  tambahKunjungan: vi.fn(),
+  ambilBumil: vi.fn(),
+  tambahKunjunganBumil: vi.fn(),
+  ambilApras: vi.fn(),
+  tambahKunjunganApras: vi.fn(),
+  ambilRemaja: vi.fn(),
+  tambahKunjunganRemaja: vi.fn(),
+}))
 
 vi.mock('@/modules/balita/db', () => ({
   ambilBalita: (...a: unknown[]) => ambilBalita(...(a as [])),
@@ -23,6 +33,10 @@ vi.mock('@/modules/bumil/db', () => ({
 vi.mock('@/modules/apras/db', () => ({
   ambilApras: (...a: unknown[]) => ambilApras(...(a as [])),
   tambahKunjunganApras: (...a: unknown[]) => tambahKunjunganApras(...(a as [])),
+}))
+vi.mock('@/modules/remaja/db', () => ({
+  ambilRemaja: (...a: unknown[]) => ambilRemaja(...(a as [])),
+  tambahKunjunganRemaja: (...a: unknown[]) => tambahKunjunganRemaja(...(a as [])),
 }))
 
 function kosongkan() {
@@ -102,6 +116,19 @@ describe('sinkronkan', () => {
     if (punyaStorage) {
       expect(window.localStorage.getItem('posyandu-antre-kunjungan')).toBe('[]')
     }
+  })
+
+  it('mengirim kunjungan remaja lewat antrean FIFO', async () => {
+    ambilRemaja.mockResolvedValue({ id: 12, nama: 'Dewi' })
+    tambahKunjunganRemaja.mockResolvedValue({ id: 200 })
+
+    tambahKeAntre({ modul: 'remaja', identitasId: 12, nama: 'Dewi', tanggal_kunjungan: '2026-08-05', isi: { imt: 19.2, status_gizi: 'Normal' } })
+
+    const hasil = await sinkronkan()
+    expect(hasil).toEqual({ terkirim: 1, gagal: 0 })
+    expect(useOfflineAntre().totalAntre.value).toBe(0)
+    expect(ambilRemaja).toHaveBeenCalledWith(12)
+    expect(tambahKunjunganRemaja.mock.calls[0][1]).toEqual({ imt: 19.2, status_gizi: 'Normal' })
   })
 
   it('galat non-jaringan menandai gagal dan tetap di antre', async () => {
