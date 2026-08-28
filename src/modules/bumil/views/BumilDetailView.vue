@@ -365,10 +365,6 @@ async function hapusBumilData() {
                       <p class="mt-0.5">{{ bumil.hamil_anak_ke || '—' }}</p>
                     </div>
                     <div>
-                      <p class="text-muted-foreground text-xs font-bold uppercase">Anak ke</p>
-                      <p class="mt-0.5">{{ bumil.anak_ke || '—' }}</p>
-                    </div>
-                    <div>
                       <p class="text-muted-foreground text-xs font-bold uppercase">Jarak anak sebelumnya</p>
                       <p class="mt-0.5">{{ bumil.jarak_dengan_anak_sebelumnya || '—' }}</p>
                     </div>
@@ -393,6 +389,10 @@ async function hapusBumilData() {
                     <div>
                       <p class="text-muted-foreground text-xs font-bold uppercase">Nama anak</p>
                       <p class="mt-0.5">{{ bumil.nama_anak || '—' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-muted-foreground text-xs font-bold uppercase">Anak ke</p>
+                      <p class="mt-0.5">{{ bumil.anak_ke || '—' }}</p>
                     </div>
                   </div>
                 </div>
