@@ -31,6 +31,7 @@ const tanggalLahir = ref('')
 const namaSuami = ref('')
 const nomorKk = ref('')
 const hamilAnakKe = ref('')
+const anakKe = ref('')
 const jarakAnakSebelumnya = ref('')
 const dusun = ref('')
 const alamat = ref('')
@@ -80,6 +81,7 @@ function bersihkanForm() {
   namaSuami.value = ''
   nomorKk.value = ''
   hamilAnakKe.value = ''
+  anakKe.value = ''
   jarakAnakSebelumnya.value = ''
   dusun.value = ''
   alamat.value = ''
@@ -97,6 +99,7 @@ function isiForm(b: Bumil) {
   namaSuami.value = b.nama_suami ?? ''
   nomorKk.value = b.nomor_kk ?? ''
   hamilAnakKe.value = b.hamil_anak_ke ?? ''
+  anakKe.value = b.anak_ke ?? ''
   jarakAnakSebelumnya.value = b.jarak_dengan_anak_sebelumnya ?? ''
   dusun.value = b.dusun ?? ''
   alamat.value = b.alamat ?? ''
@@ -145,6 +148,7 @@ async function simpan() {
     nama_suami: namaSuami.value.trim() || null,
     nomor_kk: nomorKk.value.trim() || null,
     hamil_anak_ke: hamilAnakKe.value.trim() || null,
+    anak_ke: anakKe.value.trim() || null,
     jarak_dengan_anak_sebelumnya: jarakAnakSebelumnya.value.trim() || null,
     dusun: dusun.value.trim() || null,
     alamat: alamat.value.trim() || null,
@@ -242,9 +246,15 @@ const klsInput =
             </div>
           </div>
 
-          <div>
-            <label for="fm-jarak" class="text-muted-foreground mb-1.5 block text-xs font-bold">Jarak dengan anak sebelumnya</label>
-            <input id="fm-jarak" v-model="jarakAnakSebelumnya" type="text" :class="klsInput" placeholder="cth: 3 tahun" />
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label for="fm-anak-ke" class="text-muted-foreground mb-1.5 block text-xs font-bold">Anak ke</label>
+              <input id="fm-anak-ke" v-model="anakKe" type="text" :class="klsInput" placeholder="cth: 3" />
+            </div>
+            <div>
+              <label for="fm-jarak" class="text-muted-foreground mb-1.5 block text-xs font-bold">Jarak dengan anak sebelumnya</label>
+              <input id="fm-jarak" v-model="jarakAnakSebelumnya" type="text" :class="klsInput" placeholder="cth: 3 tahun" />
+            </div>
           </div>
 
           <InputDusun v-model="dusun" />
