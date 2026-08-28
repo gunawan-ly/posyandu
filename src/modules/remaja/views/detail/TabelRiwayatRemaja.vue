@@ -77,9 +77,9 @@ function tekanan(nilai: number | null, satuan: string | null): string {
       <div v-else class="overflow-x-auto">
         <table class="text-sm w-full min-w-[1100px] border-collapse">
           <thead>
-            <tr class="text-muted-foreground text-left border-border/60 border-b bg-muted/40 text-xs font-bold tracking-wide uppercase">
-              <th rowspan="2" class="border-border/60 px-3 py-2 align-bottom whitespace-nowrap">Tanggal</th>
-              <th rowspan="2" class="border-border/60 border-l px-3 py-2 align-bottom whitespace-nowrap">Umur</th>
+            <tr class="text-muted-foreground border-border/60 border-b bg-muted/40 text-xs font-bold tracking-wide uppercase">
+              <th rowspan="2" class="border-border/60 align-bottom sticky left-0 z-10 bg-muted/40 px-3 py-2 text-center whitespace-nowrap">Tanggal</th>
+              <th rowspan="2" class="border-border/60 align-bottom border-l px-3 py-2 text-center whitespace-nowrap">Umur</th>
               <template v-for="g in GRUP" :key="g.grup">
                 <th
                   v-if="g.kolom.length > 1"
@@ -91,19 +91,19 @@ function tekanan(nilai: number | null, satuan: string | null): string {
                 <th
                   v-else
                   rowspan="2"
-                  class="border-border/60 border-l px-3 py-2 align-bottom text-center"
+                  class="border-border/60 align-bottom border-l px-3 py-2 text-center"
                 >
                   {{ g.grup }}
                 </th>
               </template>
               <th v-if="isAdmin" rowspan="2" class="border-border/60 border-l px-3 py-2"></th>
             </tr>
-            <tr class="text-muted-foreground text-left border-border/60 border-b bg-muted/40 text-xs font-bold uppercase">
+            <tr class="text-muted-foreground border-border/60 border-b bg-muted/40 text-xs font-bold uppercase">
               <template v-for="g in GRUP" :key="'sub-' + g.grup">
                 <th
                   v-for="k in g.kolom.length > 1 ? g.kolom : []"
                   :key="g.grup + k"
-                  class="border-border/60 border-l px-3 py-1.5 whitespace-nowrap"
+                  class="border-border/60 border-l px-3 py-1.5 text-center whitespace-nowrap"
                 >
                   {{ k }}
                 </th>
@@ -117,24 +117,24 @@ function tekanan(nilai: number | null, satuan: string | null): string {
               class="hover:bg-emerald-50/40 cursor-pointer border-border/60 border-b transition-colors last:border-0"
               @click="emit('lihat', k)"
             >
-              <td class="px-3 py-3 font-medium whitespace-nowrap">{{ formatTanggal(k.tanggal_kunjungan) }}</td>
-              <td class="text-muted-foreground px-3 py-3 whitespace-nowrap">{{ tahun(k.umur_tahun) }}</td>
-              <td class="px-3 py-3 whitespace-nowrap">{{ angka(k.berat_badan) }}</td>
-              <td class="px-3 py-3 whitespace-nowrap">{{ angka(k.tinggi_badan) }}</td>
-              <td class="px-3 py-3 whitespace-nowrap">{{ yaTidak(k.imt) }}</td>
-              <td class="px-3 py-3 whitespace-nowrap">{{ angka(k.lingkar_perut) }}</td>
-              <td class="px-3 py-3 whitespace-nowrap">{{ tekanan(k.td_sistole, k.td_diastole != null ? String(k.td_diastole) : null) }}</td>
-              <td class="px-3 py-3 whitespace-nowrap">{{ yaTidak(k.td_kategori) }}</td>
-              <td class="px-3 py-3 whitespace-nowrap">{{ angka(k.gula_darah) }}</td>
-              <td class="px-3 py-3 whitespace-nowrap">{{ yaTidak(k.gula_kategori) }}</td>
-              <td class="px-3 py-3 whitespace-nowrap">{{ angka(k.hb) }}</td>
-              <td class="px-3 py-3 whitespace-nowrap">{{ yaTidak(k.anemia) }}</td>
-              <td class="px-3 py-3 whitespace-nowrap">{{ yaTidak(k.batuk_terus_menerus) }}</td>
-              <td class="px-3 py-3 whitespace-nowrap">{{ yaTidak(k.demam_lebih_dua_minggu) }}</td>
-              <td class="px-3 py-3 whitespace-nowrap">{{ yaTidak(k.bb_tidak_naik_dua_bulan) }}</td>
-              <td class="px-3 py-3 whitespace-nowrap">{{ yaTidak(k.kontak_erat_tbc) }}</td>
-              <td class="px-3 py-3 whitespace-nowrap">{{ yaTidak(k.rujuk) }}</td>
-              <td class="text-muted-foreground max-w-[160px] truncate px-3 py-3 whitespace-nowrap" :title="teksGabung(k.edukasi, k.catatan)">
+              <td class="bg-background font-medium sticky left-0 z-10 px-3 py-3 text-center whitespace-nowrap">{{ formatTanggal(k.tanggal_kunjungan) }}</td>
+              <td class="text-muted-foreground px-3 py-3 text-center whitespace-nowrap">{{ tahun(k.umur_tahun) }}</td>
+              <td class="px-3 py-3 text-center whitespace-nowrap">{{ angka(k.berat_badan) }}</td>
+              <td class="px-3 py-3 text-center whitespace-nowrap">{{ angka(k.tinggi_badan) }}</td>
+              <td class="px-3 py-3 text-center whitespace-nowrap">{{ yaTidak(k.imt) }}</td>
+              <td class="px-3 py-3 text-center whitespace-nowrap">{{ angka(k.lingkar_perut) }}</td>
+              <td class="px-3 py-3 text-center whitespace-nowrap">{{ tekanan(k.td_sistole, k.td_diastole != null ? String(k.td_diastole) : null) }}</td>
+              <td class="px-3 py-3 text-center whitespace-nowrap">{{ yaTidak(k.td_kategori) }}</td>
+              <td class="px-3 py-3 text-center whitespace-nowrap">{{ angka(k.gula_darah) }}</td>
+              <td class="px-3 py-3 text-center whitespace-nowrap">{{ yaTidak(k.gula_kategori) }}</td>
+              <td class="px-3 py-3 text-center whitespace-nowrap">{{ angka(k.hb) }}</td>
+              <td class="px-3 py-3 text-center whitespace-nowrap">{{ yaTidak(k.anemia) }}</td>
+              <td class="px-3 py-3 text-center whitespace-nowrap">{{ yaTidak(k.batuk_terus_menerus) }}</td>
+              <td class="px-3 py-3 text-center whitespace-nowrap">{{ yaTidak(k.demam_lebih_dua_minggu) }}</td>
+              <td class="px-3 py-3 text-center whitespace-nowrap">{{ yaTidak(k.bb_tidak_naik_dua_bulan) }}</td>
+              <td class="px-3 py-3 text-center whitespace-nowrap">{{ yaTidak(k.kontak_erat_tbc) }}</td>
+              <td class="px-3 py-3 text-center whitespace-nowrap">{{ yaTidak(k.rujuk) }}</td>
+              <td class="text-muted-foreground max-w-[160px] truncate px-3 py-3 text-center whitespace-nowrap" :title="teksGabung(k.edukasi, k.catatan)">
                 {{ teksGabung(k.edukasi, k.catatan) }}
               </td>
               <td v-if="isAdmin" class="px-3 py-3 text-right">
