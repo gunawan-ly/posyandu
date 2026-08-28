@@ -18,7 +18,6 @@ export interface Remaja {
   jenis_kelamin: string | null
   tanggal_lahir: string | null
   tempat_lahir: string | null
-  anak_ke: string | null
   nama_orang_tua: string | null
   nik_orang_tua: string | null
   nomor_kk: string | null
@@ -35,7 +34,6 @@ export interface InputRemaja {
   tanggal_lahir: string
   nik?: string | null
   tempat_lahir?: string | null
-  anak_ke?: string | null
   nama_orang_tua?: string | null
   nik_orang_tua?: string | null
   nomor_kk?: string | null

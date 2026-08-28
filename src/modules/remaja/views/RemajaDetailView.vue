@@ -151,10 +151,6 @@ async function hapusAnak() {
                 <p class="mt-0.5">{{ formatTanggal(remaja.tanggal_lahir) }}</p>
               </div>
               <div>
-                <p class="text-muted-foreground text-xs font-bold uppercase">Anak ke</p>
-                <p class="mt-0.5">{{ remaja.anak_ke || '—' }}</p>
-              </div>
-              <div>
                 <p class="text-muted-foreground text-xs font-bold uppercase">Nama orang tua</p>
                 <p class="mt-0.5">{{ remaja.nama_orang_tua || '—' }}</p>
               </div>
