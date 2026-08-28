@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { TriangleAlert } from '@lucide/vue'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import InputDusun from '@/components/InputDusun.vue'
 import InputSegmen from '@/components/InputSegmen.vue'
 import { Button } from '@/components/ui/button'
 import { ambilBumil, buatBumil, KATEGORI_BUMIL, ubahBumil, type Bumil } from '@/modules/bumil/db'
-import { parseTanggal } from '@/lib/umur'
+import { parseTanggal, umurSaatIni } from '@/lib/umur'
 
 const props = defineProps<{
   open: boolean
@@ -28,7 +28,6 @@ const nama = ref('')
 const kategori = ref('')
 const nik = ref('')
 const tanggalLahir = ref('')
-const umur = ref('')
 const namaSuami = ref('')
 const nomorKk = ref('')
 const hamilAnakKe = ref('')
@@ -42,6 +41,15 @@ const caraPersalin = ref('')
 const sibuk = ref(false)
 const memuat = ref(false)
 const pesanError = ref('')
+
+// Umur dihitung OTOMATIS dari tanggal lahir ke waktu sekarang (v2.40.4);
+// tidak lagi diinput manual oleh kader.
+const umurOtomatis = computed(() => {
+  if (!tanggalLahir.value) return null
+  const bln = umurSaatIni(tanggalLahir.value)
+  if (bln == null) return null
+  return Math.floor(bln / 12)
+})
 
 const judul = ref('Tambah ibu hamil baru')
 
@@ -69,7 +77,6 @@ function bersihkanForm() {
   kategori.value = ''
   nik.value = ''
   tanggalLahir.value = ''
-  umur.value = ''
   namaSuami.value = ''
   nomorKk.value = ''
   hamilAnakKe.value = ''
@@ -87,7 +94,6 @@ function isiForm(b: Bumil) {
   kategori.value = b.kategori ?? ''
   nik.value = b.nik ?? ''
   tanggalLahir.value = b.tanggal_lahir ?? ''
-  umur.value = b.umur ?? ''
   namaSuami.value = b.nama_suami ?? ''
   nomorKk.value = b.nomor_kk ?? ''
   hamilAnakKe.value = b.hamil_anak_ke ?? ''
@@ -135,7 +141,7 @@ async function simpan() {
     kategori: kategori.value,
     nik: nik.value.trim() || null,
     tanggal_lahir: tanggalLahir.value || null,
-    umur: umur.value.trim() || null,
+    umur: umurOtomatis.value != null ? String(umurOtomatis.value) : null,
     nama_suami: namaSuami.value.trim() || null,
     nomor_kk: nomorKk.value.trim() || null,
     hamil_anak_ke: hamilAnakKe.value.trim() || null,
@@ -215,7 +221,13 @@ const klsInput =
             </div>
             <div>
               <label for="fm-umur" class="text-muted-foreground mb-1.5 block text-xs font-bold">Umur (tahun)</label>
-              <input id="fm-umur" v-model="umur" type="number" inputmode="numeric" min="10" max="55" :class="klsInput" />
+              <div
+                id="fm-umur"
+                aria-live="polite"
+                class="text-muted-foreground grid h-12 place-items-start rounded-md border border-dashed px-3 py-2 text-base md:h-10 md:text-sm"
+              >
+                {{ umurOtomatis != null ? `${umurOtomatis} tahun` : '— (otomatis dari tanggal lahir)' }}
+              </div>
             </div>
           </div>
 
