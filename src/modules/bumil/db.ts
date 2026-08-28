@@ -35,6 +35,7 @@ export interface Bumil {
   cara_persalin: string | null
   anak_ke: string | null
   kategori: string | null
+  nama_anak: string | null
   created_at: string
 }
 
@@ -83,6 +84,7 @@ export interface InputBumil {
   cara_persalin?: string | null
   anak_ke?: string | null
   kategori?: string | null
+  nama_anak?: string | null
 }
 
 export interface InputKunjunganBumil {

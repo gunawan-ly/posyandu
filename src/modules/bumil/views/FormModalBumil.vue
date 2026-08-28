@@ -25,6 +25,7 @@ const emit = defineEmits<{
 }>()
 
 const nama = ref('')
+const namaAnak = ref('')
 const kategori = ref('')
 const nik = ref('')
 const tanggalLahir = ref('')
@@ -75,6 +76,7 @@ watch(() => props.open, async (terbuka) => {
 
 function bersihkanForm() {
   nama.value = ''
+  namaAnak.value = ''
   kategori.value = ''
   nik.value = ''
   tanggalLahir.value = ''
@@ -93,6 +95,7 @@ function bersihkanForm() {
 
 function isiForm(b: Bumil) {
   nama.value = b.nama ?? ''
+  namaAnak.value = b.nama_anak ?? ''
   kategori.value = b.kategori ?? ''
   nik.value = b.nik ?? ''
   tanggalLahir.value = b.tanggal_lahir ?? ''
@@ -141,6 +144,7 @@ async function simpan() {
 
   const payload = {
     nama: nama.value.trim(),
+    nama_anak: namaAnak.value.trim() || null,
     kategori: kategori.value,
     nik: nik.value.trim() || null,
     tanggal_lahir: tanggalLahir.value || null,
@@ -200,12 +204,16 @@ const klsInput =
         <p v-if="memuat" class="text-muted-foreground text-sm">Memuat data…</p>
 
         <form v-else class="space-y-5" @submit.prevent="simpan">
-          <div>
-            <label for="fm-nama" class="text-muted-foreground mb-1.5 block text-xs font-bold">Nama ibu *</label>
-            <input id="fm-nama" v-model="nama" type="text" :class="klsInput" placeholder="cth: Wiwin Idrus" />
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label for="fm-nama" class="text-muted-foreground mb-1.5 block text-xs font-bold">Nama ibu *</label>
+              <input id="fm-nama" v-model="nama" type="text" :class="klsInput" placeholder="cth: Wiwin Idrus" />
+            </div>
+            <div>
+              <label for="fm-nama-anak" class="text-muted-foreground mb-1.5 block text-xs font-bold">Nama anak</label>
+              <input id="fm-nama-anak" v-model="namaAnak" type="text" :class="klsInput" placeholder="cth: Bayi" />
+            </div>
           </div>
-
-          <InputSegmen v-model="kategori" :opsi="KATEGORI_BUMIL" label="Kategori" />
 
           <div class="grid gap-4 sm:grid-cols-2">
             <div>
@@ -213,9 +221,13 @@ const klsInput =
               <input id="fm-nik" v-model="nik" type="text" inputmode="numeric" :class="klsInput" />
             </div>
             <div>
-              <label for="fm-no-kk" class="text-muted-foreground mb-1.5 block text-xs font-bold">Nomor KK</label>
-              <input id="fm-no-kk" v-model="nomorKk" type="text" inputmode="numeric" :class="klsInput" />
+              <InputSegmen v-model="kategori" :opsi="KATEGORI_BUMIL" label="Kategori" />
             </div>
+          </div>
+
+          <div>
+            <label for="fm-no-kk" class="text-muted-foreground mb-1.5 block text-xs font-bold">Nomor KK</label>
+            <input id="fm-no-kk" v-model="nomorKk" type="text" inputmode="numeric" :class="klsInput" />
           </div>
 
           <div class="grid gap-4 sm:grid-cols-2">

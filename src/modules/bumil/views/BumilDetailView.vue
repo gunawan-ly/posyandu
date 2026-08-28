@@ -321,12 +321,16 @@ async function hapusBumilData() {
                     <p class="mt-0.5">{{ bumil.nama || '—' }}</p>
                   </div>
                   <div>
-                    <p class="text-muted-foreground text-xs font-bold uppercase">Kategori</p>
-                    <p class="mt-0.5">{{ bumil.kategori || '—' }}</p>
+                    <p class="text-muted-foreground text-xs font-bold uppercase">Nama anak</p>
+                    <p class="mt-0.5">{{ bumil.nama_anak || '—' }}</p>
                   </div>
                   <div>
                     <p class="text-muted-foreground text-xs font-bold uppercase">NIK</p>
                     <p class="mt-0.5 break-all">{{ bumil.nik || '—' }}</p>
+                  </div>
+                  <div>
+                    <p class="text-muted-foreground text-xs font-bold uppercase">Kategori</p>
+                    <p class="mt-0.5">{{ bumil.kategori || '—' }}</p>
                   </div>
                   <div>
                     <p class="text-muted-foreground text-xs font-bold uppercase">No. KK</p>

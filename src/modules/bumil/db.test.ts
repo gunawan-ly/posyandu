@@ -19,6 +19,7 @@ function buatBumil(ubah: Partial<Bumil> = {}): Bumil {
     cara_persalin: null,
     anak_ke: null,
     kategori: 'Hamil',
+    nama_anak: null,
     created_at: '',
     ...ubah,
   }
