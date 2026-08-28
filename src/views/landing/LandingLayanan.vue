@@ -75,7 +75,7 @@ const LAYANAN: ModulLayanan[] = [
           Satu posyandu, lima sasaran kesehatan.
         </h2>
         <p class="text-muted-foreground mt-4 max-w-2xl text-sm leading-relaxed">
-          Bumil, Balita, dan Apras sudah aktif. Remaja, dewasa & lansia menyusul.
+          Bumil, Balita, Apras, dan Remaja sudah aktif. Dewasa & lansia menyusul.
         </p>
       </Reveal>
 

@@ -76,7 +76,7 @@ const MODUL: ModulLayanan[] = [
           </h2>
         </div>
         <p class="text-muted-foreground max-w-sm text-sm">
-          Data ibu hamil, balita, dan apras sudah aktif; remaja, dewasa & lansia menyusul.
+          Data ibu hamil, balita, apras, dan remaja sudah aktif; dewasa & lansia menyusul.
         </p>
       </div>
 

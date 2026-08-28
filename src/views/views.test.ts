@@ -23,6 +23,12 @@ vi.mock('@/modules/apras/db', () => ({
   listKunjunganAprasPeriode: vi.fn().mockResolvedValue([]),
 }))
 
+// Modul Remaja (v2.39.0): halaman daftar kini memuat data lewat lapisan db.
+vi.mock('@/modules/remaja/db', () => ({
+  listRemaja: vi.fn().mockResolvedValue([]),
+  hapusRemaja: vi.fn().mockResolvedValue(undefined),
+}))
+
 // Tanpa Supabase saat test — seksi statistik landing memakai fallback tanpa fetch jaringan.
 vi.mock('@/supabase/client', () => ({
   supabase: null,
@@ -60,7 +66,11 @@ const OPSI_MOUNT = {
 const dorong = vi.fn().mockResolvedValue(undefined)
 vi.mock('vue-router', async (importOriginal) => {
   const asli = await importOriginal<typeof import('vue-router')>()
-  return { ...asli, useRouter: () => ({ push: dorong }) }
+  return {
+    ...asli,
+    useRouter: () => ({ push: dorong }),
+    useRoute: () => ({ query: {} }),
+  }
 })
 
 describe('render komponen utama', () => {
@@ -114,20 +124,24 @@ describe('render komponen utama', () => {
     expect(wrapper.text()).toContain('Anak pra sekolah usia 5–6 tahun')
   })
 
-  it('Rute /remaja terdaftar dan memuat placeholder Modul Remaja', async () => {
-    // Meta guard rute: daftar butuh login, tambah data butuh admin.
+  it('Rute /remaja terdaftar dan memuat halaman daftar Remaja penuh', async () => {
+    // Meta guard rute: daftar & detail butuh login. Rute tambah/edit lama
+    // dialihkan ke daftar sejak konsolidasi form modal (v2.39.0).
     const ruteDaftar = remajaRoutes.find((r) => r.path === '/remaja')
     const ruteBaru = remajaRoutes.find((r) => r.path === '/remaja/baru')
+    const ruteEdit = remajaRoutes.find((r) => r.path === '/remaja/:id/edit')
+    const ruteDetail = remajaRoutes.find((r) => r.path === '/remaja/:id')
     expect(ruteDaftar?.name).toBe('remaja')
     expect(ruteDaftar?.meta).toMatchObject({ requiresAuth: true })
-    expect(ruteBaru?.meta).toMatchObject({ requiresAuth: true, requiresAdmin: true })
+    expect(ruteBaru?.redirect).toBe('/remaja')
+    expect(ruteEdit?.redirect).toBe('/remaja')
+    expect(ruteDetail?.meta).toMatchObject({ requiresAuth: true })
 
-    // Halaman placeholder menampilkan keterangan sasaran.
+    // Halaman daftar penuh (bukan placeholder lagi): judul + aksi admin.
     const wrapper = mount(RemajaListView, OPSI_MOUNT)
     await flushPromises()
-    expect(wrapper.text()).toContain('Modul Remaja')
-    expect(wrapper.text()).toContain('Usia Sekolah & Remaja')
-    expect(wrapper.text()).toContain('tumbuh kembang dan kesehatan remaja')
+    expect(wrapper.text()).toContain('Daftar Remaja')
+    expect(wrapper.text()).toContain('Anak usia sekolah & remaja 7–18 tahun')
   })
 
   it('Navigasi modul: Apras & Remaja aktif, Dewasa & Lansia tetap terkunci dengan gembok', () => {

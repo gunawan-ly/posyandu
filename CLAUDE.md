@@ -34,7 +34,7 @@ Alur data: `views` → `src/modules/<modul>/db.ts` (service CRUD) → Supabase.
 
 ### Struktur per-modul
 
-Tiap modul punya shape sama: `src/modules/<modul>/{views/, db.ts, routes.ts}`. Modul aktif penuh: `balita`, `bumil`, & `apras`; modul `remaja` (7–18 th) & `lansia` (dewasa/lansia) masih **placeholder** (rute `/remaja*` & `/lansia*` terdaftar di router — list memakai `PlaceholderModul.vue`, detail/edit redirect ke daftar; struktur tabel pencatatan menyusul). Modul baru menyalin shape ini dan didaftarkan lewat spread `...<modul>Routes` di `src/router/index.ts` — **jangan** menaruh service/views modul baru di `src/views/` atau file `db.ts` app-level.
+Tiap modul punya shape sama: `src/modules/<modul>/{views/, db.ts, routes.ts}`. Modul aktif penuh: `balita`, `bumil`, & `apras`; modul `remaja` (7–18 th) aktif fase identitas + CRUD (v2.39.0, kunjungan/rekap menyusul); modul `lansia` (dewasa/lansia) masih **placeholder** (rute `/lansia*` terdaftar di router — list memakai `PlaceholderModul.vue`, detail/edit redirect ke daftar; struktur tabel pencatatan menyusul). Modul baru menyalin shape ini dan didaftarkan lewat spread `...<modul>Routes` di `src/router/index.ts` — **jangan** menaruh service/views modul baru di `src/views/` atau file `db.ts` app-level.
 
 Router: guard `requiresAuth` / `requiresAdmin` via route meta di `beforeEach`; lazy-load semua rute; fallback `*` → `/`.
 
