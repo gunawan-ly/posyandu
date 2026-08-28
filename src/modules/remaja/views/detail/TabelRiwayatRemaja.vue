@@ -78,7 +78,7 @@ function tekanan(nilai: number | null, satuan: string | null): string {
         <table class="text-sm w-full min-w-[1100px] border-collapse">
           <thead>
             <tr class="text-muted-foreground border-border/60 border-b bg-muted/40 text-xs font-bold tracking-wide uppercase">
-              <th rowspan="2" class="border-border/60 align-bottom sticky left-0 z-10 bg-muted/40 px-3 py-2 text-center whitespace-nowrap">Tanggal</th>
+              <th rowspan="2" class="border-border/60 align-bottom sticky left-0 z-10 bg-background px-3 py-2 text-center whitespace-nowrap">Tanggal</th>
               <th rowspan="2" class="border-border/60 align-bottom border-l px-3 py-2 text-center whitespace-nowrap">Umur</th>
               <template v-for="g in GRUP" :key="g.grup">
                 <th
