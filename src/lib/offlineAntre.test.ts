@@ -122,13 +122,13 @@ describe('sinkronkan', () => {
     ambilRemaja.mockResolvedValue({ id: 12, nama: 'Dewi' })
     tambahKunjunganRemaja.mockResolvedValue({ id: 200 })
 
-    tambahKeAntre({ modul: 'remaja', identitasId: 12, nama: 'Dewi', tanggal_kunjungan: '2026-08-05', isi: { imt: 19.2, status_gizi: 'Normal' } })
+    tambahKeAntre({ modul: 'remaja', identitasId: 12, nama: 'Dewi', tanggal_kunjungan: '2026-08-05', isi: { imt: '19 (N)' } })
 
     const hasil = await sinkronkan()
     expect(hasil).toEqual({ terkirim: 1, gagal: 0 })
     expect(useOfflineAntre().totalAntre.value).toBe(0)
     expect(ambilRemaja).toHaveBeenCalledWith(12)
-    expect(tambahKunjunganRemaja.mock.calls[0][1]).toEqual({ imt: 19.2, status_gizi: 'Normal' })
+    expect(tambahKunjunganRemaja.mock.calls[0][1]).toEqual({ imt: '19 (N)' })
   })
 
   it('galat non-jaringan menandai gagal dan tetap di antre', async () => {

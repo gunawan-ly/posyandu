@@ -29,8 +29,7 @@ describe('susunIsiKunjungan remaja', () => {
         tanggal_kunjungan: '2026-08-05',
         berat_badan: 45,
         tinggi_badan: 155,
-        imt: 18.7,
-        status_gizi: 'Normal',
+        imt: '18.7 (N)',
         lingkar_perut: 70,
       },
     )
@@ -40,8 +39,7 @@ describe('susunIsiKunjungan remaja', () => {
     expect(isi.umur_tahun).toBeCloseTo(206 / 12, 2)
     expect(isi.berat_badan).toBe(45)
     expect(isi.tinggi_badan).toBe(155)
-    expect(isi.imt).toBe(18.7)
-    expect(isi.status_gizi).toBe('Normal')
+    expect(isi.imt).toBe('18.7 (N)')
     expect(isi.lingkar_perut).toBe(70)
   })
 
@@ -86,7 +84,6 @@ describe('susunIsiKunjungan remaja', () => {
       { tanggal_kunjungan: '2026-08-05', berat_badan: 45, tinggi_badan: 155 },
     )
     expect(isi.imt).toBeNull()
-    expect(isi.status_gizi).toBeNull()
     expect(isi.lingkar_perut).toBeNull()
     expect(isi.td_sistole).toBeNull()
     expect(isi.gula_darah).toBeNull()

@@ -28,8 +28,7 @@ const sunting = props.edit ?? null
 const tglKunjungan = ref(sunting?.tanggal_kunjungan || new Date().toISOString().slice(0, 10))
 const beratBadan = ref<string>(sunting?.berat_badan != null ? String(sunting.berat_badan) : '')
 const tinggiBadan = ref<string>(sunting?.tinggi_badan != null ? String(sunting.tinggi_badan) : '')
-const imt = ref<string>(sunting?.imt != null ? String(sunting.imt) : '')
-const statusGizi = ref(sunting?.status_gizi ?? '')
+const imt = ref<string>(sunting?.imt || '')
 const lingkarPerut = ref<string>(sunting?.lingkar_perut != null ? String(sunting.lingkar_perut) : '')
 const tdSistole = ref<string>(sunting?.td_sistole != null ? String(sunting.td_sistole) : '')
 const tdDiastole = ref<string>(sunting?.td_diastole != null ? String(sunting.td_diastole) : '')
@@ -60,14 +59,12 @@ const dirujukTbc = computed(() => jumlahGejalaTbc.value >= 2)
 const OPSI_YA_TIDAK = ['Ya', 'Tidak'] as const
 const OPSI_TD = ['Rendah', 'Normal', 'Tinggi'] as const
 const OPSI_GULA = ['Rendah', 'Normal', 'Tinggi'] as const
-const OPSI_STATUS_GIZI = ['Sangat Kurus', 'Kurus', 'Normal', 'Gemuk', 'Obesitas'] as const
 const OPSI_ANEMIA = ['Ya', 'Tidak'] as const
 
 function kosongkanForm() {
   beratBadan.value = ''
   tinggiBadan.value = ''
   imt.value = ''
-  statusGizi.value = ''
   lingkarPerut.value = ''
   tdSistole.value = ''
   tdDiastole.value = ''
@@ -105,8 +102,7 @@ async function simpanKunjungan() {
     tanggal_kunjungan: tglKunjungan.value,
     berat_badan: bb,
     tinggi_badan: tb,
-    imt: imt.value ? Number(imt.value) : null,
-    status_gizi: statusGizi.value || null,
+    imt: imt.value || null,
     lingkar_perut: lingkarPerut.value ? Number(lingkarPerut.value) : null,
     td_sistole: tdSistole.value ? Number(tdSistole.value) : null,
     td_diastole: tdDiastole.value ? Number(tdDiastole.value) : null,
@@ -185,10 +181,9 @@ const klsInput =
           </div>
           <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label for="imt" class="text-muted-foreground mb-1.5 block text-xs font-bold">IMT (kg/m²)</label>
-              <input id="imt" v-model="imt" type="number" inputmode="decimal" step="0.1" min="0" placeholder="cth: 19,2" class="w-full" :class="klsInput" />
+              <label for="imt" class="text-muted-foreground mb-1.5 block text-xs font-bold">IMT (mis. 19 (N))</label>
+              <input id="imt" v-model="imt" type="text" placeholder="cth: 19 (N)" class="w-full" :class="klsInput" />
             </div>
-            <InputSegmen v-model="statusGizi" label="Status gizi" :opsi="OPSI_STATUS_GIZI" />
           </div>
         </div>
 
@@ -302,8 +297,9 @@ const klsInput =
       </form>
 
       <p class="text-muted-foreground border-border/60 border-t pt-3 text-xs leading-relaxed">
-        IMT &amp; status gizi diisi manual oleh kader. Pemeriksaan (lingkar perut, tekanan darah,
-        gula darah, kadar Hb) khusus remaja berusia ≥ 15 tahun &amp; remaja putri.
+        IMT diisi manual oleh kader (mis. "19 (N)", status dalam kurung gizi).
+        Pemeriksaan (lingkar perut, tekanan darah, gula darah, kadar Hb) khusus
+        remaja berusia ≥ 15 tahun &amp; remaja putri.
       </p>
     </CardContent>
   </Card>

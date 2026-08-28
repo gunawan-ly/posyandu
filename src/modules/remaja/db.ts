@@ -100,9 +100,9 @@ export async function hapusRemaja(id: number): Promise<void> {
 
 // ===== Kunjungan =====
 
-// Kunjungan remaja (fase 2). Status gizi (imt & status_gizi) diisi MANUAL oleh
-// kader untuk saat ini; hitung & klasifikasi otomatis (IMT-for-age WHO 2007)
-// menyusul batch berikutnya.
+// Kunjungan remaja (fase 2). Status gizi diisi MANUAL oleh kader saat ini;
+// klasifikasi otomatis (IMT-for-age WHO 2007) menyusul. `imt` berupa TEKS
+// (bisa "19 (N)") — nilai & status digabung jadi satu kolom (v2.40.1).
 export interface KunjunganRemaja {
   id: number
   remaja_id: number | null
@@ -111,8 +111,7 @@ export interface KunjunganRemaja {
   tanggal_kunjungan: string | null
   berat_badan: number | null
   tinggi_badan: number | null
-  imt: number | null
-  status_gizi: string | null
+  imt: string | null
   lingkar_perut: number | null
   td_sistole: number | null
   td_diastole: number | null
@@ -136,8 +135,7 @@ export interface InputKunjunganRemaja {
   tanggal_kunjungan: string
   berat_badan?: number | null
   tinggi_badan?: number | null
-  imt?: number | null
-  status_gizi?: string | null
+  imt?: string | null
   lingkar_perut?: number | null
   td_sistole?: number | null
   td_diastole?: number | null
@@ -201,7 +199,6 @@ export function susunIsiKunjungan(remaja: Remaja, input: InputKunjunganRemaja) {
     berat_badan: input.berat_badan ?? null,
     tinggi_badan: input.tinggi_badan ?? null,
     imt: input.imt ?? null,
-    status_gizi: input.status_gizi ?? null,
     lingkar_perut: input.lingkar_perut ?? null,
     td_sistole: input.td_sistole ?? null,
     td_diastole: input.td_diastole ?? null,
